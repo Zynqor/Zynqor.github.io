@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.css" integrity="sha256-uTcjoMD6rPt4OyV3Rs02Slxl0BJGMNVKAm/1eYPt2go=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhangkuang.asia","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.23.2","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="嵌入式linux秋招面经整理,驱动开发,BSP相关方向">
+<meta property="og:type" content="article">
+<meta property="og:title" content="嵌入式linux面试题整理">
+<meta property="og:url" content="http://zhangkuang.asia/2025/09/02/%E5%B5%8C%E5%85%A5%E5%BC%8Flinux%E9%9D%A2%E8%AF%95%E9%A2%98%E6%95%B4%E7%90%86/index.html">
+<meta property="og:site_name" content="Kuang&#39;s Tech Log">
+<meta property="og:description" content="嵌入式linux秋招面经整理,驱动开发,BSP相关方向">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-09-02T14:18:23.000Z">
+<meta property="article:modified_time" content="2025-09-12T08:04:01.854Z">
+<meta property="article:author" content="Zzkuang">
+<meta property="article:tag" content="Linux">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://zhangkuang.asia/2025/09/02/%E5%B5%8C%E5%85%A5%E5%BC%8Flinux%E9%9D%A2%E8%AF%95%E9%A2%98%E6%95%B4%E7%90%86/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://zhangkuang.asia/2025/09/02/%E5%B5%8C%E5%85%A5%E5%BC%8Flinux%E9%9D%A2%E8%AF%95%E9%A2%98%E6%95%B4%E7%90%86/","path":"2025/09/02/嵌入式linux面试题整理/","title":"嵌入式linux面试题整理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>嵌入式linux面试题整理 | Kuang's Tech Log</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.umd.js" integrity="sha256-UiSieVaV/DXce2LW7QH+o77w+AIoAvSCPBkezriZ2DQ=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kuang's Tech Log</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">任何资源链接问题或者技术问题欢迎邮件联系讨论</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-DDR%E6%8C%82%E5%9C%A8PS%E8%BF%98%E6%98%AFPL%E4%B8%8B%E9%9D%A2-%E4%B8%BA%E4%BB%80%E4%B9%88-%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E6%8C%82%E5%9C%A8PS%E8%BF%98%E6%98%AFPL%E5%91%A2"><span class="nav-number">1.</span> <span class="nav-text">Q:DDR挂在PS还是PL下面,为什么?如何选择挂在PS还是PL呢?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A"><span class="nav-number">1.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E4%BD%A0%E5%81%9A%E8%BF%87%E5%93%AA%E4%BA%9B%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91-%E4%BD%A0%E7%9A%84%E9%A9%B1%E5%8A%A8%E6%98%AF%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0%E7%9A%84"><span class="nav-number">2.</span> <span class="nav-text">Q:你做过哪些驱动开发 &#x2F; 你的驱动是怎么实现的</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-1"><span class="nav-number">2.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E7%A1%AC%E4%BB%B6%E7%9A%84%E5%A4%8D%E4%BD%8D%E7%94%B5%E5%B9%B3-%E5%BB%B6%E6%97%B6%E8%A6%81%E6%B1%82%E4%B8%8D%E5%90%8C-%E9%A9%B1%E5%8A%A8%E9%87%8C%E6%80%8E%E4%B9%88%E5%A4%84%E7%90%86"><span class="nav-number">3.</span> <span class="nav-text">Q:硬件的复位电平&#x2F;延时要求不同,驱动里怎么处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-2"><span class="nav-number">3.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E4%B8%80%E4%B8%AA%E4%B8%AD%E6%96%AD"><span class="nav-number">4.</span> <span class="nav-text">Q:如何实现一个中断</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-3"><span class="nav-number">4.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E7%9C%8B%E9%97%A8%E7%8B%97-Watchdog-%E7%9A%84%E5%8E%9F%E7%90%86%E6%98%AF%E4%BB%80%E4%B9%88-%E5%BA%94%E7%94%A8%E5%B1%82%E6%80%8E%E4%B9%88%E5%96%82%E7%8B%97"><span class="nav-number">5.</span> <span class="nav-text">Q:看门狗(Watchdog)的原理是什么?应用层怎么喂狗</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-4"><span class="nav-number">5.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E9%A9%B1%E5%8A%A8%E5%A6%82%E4%BD%95%E7%BB%99%E5%BA%94%E7%94%A8%E5%B1%82%E5%B0%81%E8%A3%85%E5%8A%9F%E8%83%BD%E5%92%8C%E6%8E%A5%E5%8F%A3"><span class="nav-number">6.</span> <span class="nav-text">Q:驱动如何给应用层封装功能和接口?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-5"><span class="nav-number">6.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-Linux-%E5%86%85%E6%A0%B8%E6%98%AF%E6%80%8E%E4%B9%88%E5%88%86%E9%85%8D%E5%86%85%E5%AD%98%E7%9A%84"><span class="nav-number">7.</span> <span class="nav-text">Q:Linux 内核是怎么分配内存的?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-6"><span class="nav-number">7.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E8%81%8A%E8%81%8A%E4%BD%A0%E5%AF%B9%E6%8C%87%E9%92%88%E7%9A%84%E7%90%86%E8%A7%A3"><span class="nav-number">8.</span> <span class="nav-text">Q: 聊聊你对指针的理解?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-7"><span class="nav-number">8.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E4%BA%86%E8%A7%A3%E4%BA%8C%E7%BA%A7%E6%8C%87%E9%92%88%E5%90%97"><span class="nav-number">9.</span> <span class="nav-text">Q: 了解二级指针吗?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-8"><span class="nav-number">9.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-long%E6%8C%87%E9%92%88%E5%A4%9A%E5%A4%A7-%E5%92%8C-int-%E6%8C%87%E9%92%88%E6%AF%94%E5%91%A2-%E6%8C%87%E9%92%88%E7%9A%84%E5%A4%A7%E5%B0%8F%E7%94%B1%E4%BB%80%E4%B9%88%E5%86%B3%E5%AE%9A"><span class="nav-number">10.</span> <span class="nav-text">Q:long指针多大?和 int 指针比呢?指针的大小由什么决定?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-9"><span class="nav-number">10.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E6%80%8E%E4%B9%88%E7%94%A8-sizeof-%E5%88%A4%E6%96%AD%E7%BB%93%E6%9E%84%E4%BD%93%E5%A4%A7%E5%B0%8F-char%E3%80%81short%E3%80%81int-%E4%B8%8D%E5%90%8C%E7%BB%84%E5%90%88%E7%9A%84%E7%BB%93%E6%9E%84%E4%BD%93%E5%A4%9A%E5%A4%A7-%E6%9C%80%E5%B0%8F%E8%83%BD%E5%8E%8B%E7%BC%A9%E5%88%B0%E5%A4%9A%E5%B0%91-%E6%80%8E%E4%B9%88%E5%AE%9E%E7%8E%B0"><span class="nav-number">11.</span> <span class="nav-text">Q: 怎么用 sizeof 判断结构体大小?char、short、int 不同组合的结构体多大?最小能压缩到多少?怎么实现?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-10"><span class="nav-number">11.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B%E6%98%AF%E5%95%A5%E5%85%B3%E7%B3%BB"><span class="nav-number">12.</span> <span class="nav-text">Q:进程和线程是啥关系?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-11"><span class="nav-number">12.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E8%81%8A%E8%81%8A-TCP-IP-%E5%8D%8F%E8%AE%AE-%E7%BD%91%E7%BB%9C%E6%80%8E%E4%B9%88%E5%88%86%E5%B1%82%E7%9A%84-TCP-%E5%92%8C-IP-%E5%88%86%E5%88%AB%E5%9C%A8%E5%93%AA%E4%B8%80%E5%B1%82"><span class="nav-number">13.</span> <span class="nav-text">Q: 聊聊 TCP&#x2F;IP 协议?网络怎么分层的?TCP 和 IP 分别在哪一层?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-12"><span class="nav-number">13.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E7%94%A8%E4%BA%8C%E7%BA%A7%E6%8C%87%E9%92%88%E7%94%B3%E8%AF%B7%E4%B8%80%E5%9D%97%E5%86%85%E5%AD%98-%E7%84%B6%E5%90%8E%E8%B5%8B%E5%80%BC%E5%B9%B6%E5%B1%95%E7%A4%BA"><span class="nav-number">14.</span> <span class="nav-text">Q: 用二级指针申请一块内存,然后赋值并展示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-13"><span class="nav-number">14.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-20-%E7%BA%A7%E5%8F%B0%E9%98%B6-%E4%B8%80%E6%AC%A1%E8%83%BD%E8%B5%B0-1-%E7%BA%A7%E6%88%96-2-%E7%BA%A7-%E6%9C%89%E5%A4%9A%E5%B0%91%E7%A7%8D%E8%B5%B0%E6%B3%95"><span class="nav-number">15.</span> <span class="nav-text">Q:20 级台阶,一次能走 1 级或 2 级,有多少种走法?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-14"><span class="nav-number">15.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E6%8F%8F%E8%BF%B0%E4%B8%80%E4%B8%8B%E5%B5%8C%E5%85%A5%E5%BC%8FLinux%E7%9A%84%E5%AE%8C%E6%95%B4%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B-%E5%B9%B6%E8%AF%B4%E6%98%8EBootloader%E7%9A%84%E4%BD%9C%E7%94%A8%E4%BB%A5%E5%8F%8A%E5%AE%83%E4%B8%8E%E5%86%85%E6%A0%B8%E7%9A%84%E9%80%9A%E4%BF%A1%E6%96%B9%E5%BC%8F"><span class="nav-number">16.</span> <span class="nav-text">Q: 描述一下嵌入式Linux的完整启动过程,并说明Bootloader的作用以及它与内核的通信方式.</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-15"><span class="nav-number">16.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E4%BA%92%E6%96%A5%E9%94%81-Mutex-%E5%92%8C%E8%87%AA%E6%97%8B%E9%94%81-Spinlock-%E7%9A%84%E6%A0%B9%E6%9C%AC%E5%8C%BA%E5%88%AB%E6%98%AF%E4%BB%80%E4%B9%88-%E5%9C%A8%E5%B5%8C%E5%85%A5%E5%BC%8FLinux%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91%E4%B8%AD-%E6%82%A8%E4%BC%9A%E5%A6%82%E4%BD%95%E9%80%89%E6%8B%A9%E4%BD%BF%E7%94%A8%E5%AE%83%E4%BB%AC-%E8%AF%B7%E8%87%B3%E5%B0%91%E4%B8%BE%E4%B8%80%E4%B8%AA%E5%BF%85%E9%A1%BB%E4%BD%BF%E7%94%A8%E8%87%AA%E6%97%8B%E9%94%81-%E8%80%8C%E4%B8%8D%E8%83%BD%E4%BD%BF%E7%94%A8%E4%BA%92%E6%96%A5%E9%94%81%E7%9A%84%E5%85%B7%E4%BD%93%E5%9C%BA%E6%99%AF"><span class="nav-number">17.</span> <span class="nav-text">Q: 互斥锁(Mutex)和自旋锁(Spinlock)的根本区别是什么?在嵌入式Linux驱动开发中,您会如何选择使用它们?请至少举一个必须使用自旋锁,而不能使用互斥锁的具体场景.</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-16"><span class="nav-number">17.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E5%BD%93Linux%E5%86%85%E6%A0%B8%E5%87%BA%E7%8E%B0%E9%97%AE%E9%A2%98%E6%97%B6-%E6%AF%94%E5%A6%82%E5%8F%91%E7%94%9F%E4%BA%86Kernel-Panic%E6%88%96%E8%80%85Oops-%E4%BD%A0%E9%80%9A%E5%B8%B8%E4%BC%9A%E5%A6%82%E4%BD%95%E5%8E%BB%E6%8E%92%E6%9F%A5-%E8%AF%B7%E6%8F%8F%E8%BF%B0%E4%BD%A0%E7%9A%84%E8%B0%83%E8%AF%95%E6%80%9D%E8%B7%AF%E5%92%8C%E5%85%B7%E4%BD%93%E4%BD%BF%E7%94%A8%E8%BF%87%E7%9A%84%E5%B7%A5%E5%85%B7"><span class="nav-number">18.</span> <span class="nav-text">Q: 当Linux内核出现问题时,比如发生了Kernel Panic或者Oops,你通常会如何去排查?请描述你的调试思路和具体使用过的工具.</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-17"><span class="nav-number">18.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E9%98%BB%E5%A1%9EI-O%E5%92%8C%E9%9D%9E%E9%98%BB%E5%A1%9EI-O%E7%9A%84%E6%A0%B9%E6%9C%AC%E5%8C%BA%E5%88%AB%E3%80%81%E4%BC%98%E5%8A%A3%E5%8A%BF%E6%98%AF%E4%BB%80%E4%B9%88-%E4%B8%BA%E4%BB%80%E4%B9%88%E9%AB%98%E6%80%A7%E8%83%BD%E6%9C%8D%E5%8A%A1%E5%99%A8%E5%A4%9A%E9%87%87%E7%94%A8%E9%9D%9E%E9%98%BB%E5%A1%9E%E6%A8%A1%E5%9E%8B"><span class="nav-number">19.</span> <span class="nav-text">Q: 阻塞I&#x2F;O和非阻塞I&#x2F;O的根本区别、优劣势是什么?为什么高性能服务器多采用非阻塞模型?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-18"><span class="nav-number">19.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E4%B8%BA%E4%BB%80%E4%B9%88%E5%9F%BA%E7%B1%BB%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E9%80%9A%E5%B8%B8%E9%9C%80%E8%A6%81%E8%A2%AB%E5%A3%B0%E6%98%8E%E4%B8%BA%E8%99%9A%E5%87%BD%E6%95%B0-%E5%A6%82%E6%9E%9C%E4%B8%8D%E6%98%AF%E8%99%9A%E5%87%BD%E6%95%B0-%E4%BC%9A%E5%8F%91%E7%94%9F%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98"><span class="nav-number">20.</span> <span class="nav-text">Q: 为什么基类的析构函数通常需要被声明为虚函数?如果不是虚函数,会发生什么问题?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-19"><span class="nav-number">20.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E5%86%85%E6%A0%B8%E4%B8%8E%E7%94%A8%E6%88%B7%E6%80%81%E9%80%9A%E4%BF%A1-%E9%99%A4%E4%BA%86-ioctl-%E8%BF%98%E4%BA%86%E8%A7%A3%E5%93%AA%E4%BA%9B%E6%9C%BA%E5%88%B6-%E5%AE%9E%E9%99%85%E7%94%A8%E8%BF%87%E5%93%AA%E4%BA%9B"><span class="nav-number">21.</span> <span class="nav-text">Q: 内核与用户态通信:除了 ioctl,还了解哪些机制?实际用过哪些?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-20"><span class="nav-number">21.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E4%B8%AD%E6%96%AD%E5%BA%95%E5%8D%8A%E9%83%A8%E7%9A%84-tasklet-%E5%92%8C-workqueue-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB-%E5%A6%82%E6%9E%9C%E8%AE%A9%E4%BD%A0%E5%9C%A8%E4%B8%80%E4%B8%AA%E9%A9%B1%E5%8A%A8%E4%B8%AD%E5%A4%84%E7%90%86%E4%B8%80%E4%B8%AA%E5%8F%AF%E8%83%BD%E4%BC%9A%E4%BC%91%E7%9C%A0%E7%9A%84%E6%93%8D%E4%BD%9C-%E4%BD%A0%E4%BC%9A%E9%80%89%E6%8B%A9%E5%93%AA%E4%B8%AA-%E4%B8%BA%E4%BB%80%E4%B9%88"><span class="nav-number">22.</span> <span class="nav-text">Q: 中断底半部的 tasklet 和 workqueue 有什么区别?如果让你在一个驱动中处理一个可能会休眠的操作,你会选择哪个?为什么?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-21"><span class="nav-number">22.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-C-%E8%AF%AD%E8%A8%80%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E4%B8%AD-malloc-%E5%92%8C-mmap-%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB-%E4%BB%80%E4%B9%88%E6%97%B6%E5%80%99%E4%BC%9A%E8%80%83%E8%99%91%E4%BD%BF%E7%94%A8-mmap"><span class="nav-number">23.</span> <span class="nav-text">Q: C 语言内存管理中,malloc 和 mmap 有什么区别?什么时候会考虑使用 mmap?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-22"><span class="nav-number">23.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1%E4%B8%AD-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98-%E4%BF%A1%E5%8F%B7%E9%87%8F%E5%92%8C-socket-%E7%9A%84%E6%96%B9%E6%A1%88-%E5%90%84%E8%87%AA%E6%9C%89%E4%BB%80%E4%B9%88%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="nav-number">24.</span> <span class="nav-text">Q: 进程间通信中,共享内存 + 信号量和 socket 的方案,各自有什么优缺点?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-23"><span class="nav-number">24.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E4%BD%A0%E7%94%A8%E8%BF%87%E5%93%AA%E4%BA%9B%E5%86%85%E6%A0%B8%E8%B0%83%E8%AF%95%E6%89%8B%E6%AE%B5-printk%E3%80%81ftrace%E3%80%81gdb%E3%80%81perf-%E5%88%86%E5%88%AB%E9%80%82%E7%94%A8%E4%BA%8E%E4%BB%80%E4%B9%88%E5%9C%BA%E6%99%AF"><span class="nav-number">25.</span> <span class="nav-text">Q: 你用过哪些内核调试手段(printk、ftrace、gdb、perf)?分别适用于什么场景?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-24"><span class="nav-number">25.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-C-%E8%99%9A%E5%87%BD%E6%95%B0%E8%A1%A8%E6%98%AF%E6%80%8E%E6%A0%B7%E7%9A%84-%E8%99%9A%E7%BB%A7%E6%89%BF%E5%92%8C%E6%99%AE%E9%80%9A%E7%BB%A7%E6%89%BF%E5%9C%A8%E5%86%85%E5%AD%98%E5%B8%83%E5%B1%80%E4%B8%8A%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">26.</span> <span class="nav-text">Q: C++虚函数表是怎样的?虚继承和普通继承在内存布局上的区别?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-25"><span class="nav-number">26.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-epoll%E8%BE%B9%E7%BC%98%E8%A7%A6%E5%8F%91%E5%92%8C%E6%B0%B4%E5%B9%B3%E8%A7%A6%E5%8F%91%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB-ET%E6%A8%A1%E5%BC%8F%E4%B8%8B%E5%A6%82%E4%BD%95%E9%81%BF%E5%85%8D%E4%B8%A2%E4%BA%8B%E4%BB%B6"><span class="nav-number">27.</span> <span class="nav-text">Q:epoll边缘触发和水平触发有什么区别?ET模式下如何避免丢事件?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-26"><span class="nav-number">27.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E5%AE%9E%E6%97%B6%E4%BF%A1%E5%8F%B7%E5%92%8C%E6%99%AE%E9%80%9A%E4%BF%A1%E5%8F%B7%E7%9A%84%E5%8C%BA%E5%88%AB-%E5%A6%82%E4%BD%95%E4%BF%9D%E8%AF%81%E4%BF%A1%E5%8F%B7%E4%B8%8D%E4%B8%A2%E5%A4%B1"><span class="nav-number">28.</span> <span class="nav-text">Q: 实时信号和普通信号的区别?如何保证信号不丢失?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-27"><span class="nav-number">28.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E4%BB%80%E4%B9%88%E6%98%AF%E7%B3%BB%E7%BB%9F%E8%B0%83%E7%94%A8"><span class="nav-number">29.</span> <span class="nav-text">Q: 什么是系统调用?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-28"><span class="nav-number">29.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-map%E5%92%8Cunordered-map%E5%8C%BA%E5%88%AB"><span class="nav-number">30.</span> <span class="nav-text">Q: map和unordered_map区别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-29"><span class="nav-number">30.1.</span> <span class="nav-text">A:</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Q-%E8%AF%B4%E4%B8%80%E4%B8%8BPCIE%E4%BB%8E%E6%8F%A1%E6%89%8B%E5%88%B0%E9%A9%B1%E5%8A%A8%E5%8A%A0%E8%BD%BD%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">31.</span> <span class="nav-text">Q:说一下PCIE从握手到驱动加载的过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#A-30"><span class="nav-number">31.1.</span> <span class="nav-text">A:</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zzkuang"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Zzkuang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/zzkuang" title="Gitee → https:&#x2F;&#x2F;gitee.com&#x2F;zzkuang" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>Gitee</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zzkuang0516@163.com" title="E-Mail → mailto:zzkuang0516@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://zhangkuang.asia/2025/09/02/%E5%B5%8C%E5%85%A5%E5%BC%8Flinux%E9%9D%A2%E8%AF%95%E9%A2%98%E6%95%B4%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Zzkuang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="嵌入式linux面试题整理 | Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          嵌入式linux面试题整理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-09-02 22:18:23" itemprop="dateCreated datePublished" datetime="2025-09-02T22:18:23+08:00">2025-09-02</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-09-12 16:04:01" itemprop="dateModified" datetime="2025-09-12T16:04:01+08:00">2025-09-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><ul>
+<li>嵌入式linux秋招面经整理,驱动开发,BSP相关方向</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="Q-DDR挂在PS还是PL下面-为什么-如何选择挂在PS还是PL呢"><a href="#Q-DDR挂在PS还是PL下面-为什么-如何选择挂在PS还是PL呢" class="headerlink" title="Q:DDR挂在PS还是PL下面,为什么?如何选择挂在PS还是PL呢?"></a>Q:DDR挂在PS还是PL下面,为什么?如何选择挂在PS还是PL呢?</h1><h2 id="A"><a href="#A" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>默认挂载ps,对于zynq的系统来说,ps端启动linux,ddr不可或缺,但是fpga端则不一定</li>
+<li>PS端有专门的DDR硬核控制器,性能更好</li>
+<li>使用Memory Interface Generator生成软核DDR控制器</li>
+<li>只有在PL端需要极大内存带宽时才配置到PL</li>
+</ol>
+<h1 id="Q-你做过哪些驱动开发-你的驱动是怎么实现的"><a href="#Q-你做过哪些驱动开发-你的驱动是怎么实现的" class="headerlink" title="Q:你做过哪些驱动开发 &#x2F; 你的驱动是怎么实现的"></a>Q:你做过哪些驱动开发 &#x2F; 你的驱动是怎么实现的</h1><h2 id="A-1"><a href="#A-1" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>回答系统级的驱动使能、配置和调试<ul>
+<li><strong>设备树 (DTS)</strong>:根据硬件手册,配置 reg, interrupts, compatible 属性.</li>
+<li><strong>内核配置 (Kconfig)</strong>:通过 menuconfig 确保相关驱动模块被编译.</li>
+<li><strong>调试验证</strong>:用 dmesg, lspci, &#x2F;dev 节点验证驱动是否成功加载 (probe) 和工作.</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-硬件的复位电平-延时要求不同-驱动里怎么处理"><a href="#Q-硬件的复位电平-延时要求不同-驱动里怎么处理" class="headerlink" title="Q:硬件的复位电平&#x2F;延时要求不同,驱动里怎么处理"></a>Q:<strong>硬件的复位电平&#x2F;延时要求不同,驱动里怎么处理</strong></h1><h2 id="A-2"><a href="#A-2" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>驱动代码应与硬件参数解耦,通过<strong>设备树</strong>传递硬件特性<ul>
+<li>在 DTS 中定义 reset-active-low(标志属性)和 reset-delay-ms &#x3D; &lt;100&gt;;(延时属性).</li>
+<li>驱动的 probe 函数中,解析这些属性.</li>
+<li>根据属性值,使用 gpiod_set_value() 控制电平,并用 msleep() 实现延时</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-如何实现一个中断"><a href="#Q-如何实现一个中断" class="headerlink" title="Q:如何实现一个中断"></a>Q:<strong>如何实现一个中断</strong></h1><h2 id="A-3"><a href="#A-3" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><strong>注册中断</strong>:在 probe 函数中调用 devm_request_irq().</li>
+<li><strong>顶半部 (ISR)</strong>:执行<strong>必须快</strong>,在中断屏蔽下运行.只做紧急工作:<strong>读&#x2F;写寄存器清中断</strong>,拷贝少量数据.<strong>调度下半部</strong>来处理耗时任务.</li>
+<li><strong>底半部 (Workqueue)</strong>:在正常内核上下文执行,<strong>可睡眠</strong>.处理复杂逻辑、数据分析、与用户空间交互等.</li>
+<li><strong>关键区别</strong>:<code>work_queue</code> vs <code>irq_thread</code> , 前者用共享线程池,后者为中断创建专用线程(开销大,但可阻塞)</li>
+</ol>
+<h1 id="Q-看门狗-Watchdog-的原理是什么-应用层怎么喂狗"><a href="#Q-看门狗-Watchdog-的原理是什么-应用层怎么喂狗" class="headerlink" title="Q:看门狗(Watchdog)的原理是什么?应用层怎么喂狗"></a>Q:<strong>看门狗(Watchdog)的原理是什么?应用层怎么喂狗</strong></h1><h2 id="A-4"><a href="#A-4" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><strong>原理</strong>:一个独立的<strong>硬件定时器</strong>.如果程序在规定时间内没有喂狗(重置定时器),它会强制<strong>复位</strong>整个系统,防止程序跑飞或死锁.</li>
+<li><strong>内核驱动</strong>:内核的看门狗驱动会创建一个设备文件,通常是 &#x2F;dev&#x2F;watchdog.</li>
+<li><strong>应用层喂狗</strong>:open(“&#x2F;dev&#x2F;watchdog”, O_WRONLY).在一个循环或定时器中,周期性地向打开的文件描述符<strong>写入任意字符</strong>,即完成一次喂狗</li>
+</ol>
+<h1 id="Q-驱动如何给应用层封装功能和接口"><a href="#Q-驱动如何给应用层封装功能和接口" class="headerlink" title="Q:驱动如何给应用层封装功能和接口?"></a>Q:<strong>驱动如何给应用层封装功能和接口?</strong></h1><h2 id="A-5"><a href="#A-5" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><strong>标准模型</strong>:实现<strong>字符设备驱动</strong>.</li>
+<li><strong>核心结构体</strong>:定义一个 struct file_operations,并填充其中的函数指针.</li>
+<li><strong>关键函数</strong>:<code>.open</code> &#x2F; <code>.release</code>:打开&#x2F;关闭设备;<code>.read</code> &#x2F;<code> .write</code>:数据传输,注意用 copy_to&#x2F;from_user();<code>.unlocked_ioctl</code>:用于实现<strong>自定义控制命令</strong>(如手动复位、设置模式等).</li>
+<li><strong>最终效果</strong>:在 &#x2F;dev&#x2F; 目录下创建设备节点,应用层像操作普通文件一样操作硬件.</li>
+</ol>
+<h1 id="Q-Linux-内核是怎么分配内存的"><a href="#Q-Linux-内核是怎么分配内存的" class="headerlink" title="Q:Linux 内核是怎么分配内存的?"></a>Q:Linux 内核是怎么分配内存的?</h1><h2 id="A-6"><a href="#A-6" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>物理内存管理<ul>
+<li>伙伴系统 (Buddy System): 为内核服务,为内核进行内存分配<ul>
+<li>原理: <strong>将所有空闲的物理页框组织成11(MAX_ORDER)个链表</strong>,第i个链表中的内存块大小是<code>2^i</code>,i从0开始</li>
+<li>分配: 当<strong>请求N个页框时</strong>,<strong>去块大小刚好覆盖需求的链表找</strong><ul>
+<li>如果找到,则分配</li>
+<li>如果<strong>没找到</strong>,则<strong>去更大的链表找一个</strong>,将其<strong>分裂成两个</strong>同等大小的块,<strong>一个用于分配,另一个放入对应大小的链表</strong></li>
+</ul>
+</li>
+<li>释放: <strong>释放内存时,会检查相邻的、地址对齐的同等大小块是否也空闲</strong><ul>
+<li>如果是,则两者合并成一个更大的块,并放入上一级链表中,这个过程会递归进行</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Slab 分配器:<ul>
+<li><strong>用于高效分配小内存减少内存碎片,机制等同于内存池</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>内核常用内存申请接口<ul>
+<li>kmalloc(): 分配物理上连续的内核内存,大小通常较小</li>
+<li>vmalloc(): 分配虚拟上连续但物理上不一定连续的内存</li>
+<li>alloc_pages(): 直接从伙伴系统分配指定数量(2的幂次方)的物理页</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-聊聊你对指针的理解"><a href="#Q-聊聊你对指针的理解" class="headerlink" title="Q: 聊聊你对指针的理解?"></a>Q: 聊聊你对指针的理解?</h1><h2 id="A-7"><a href="#A-7" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><strong>指针存储了另一个变量的内存地址</strong>,<strong>提供了对内存的直接访问能力</strong><ul>
+<li>指针的类型决定了它指向的内存区域的大小和如何解释</li>
+</ul>
+</li>
+<li>通用应用高效传参:<ul>
+<li>作为函数参数,传递地址而非对象副本,用于<strong>修改外部变量</strong>或<strong>避免大对象拷贝</strong></li>
+<li>动态内存分配:<code>malloc/free</code> 和 <code>new/delete</code> 的返回值都是<strong>指向堆区内存的指针</strong></li>
+<li>数据结构实现:是实现链表、树、图等数据结构的基础,节点之间通过指针连接.</li>
+</ul>
+</li>
+<li><strong>访问硬件寄存器</strong>:<ul>
+<li><strong>将已知的硬件物理地址强制转换为指针</strong>,<strong>直接读写寄存器以控制硬件</strong>.</li>
+<li>中断向量表:在<strong>裸机</strong>中,<strong>中断向量表本质上是一个函数指针数组</strong></li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-了解二级指针吗"><a href="#Q-了解二级指针吗" class="headerlink" title="Q: 了解二级指针吗?"></a>Q: 了解二级指针吗?</h1><h2 id="A-8"><a href="#A-8" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><strong>二级指针</strong>是一个变量,它<strong>存储的是一个一级指针的地址</strong></li>
+<li>核心应用场景<ul>
+<li>在函数内部修改外部指针变量<ul>
+<li>当需要<strong>在函数内部分配内存</strong>,并<strong>让一个外部的指针指向这块新内存时</strong>使用</li>
+<li>原理: <ul>
+<li><strong>只传递一级指针是值传递,修改的是指针的副本</strong></li>
+<li><strong>必须传递指针的地址</strong>,通过解引用<code>*p</code>来修改外部的指针</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-long指针多大-和-int-指针比呢-指针的大小由什么决定"><a href="#Q-long指针多大-和-int-指针比呢-指针的大小由什么决定" class="headerlink" title="Q:long指针多大?和 int 指针比呢?指针的大小由什么决定?"></a>Q:long指针多大?和 int 指针比呢?指针的大小由什么决定?</h1><h2 id="A-9"><a href="#A-9" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>指针变量的大小,由当前系统的体系结构(地址总线位数)决定</li>
+<li>指针自身的大小与它指向的数据类型无关</li>
+<li><strong>指针类型告诉编译器两件重要事情:</strong><ul>
+<li><strong>解引用时的访问范围</strong></li>
+<li><strong>指针运算的步长</strong></li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-怎么用-sizeof-判断结构体大小-char、short、int-不同组合的结构体多大-最小能压缩到多少-怎么实现"><a href="#Q-怎么用-sizeof-判断结构体大小-char、short、int-不同组合的结构体多大-最小能压缩到多少-怎么实现" class="headerlink" title="Q: 怎么用 sizeof 判断结构体大小?char、short、int 不同组合的结构体多大?最小能压缩到多少?怎么实现?"></a>Q: 怎么用 sizeof 判断结构体大小?char、short、int 不同组合的结构体多大?最小能压缩到多少?怎么实现?</h1><h2 id="A-10"><a href="#A-10" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>默认对齐规则:<ul>
+<li>成员自身对齐: <strong>结构体中每个成员的起始地址,必须是其自身类型大小的整数倍</strong>.</li>
+<li>结构体整体对齐: <strong>结构体的总大小,必须是其所有成员中最大对齐值的整数倍</strong>.</li>
+</ul>
+</li>
+<li>压缩 (不对齐&#x2F;Packed)最小大小: <strong>结构体的最小大小是其所有成员大小之和</strong><ul>
+<li>通过编译器指令设置1字节对齐</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-进程和线程是啥关系"><a href="#Q-进程和线程是啥关系" class="headerlink" title="Q:进程和线程是啥关系?"></a>Q:进程和线程是啥关系?</h1><h2 id="A-11"><a href="#A-11" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>定义与核心区别<ul>
+<li>进程 (Process): <strong>是操作系统进行资源分配和管理的基本单位</strong>.它是一个独立的程序执行实例,拥有自己完整的、私有的虚拟地址空间、文件描述符、内存等资源.</li>
+<li>线程 (Thread): <strong>是操作系统进行CPU调度的基本单位</strong>,也被称为轻量级进程.本身<strong>不拥有系统资源</strong>,而是<strong>依赖于其所属的进程</strong></li>
+</ul>
+</li>
+<li>资源共享与隔离(关系的核心)<ul>
+<li><strong>进程间资源是相互隔离</strong>的<ul>
+<li>一个进程崩溃不会影响其他进程,安全性高</li>
+<li>进程创建和切换的开销大(需要切换页表、内核栈等)</li>
+<li>数据共享复杂,需要通过专门的进程间通信(IPC)机制.</li>
+</ul>
+</li>
+<li><strong>线程共享其所属进程的绝大部分资源</strong><ul>
+<li>共享资源:堆空间,全局变量静态变量,代码段,文件描述符</li>
+<li>私有资源: <strong>每个线程拥有自己独立的栈</strong>,用于存储局部变量和函数调用信息</li>
+<li>创建和切换开销小,数据共享非常方便,通信效率高</li>
+<li>线程的崩溃可能导致整个进程崩溃</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>进程是资源所有者,线程是执行者</li>
+</ol>
+<h1 id="Q-聊聊-TCP-IP-协议-网络怎么分层的-TCP-和-IP-分别在哪一层"><a href="#Q-聊聊-TCP-IP-协议-网络怎么分层的-TCP-和-IP-分别在哪一层" class="headerlink" title="Q: 聊聊 TCP&#x2F;IP 协议?网络怎么分层的?TCP 和 IP 分别在哪一层?"></a>Q: 聊聊 TCP&#x2F;IP 协议?网络怎么分层的?TCP 和 IP 分别在哪一层?</h1><h2 id="A-12"><a href="#A-12" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>网络分层模型网络协议通常按功能分层,常用的是五层教学模型<ul>
+<li>应用层</li>
+<li>传输层</li>
+<li><strong>网络层:网络寻址</strong></li>
+<li>数据链路层</li>
+<li>物理层</li>
+</ul>
+</li>
+<li>IP协议 (位于网络层), 负责主机的IP地址寻址和数据包的路由<ul>
+<li>特点:无连接:,不可靠</li>
+</ul>
+</li>
+<li>TCP协议 (位于传输层),在IP协议之上,提供面向连接的、可靠的、基于字节流的传输服务<ul>
+<li>可靠性保障机制:<ul>
+<li>连接管理: 三次握手和四次挥手</li>
+<li>确认与重传: <strong>基于序列号(SEQ)和确认号(ACK)的超时重传机制</strong></li>
+<li><strong>流量控制</strong>: 基于接收方窗口大小的<strong>滑动窗口</strong>协议</li>
+<li><strong>拥塞控制</strong>: <strong>慢启动</strong>(<strong>连接初期逐步指数扩大拥塞窗口</strong>)、<strong>拥塞避免</strong>(<strong>扩大窗口至阈值变线性增长</strong>)等算法,感知并应对网络拥塞,<strong>根据丢包率延迟判断网络情况</strong></li>
+</ul>
+</li>
+<li>字节流特性:TCP是面向字节流的,没有消息边界.这可能导致粘包&#x2F;拆包问题,需要应用层协议自行解决</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-用二级指针申请一块内存-然后赋值并展示"><a href="#Q-用二级指针申请一块内存-然后赋值并展示" class="headerlink" title="Q: 用二级指针申请一块内存,然后赋值并展示"></a>Q: 用二级指针申请一块内存,然后赋值并展示</h1><h2 id="A-13"><a href="#A-13" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><p>函数入参是二级指针</p>
+<ul>
+<li>能存放字符串的只有<code>char*</code>,因此分配内存时需要malloc<code>char*</code>类型</li>
+<li>字符串拷贝使用strcpy</li>
+<li>二级指针解引用一次是一级指针的地址,将分配的<code>char *</code>赋值给解引用一次的二级指针</li>
+</ul>
+</li>
+<li><p>代码实现:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">allocate_and_init</span><span class="params">(<span class="type">char</span> **str, <span class="type">int</span> size)</span> &#123; <span class="comment">// 第1步正确:函数签名对了</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 第2步:分配一块给字符串用的内存,用一个一级指针接收</span></span><br><span class="line">    <span class="type">char</span> *new_memory = (<span class="type">char</span> *)<span class="built_in">malloc</span>(size);</span><br><span class="line">    <span class="keyword">if</span> (new_memory == <span class="literal">NULL</span>) &#123; <span class="keyword">return</span>; &#125; <span class="comment">// 别忘了检查</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 第3步:把字符串内容拷贝到新内存里</span></span><br><span class="line">    <span class="built_in">strcpy</span>(new_memory, <span class="string">&quot;Hello, World!&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 第4步:通过解引用二级指针,修改外部的一级指针,让它指向新内存</span></span><br><span class="line">    *str = new_memory;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h1 id="Q-20-级台阶-一次能走-1-级或-2-级-有多少种走法"><a href="#Q-20-级台阶-一次能走-1-级或-2-级-有多少种走法" class="headerlink" title="Q:20 级台阶,一次能走 1 级或 2 级,有多少种走法?"></a>Q:20 级台阶,一次能走 1 级或 2 级,有多少种走法?</h1><h2 id="A-14"><a href="#A-14" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><p>递归解法</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">climbStairs</span><span class="params">(<span class="type">int</span> n)</span> &#123;</span><br><span class="line">    <span class="comment">// 递归边界 (Base Case)</span></span><br><span class="line">    <span class="keyword">if</span> (n == <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>; <span class="comment">// 1级台阶只有1种走法</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (n == <span class="number">2</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">2</span>; <span class="comment">// 2级台阶有2种走法 (1+1, 2)</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 递归关系:走到n的走法 = 走到n-1的走法 + 走到n-2的走法</span></span><br><span class="line">    <span class="keyword">return</span> climbStairs(n - <span class="number">1</span>) + climbStairs(n - <span class="number">2</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">int</span> n = <span class="number">20</span>;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Number of ways to climb %d stairs is: %d\n&quot;</span>, n, climbStairs(n));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>动态规划解法 (面试官更期待的)</p>
+<ul>
+<li>既然递归有重复计算,我们可以用一个数组把计算过的结果存起来,避免重复计算.这就是动态规划的思想.</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-描述一下嵌入式Linux的完整启动过程-并说明Bootloader的作用以及它与内核的通信方式"><a href="#Q-描述一下嵌入式Linux的完整启动过程-并说明Bootloader的作用以及它与内核的通信方式" class="headerlink" title="Q: 描述一下嵌入式Linux的完整启动过程,并说明Bootloader的作用以及它与内核的通信方式."></a>Q: 描述一下嵌入式Linux的完整启动过程,并说明Bootloader的作用以及它与内核的通信方式.</h1><h2 id="A-15"><a href="#A-15" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>核心要点一:完整的启动流程 <ul>
+<li>On-Chip ROM (<strong>BootROM</strong>): <strong>CPU上电后执行的第一段固化代码</strong>.它会<strong>根据BOOT引脚的设置</strong>,<strong>从指定的启动设备</strong>(如QSPI Flash, SD卡)<strong>加载并执行</strong>第一阶段引导加载程序(<strong>FSBL</strong>).</li>
+<li><strong>FSBL</strong> (First Stage Bootloader): 主要<strong>负责初始化最关键的硬件</strong>,<strong>特别是DDR内存控制器</strong>.然后它会从启动介质中加载后续的组件(如PMUFW, ATF, U-Boot)到DDR中.</li>
+<li><strong>ATF &amp; PMUFW</strong> (可选但常见): 在MPSoC中,会先加载<strong>ARM Trusted Firmware</strong> (ATF) 来<strong>建立安全环境</strong>,以及加载<strong>平台管理单元固件(PMUFW)</strong>.</li>
+<li><strong>U-Boot</strong> (Second Stage Bootloader): 这是功能完备的Bootloader.它会进行<strong>更全面的硬件初始化(如网口、PCIe)</strong>,<strong>提供命令行交互</strong>,并最终负责加载Linux内核.</li>
+<li><strong>Linux Kernel</strong>: <strong>U-Boot将内核镜像(Image)和设备树(DTB)加载到内存的指定位置</strong>,然后<strong>跳转到内核的入口点</strong>开始执行.<strong>内核</strong>会进行<strong>自解压</strong>,然后<strong>利用设备树信息初始化所有驱动</strong>,最后<strong>挂载根文件系统</strong>,并<strong>启动第一个用户进程init</strong>.</li>
+<li><strong>Init Process</strong>: init进程是所有用户进程的父进程,它会<strong>根据配置文件</strong>(如inittab或systemd配置)<strong>启动其他系统服务</strong>,最终出现登录Shell.</li>
+</ul>
+</li>
+<li>核心要点二:<strong>Bootloader的核心作用</strong> (为什么不能没有它)<ul>
+<li>硬件初始化: 它<strong>是板级硬件</strong>(Board-Specific)<strong>和通用内核</strong>(General Kernel)<strong>之间的桥梁</strong>.<strong>内核不知道具体的DDR型号、时钟频率,这些必须由Bootloader配置好,为内核创造一个可执行的基本环境</strong>.</li>
+<li>加载内核镜像: <strong>内核自身无法从Flash中把自己加载到RAM中</strong>运行,这个搬运工的角色必须由Bootloader来承担.</li>
+<li>传递启动参数: <strong>Bootloader是向内核传递信息的第一个入口</strong>.它<strong>告诉内核根文件系统在哪</strong>、<strong>控制台用哪个串口</strong>等关键信息.</li>
+<li>提供调试和恢复功能: <strong>提供命令行</strong>,允许开发者<strong>在内核启动前进行调试、系统更新或进入恢复模式</strong>.</li>
+</ul>
+</li>
+<li>核心要点三:Bootloader与内核的通信机制核心机制:<ul>
+<li>设备树 (Device Tree Blob - DTB)<ul>
+<li>U-Boot在启动内核前,会将内核镜像和DTB文件加载到内存中的不同地址.</li>
+<li><strong>DTB中不仅包含了板上几乎所有的硬件信息描述</strong>(如CPU核数、内存地址和大小、外设寄存器地址、中断号等),<strong>U-Boot还会动态地修改DTB,将启动参数(bootargs)写入chosen节点下</strong>.</li>
+</ul>
+</li>
+<li>传递方式:<ul>
+<li><strong>U-Boot在跳转到内核入口点时</strong>,会遵循ARM的启动协议,<strong>将DTB在内存中的物理地址存放在一个约定的寄存器中</strong>(如ARM32的r2,ARM64的x0).</li>
+<li><strong>内核启动后</strong>,会<strong>从这个约定的寄存器中获取地址</strong>,找到DTB,解析它来初始化对应的硬件驱动,并<strong>从chosen节点读取bootargs来执行后续的启动流程</strong>.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-互斥锁-Mutex-和自旋锁-Spinlock-的根本区别是什么-在嵌入式Linux驱动开发中-您会如何选择使用它们-请至少举一个必须使用自旋锁-而不能使用互斥锁的具体场景"><a href="#Q-互斥锁-Mutex-和自旋锁-Spinlock-的根本区别是什么-在嵌入式Linux驱动开发中-您会如何选择使用它们-请至少举一个必须使用自旋锁-而不能使用互斥锁的具体场景" class="headerlink" title="Q: 互斥锁(Mutex)和自旋锁(Spinlock)的根本区别是什么?在嵌入式Linux驱动开发中,您会如何选择使用它们?请至少举一个必须使用自旋锁,而不能使用互斥锁的具体场景."></a>Q: 互斥锁(Mutex)和自旋锁(Spinlock)的根本区别是什么?在嵌入式Linux驱动开发中,您会如何选择使用它们?请至少举一个必须使用自旋锁,而不能使用互斥锁的具体场景.</h1><h2 id="A-16"><a href="#A-16" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><p>核心要点一:根本区别在于等待方式</p>
+<ul>
+<li>互斥锁 (Mutex): <strong>获取锁失败时,当前执行单元会进入睡眠状态,让出CPU给其他任务</strong>.这是一种<strong>不占用CPU</strong>的等待.<ul>
+<li>优点:等待期间不消耗CPU,适用于锁保护的代码执行时间可能较长的场景.</li>
+<li>缺点:涉及进程&#x2F;线程的上下文切换,开销较大.</li>
+</ul>
+</li>
+<li>自旋锁 (Spinlock): <strong>获取锁失败时,当前执行单元会进入一个忙等待循环</strong>(原地自旋),<strong>持续占用CPU</strong>直到锁被释放.这是一种占用CPU的等待.<ul>
+<li>优点:没有上下文切换的开销,适用于锁保护的代码执行时间非常短的场景.</li>
+<li>缺点:如果锁占用时间长,会严重浪费CPU资源.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>核心要点二:选择原则与适用场景</p>
+<ul>
+<li>预期的锁持有时间:<ul>
+<li>如果<strong>锁的持有时间很短</strong>(通常是微秒级别,几条汇编指令就能完成),应优先使用自旋锁,因为上下文切换的开销可能比锁的持有时间还要长.</li>
+<li>如果<strong>锁的持有时间可能很长</strong>,或者在<strong>锁保护的区域内可能发生睡眠</strong>(如调用<code>copy_from_user</code>、<code>kmalloc</code>等可能引起阻塞的函数),则必须<strong>使用互斥锁</strong>.</li>
+</ul>
+</li>
+<li>执行的上下文: 这是最关键的区别.<ul>
+<li><strong>互斥锁只能在进程上下文中使用</strong>,因为它需要睡眠.</li>
+<li><strong>自旋锁可以在进程上下文和中断上下文中</strong>使用.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>核心要点三:<strong>必须使用自旋锁的场景</strong>——中断处理程序</p>
+<ul>
+<li>场景描述: 当一个设备驱动的<strong>中断处理程序需要访问一个与驱动其他部分</strong>(如<code>read</code>&#x2F;<code>write</code>函数)<strong>共享的全局数据结构</strong>时,必须使用自旋锁来保护这个数据结构.</li>
+<li>原因分析:<ul>
+<li>中断处理程序运行在<strong>中断上下文中</strong>,这是一个特殊的、<strong>不能被调度</strong>的环境.</li>
+<li><strong>如果在中断上下文中使用互斥锁,并且该锁恰好被进程上下文的代码持有,中断处理程序会尝试睡眠以等待锁</strong>.</li>
+<li><strong>在中断上下文中睡眠是绝对不允许的</strong>,因为<strong>中断处理程序没有一个可以被内核调度器重新调度回来的进程实体</strong>.这将<strong>导致系统死锁 (Deadlock) 和崩溃</strong>.</li>
+<li>因此,自旋锁是中断上下文中唯一可用的锁机制.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-当Linux内核出现问题时-比如发生了Kernel-Panic或者Oops-你通常会如何去排查-请描述你的调试思路和具体使用过的工具"><a href="#Q-当Linux内核出现问题时-比如发生了Kernel-Panic或者Oops-你通常会如何去排查-请描述你的调试思路和具体使用过的工具" class="headerlink" title="Q: 当Linux内核出现问题时,比如发生了Kernel Panic或者Oops,你通常会如何去排查?请描述你的调试思路和具体使用过的工具."></a>Q: 当Linux内核出现问题时,比如发生了Kernel Panic或者Oops,你通常会如何去排查?请描述你的调试思路和具体使用过的工具.</h1><h2 id="A-17"><a href="#A-17" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>前置知识<ul>
+<li>Oops: 它发生在<strong>内核态代码访问了无效的内存地址</strong>(比如空指针解引用)<strong>或执行了非法指令时</strong><ul>
+<li><strong>产生Oops后,内核会杀死当前进程</strong>(因为是这个进程的系统调用触发了内核错误),但<strong>内核本身会尝试继续运行</strong></li>
+<li>系统不一定会立即宕机,但会处于一个不稳定状态,很可能在不久后因为数据结构损坏而最终Panic.Oops信息是调试驱动问题的最重要线索.</li>
+</ul>
+</li>
+<li>Kernel Panic: 这是<strong>内核遇到的致命错误,无法恢复</strong>.一旦<strong>发生Panic,内核会停止所有任务,打印尽可能多的调试信息</strong>,然后<strong>系统彻底宕机</strong>.Panic的原因有很多,比如找不到根文件系统、关键的内核数据结构损坏、或者由一个未处理的Oops引发</li>
+</ul>
+</li>
+<li>第一步:<strong>获取日志</strong> (保存现场)<ul>
+<li>核心工具: 串口 + 日志记录软件 (Minicom&#x2F;Putty).</li>
+<li>关键信息: 重点关注日志中的三样东西:<ol>
+<li><strong>错误摘要</strong>: 比如 <code>NULL pointer dereference</code> (空指针) 或 <code>sleeping function called from invalid context</code> (上下文错误).</li>
+<li><strong>PC&#x2F;IP 值: 指令指针,也就是出错的内存地址</strong>.</li>
+<li><strong>Call Trace: 函数调用栈,能看出代码是怎么跑到出错点的</strong>.</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>第二步:<strong>定位源码</strong> (翻译地址)<ul>
+<li>核心工具: <strong>addr2line</strong></li>
+<li>操作公式: <code>addr2line -e vmlinux &lt;PC值&gt;</code>.<ul>
+<li><code>vmlinux</code> 是带调试信息的内核镜像.</li>
+<li><code>&lt;PC值&gt;</code> 就是上一步日志里的那个内存地址.</li>
+</ul>
+</li>
+<li>达成效果: 这个命令能把看不懂的<strong>内存地址</strong>,直接<strong>翻译成哪个文件的第几行</strong>.</li>
+</ul>
+</li>
+<li>第三步:分析修复 (对症下药)<ul>
+<li>定位后: 结合第二步找到的源码位置和第一步的函数调用栈,审查代码逻辑.</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-阻塞I-O和非阻塞I-O的根本区别、优劣势是什么-为什么高性能服务器多采用非阻塞模型"><a href="#Q-阻塞I-O和非阻塞I-O的根本区别、优劣势是什么-为什么高性能服务器多采用非阻塞模型" class="headerlink" title="Q: 阻塞I&#x2F;O和非阻塞I&#x2F;O的根本区别、优劣势是什么?为什么高性能服务器多采用非阻塞模型?"></a>Q: 阻塞I&#x2F;O和非阻塞I&#x2F;O的根本区别、优劣势是什么?为什么高性能服务器多采用非阻塞模型?</h1><h2 id="A-18"><a href="#A-18" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>前置知识<ul>
+<li><strong>Linux中几乎所有的I&#x2F;O操作,在内核层面最终都会归结为对文件描述符的操作</strong></li>
+<li>当我们<strong>调用一个I&#x2F;O函数</strong>(如read, recv)时,分为<strong>两个阶段</strong>:<ul>
+<li><strong>等待数据阶段</strong>: 内核等待硬件准备好数据.比如,网卡接收到数据包,并把它复制到内核缓冲区.</li>
+<li><strong>拷贝数据阶段</strong>: 内核把准备好的数据,从内核缓冲区拷贝到我们应用进程的内存空间.</li>
+</ul>
+</li>
+<li>阻塞I&#x2F;O和非阻塞I&#x2F;O的<strong>根本区别</strong>,就体现在<strong>等待数据阶段应用进程的状态</strong></li>
+</ul>
+</li>
+<li>核心要点一:根本区别在于等不等<ul>
+<li><strong>阻塞</strong>I&#x2F;O (Blocking I&#x2F;O):<ul>
+<li>行为: 当应用调用<code>read</code>等函数,如果<strong>内核的数据还没准备好,应用进程会被挂起</strong>(进入睡眠状态),<strong>完全放弃CPU</strong>,<strong>直到数据准备好并被拷贝到用户空间</strong>后,才会被唤醒.</li>
+<li>特点: <strong>一个线程在I&#x2F;O操作完成前,什么都干不了</strong>.调用即阻塞.</li>
+</ul>
+</li>
+<li><strong>非阻塞</strong>I&#x2F;O (Non-blocking I&#x2F;O):<ul>
+<li>行为: 当应用调用<code>read</code>等函数,<strong>如果内核数据没准备好</strong>,该函数会立即<strong>返回一个错误码</strong> (例如<code>EAGAIN</code>或<code>EWOULDBLOCK</code>),而<strong>不会让应用进程睡眠</strong>.</li>
+<li>特点: <strong>调用立即返回</strong>,不阻塞.<strong>应用进程需要通过一个循环来不断尝试读取</strong>,直到成功为止.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>核心要点二:优劣势对比<ul>
+<li><strong>阻塞</strong>I&#x2F;O:<ul>
+<li><strong>优点</strong>: 编程模型<strong>简单</strong>,代码逻辑是线性的,易于理解.</li>
+<li><strong>缺点</strong>: 性能极差,<strong>并发能力低下</strong>.<strong>一个线程只能处理一个I&#x2F;O连接</strong>.如果要<strong>同时处理大量连接</strong>,<strong>就需要创建大量线程</strong>,导致巨大的内存开销和CPU上下文切换开销,最终拖垮服务器.</li>
+</ul>
+</li>
+<li><strong>非阻塞</strong>I&#x2F;O:<ul>
+<li><strong>优点</strong>: 不会被单个I&#x2F;O操作卡死,可以<strong>在等待数据的间隙去做别的事情</strong>.</li>
+<li><strong>缺点</strong>: 编程模型<strong>复杂</strong>.单纯的非阻塞I&#x2F;O会导致应用进程在循环中不断查询,形成忙等待,浪费CPU.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>核心要点三:为何选择非阻塞 (引出I&#x2F;O多路复用)<ul>
+<li>问题演进: <strong>单纯的非阻塞</strong>I&#x2F;O模型因为会忙等,所以<strong>很少直接使用</strong>.它的<strong>价值在于</strong>和<strong>I&#x2F;O多路复用</strong>技术 (如<code>select</code>, <code>poll</code>, <code>epoll</code>) 结合.</li>
+<li><strong>I&#x2F;O多路复用</strong>: 它的作用是批量查询.应用进程可以一次性<strong>把自己关心的所有文件描述符(FD)都交给内核</strong>,然后<strong>自己进入阻塞睡眠状态</strong>,由内核来等待描述符数据到来,唤醒用户程序</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-为什么基类的析构函数通常需要被声明为虚函数-如果不是虚函数-会发生什么问题"><a href="#Q-为什么基类的析构函数通常需要被声明为虚函数-如果不是虚函数-会发生什么问题" class="headerlink" title="Q: 为什么基类的析构函数通常需要被声明为虚函数?如果不是虚函数,会发生什么问题?"></a>Q: 为什么基类的析构函数通常需要被声明为虚函数?如果不是虚函数,会发生什么问题?</h1><h2 id="A-19"><a href="#A-19" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><p>核心要点一:根本原因–<strong>为了实现多态下的正确析构</strong></p>
+<ul>
+<li>一句话总结:将基类析构函数声明为<code>virtual</code>,是为了<strong>确保当通过基类指针或引用删除一个派生类对象时,能够正确地调用派生类的析构函数</strong>,从而避免资源泄漏.</li>
+</ul>
+</li>
+<li><p>编译器调用析构函数时,<strong>如果析构是虚的,就知道这个是基类,应该去调用子类的析构</strong></p>
+</li>
+<li><p>然后如<strong>果发现这个对象的析构函数是实的,就不考虑子类的事情</strong>,然后直接调用</p>
+</li>
+</ol>
+<h1 id="Q-内核与用户态通信-除了-ioctl-还了解哪些机制-实际用过哪些"><a href="#Q-内核与用户态通信-除了-ioctl-还了解哪些机制-实际用过哪些" class="headerlink" title="Q: 内核与用户态通信:除了 ioctl,还了解哪些机制?实际用过哪些?"></a>Q: 内核与用户态通信:除了 ioctl,还了解哪些机制?实际用过哪些?</h1><h2 id="A-20"><a href="#A-20" class="headerlink" title="A:"></a>A:</h2><p>内核与用户态的通信机制可以根据其主要用途分为两大类:数据平面和控制平面.</p>
+<ol>
+<li><strong>数据平面</strong> (主要用于<strong>高效传输大块数据</strong>)<ul>
+<li><strong>内存映射</strong> (<strong>mmap</strong>):<ul>
+<li>核心优势是实现零拷贝(Zero-copy),<strong>用户空间和内核空间共享同一块物理内存</strong>,避免了不必要的数据复制,是最高效的方式</li>
+<li><strong>UIO</strong> (Userspace I&#x2F;O) 本质上也是对<code>mmap</code>机制的一种<strong>简化封装</strong>,方便用户态直接访问设备寄存器和内存.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>控制平面</strong> (主要用于发送命令、获取状态、传递短消息)<ul>
+<li><strong>ioctl</strong> (Input&#x2F;Output Control):<ul>
+<li>最传统、最直接的控制通道,<strong>通过一个命令号来区分不同的操作</strong>.</li>
+<li>优点是直接,缺点是<strong>命令号需要内核和应用层同步</strong>,扩展不便,且是<strong>同步阻塞</strong>调用.</li>
+</ul>
+</li>
+<li><strong>procfs</strong> &#x2F; <strong>sysfs</strong> 虚拟文件系统:<ul>
+<li>将<strong>设备的状态和参数暴露为文件系统中的文件</strong>,用户态通过简单的<code>read/write</code>操作即可查询或配置驱动.</li>
+<li>例如,在嵌入式项目中,可以通过<code>echo 1 &gt; /sys/class/leds/user-led/brightness</code>来点亮一个LED灯.这种方式非常直观,便于脚本自动化.</li>
+</ul>
+</li>
+<li><strong>Netlink Socket</strong>:<ul>
+<li>一种专门<strong>用于内核与用户态进程通信的socket</strong>,功能强大.</li>
+<li>支持<strong>全双工、异步通信</strong>,消息传递是结构化的,非常<strong>适合内核主动向用户态发送事件通知</strong>.例如,网络设备状态变化(网线插拔)就是通过Netlink通知上层的</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-中断底半部的-tasklet-和-workqueue-有什么区别-如果让你在一个驱动中处理一个可能会休眠的操作-你会选择哪个-为什么"><a href="#Q-中断底半部的-tasklet-和-workqueue-有什么区别-如果让你在一个驱动中处理一个可能会休眠的操作-你会选择哪个-为什么" class="headerlink" title="Q: 中断底半部的 tasklet 和 workqueue 有什么区别?如果让你在一个驱动中处理一个可能会休眠的操作,你会选择哪个?为什么?"></a>Q: 中断底半部的 tasklet 和 workqueue 有什么区别?如果让你在一个驱动中处理一个可能会休眠的操作,你会选择哪个?为什么?</h1><h2 id="A-21"><a href="#A-21" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><strong>核心区别 (上下文与休眠能力)</strong><ul>
+<li><p><strong>Tasklet</strong> (<strong>小任务</strong>):</p>
+<ul>
+<li>上下文: <strong>在软中断上下文中执行</strong>,这是一个特殊的、<strong>不能被调度的上下文</strong>.</li>
+<li>休眠: <strong>绝对不允许休眠</strong>.在软中断上下文中调用任何可能导致睡眠的函数(如 <code>kmalloc</code>、<code>mutex_lock</code>、<code>copy_from_user</code> 等)都会导致系统崩溃(Kernel Panic).</li>
+<li>并发: 同一个 tasklet 不会在多个 CPU 上同时执行,但不同 tasklet 可以在不同 CPU 上并发执行.</li>
+<li>适用场景: 处理那些<strong>执行快、不休眠、与硬件强相关的延迟任务</strong>.</li>
+</ul>
+</li>
+<li><p>Workqueue (工作队列):</p>
+<ul>
+<li>上下文: 在<strong>内核线程上下文中执行</strong>,也称为<strong>进程上下文</strong>.</li>
+<li>休眠: <strong>允许休眠</strong>.因为它<strong>本质上就是一个内核线程</strong>,所以拥有进程上下文的所有能力,<strong>可以被内核正常调度</strong>,也可以安全地调用会导致阻塞或休眠的函数.</li>
+<li>并发: 由<strong>内核线程池管理</strong>,<strong>并发能力更强</strong>,调度更灵活.</li>
+<li>适用场景: 处理那些<strong>可能耗时较长或需要休眠的延迟任务</strong>,比<strong>如进行文件I&#x2F;O、复杂的计算、或者需要获取锁</strong>等</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-C-语言内存管理中-malloc-和-mmap-有什么区别-什么时候会考虑使用-mmap"><a href="#Q-C-语言内存管理中-malloc-和-mmap-有什么区别-什么时候会考虑使用-mmap" class="headerlink" title="Q: C 语言内存管理中,malloc 和 mmap 有什么区别?什么时候会考虑使用 mmap?"></a>Q: C 语言内存管理中,<code>malloc</code> 和 <code>mmap</code> 有什么区别?什么时候会考虑使用 <code>mmap</code>?</h1><h2 id="A-22"><a href="#A-22" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><p>层面与来源不同</p>
+<ul>
+<li><code>malloc</code>: 是<strong>C标准库函数</strong>.它是一个<strong>用户态的内存分配器</strong>,负责<strong>管理进程的堆</strong>(Heap)内存.为了提高效率,它底层会通过 <code>brk</code> 或 <code>mmap</code> 系统调用向内核申请大块内存,然后切分成小块分配给程序.</li>
+<li><code>mmap</code>: <strong>是一个系统调用</strong>.它<strong>直接请求内核</strong>,<strong>将一个文件或设备映射到进程的虚拟地址空间</strong>.</li>
+</ul>
+</li>
+<li><p>核心用途不同</p>
+<ul>
+<li><code>malloc</code>: 主要<strong>用于通用的、动态的内存分配</strong>.当程序需要一块大小不定的内存来存储数据时,<code>malloc</code> 是最常规和首选的方式.</li>
+<li><code>mmap</code>: 主要用于以下特定场景:<ul>
+<li><strong>高性能文件I&#x2F;O</strong>: <strong>将大文件映射到内存,可以像操作数组一样直接读写</strong>,<strong>避免了</strong> <code>read/write</code> <strong>带来的内核态和用户态之间的数据拷贝开销</strong>,实现零拷贝.</li>
+<li><strong>进程间共享内存</strong>: <strong>多个进程映射同一个文件到各自的地址空间</strong>,可以实现高效的数据共享,是重要的IPC(进程间通信)手段.</li>
+<li><strong>映射设备内存</strong>: 在驱动编程中,将硬件设备的物理地址(如寄存器、显存)映射到内存,使得程序可以直接通过内存地址来操作硬件.这在我的Zynq项目中就曾使用过.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-进程间通信中-共享内存-信号量和-socket-的方案-各自有什么优缺点"><a href="#Q-进程间通信中-共享内存-信号量和-socket-的方案-各自有什么优缺点" class="headerlink" title="Q: 进程间通信中,共享内存 + 信号量和 socket 的方案,各自有什么优缺点?"></a>Q: 进程间通信中,共享内存 + 信号量和 socket 的方案,各自有什么优缺点?</h1><h2 id="A-23"><a href="#A-23" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><p>适用范围</p>
+<ul>
+<li><strong>共享内存</strong>: <strong>仅限同一主机</strong>.它是把同一块<strong>物理内存映射</strong>到不同进程的虚拟地址空间.</li>
+<li>Socket: 既<strong>可用于同一主机</strong>,也<strong>可用于跨网络的主机间通信</strong>.这是它最大的优势.</li>
+</ul>
+</li>
+<li><p>性能与数据拷贝</p>
+<ul>
+<li>共享内存: 最快.数据一旦写入,其他进程立刻可见,<strong>真正实现了零拷贝</strong>,非常适合大数据量、低延迟的场景.</li>
+<li>Socket: 较慢.<strong>传统</strong><code>read/write</code><strong>模式涉及至少两次数据拷贝</strong>(内核缓冲区 &lt;-&gt; 用户缓冲区).虽然可以通过 <code>sendfile</code> 等高级API在特定场景(如文件到网络)实现零拷贝,但通用性不如共享内存.</li>
+</ul>
+</li>
+<li><p>同步机制</p>
+<ul>
+<li>共享内存: <strong>无内置同步机制</strong>.它<strong>本身只是一块裸内存</strong>,必须借助外部工具(如信号量、互斥锁)来保证数据的一致性和避免竞态条件,这增加了编程的复杂性.</li>
+<li>Socket: <strong>自带基本同步</strong>.<code>read/write</code><strong>操作是原子的</strong>,并且默认的阻塞式I&#x2F;O提供了一种隐式的同步,简化了编程模型.</li>
+</ul>
+</li>
+<li><p><strong>使用复杂度</strong></p>
+<ul>
+<li><strong>共享内存</strong>: <strong>高</strong>.需要手动处理复杂的同步问题,容易出错(如死锁、数据污染).</li>
+<li><strong>Socket</strong>: <strong>相对较低</strong>.API(<code>bind</code>, <code>listen</code>, <code>accept</code>, <code>connect</code>)是标准化的,客户端&#x2F;服务器模型非常成熟和通用.</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-你用过哪些内核调试手段-printk、ftrace、gdb、perf-分别适用于什么场景"><a href="#Q-你用过哪些内核调试手段-printk、ftrace、gdb、perf-分别适用于什么场景" class="headerlink" title="Q: 你用过哪些内核调试手段(printk、ftrace、gdb、perf)?分别适用于什么场景?"></a>Q: 你用过哪些内核调试手段(printk、ftrace、gdb、perf)?分别适用于什么场景?</h1><h2 id="A-24"><a href="#A-24" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><strong>printk</strong> (打印内核日志)<ul>
+<li>是什么: <strong>内核版的</strong> <code>printf</code>,<strong>用于向内核日志缓冲区输出信息</strong>.<strong>可以通过</strong> <code>dmesg</code> <strong>命令查看</strong>.</li>
+</ul>
+</li>
+<li><strong>ftrace</strong> (<strong>函数跟踪器</strong>)<ul>
+<li>是什么: 内核内置的、功能强大的跟踪框架,可以<strong>用来监控内核函数的行为</strong>.</li>
+<li>适用场景:<ul>
+<li><strong>性能分析&#x2F;延迟问题</strong>: <code>function_graph</code> 跟踪器可以清晰地展示函数调用链及每个函数的执行时间,非常适合定位导致高延迟的函数.</li>
+<li><strong>逻辑流程分析</strong>: 跟踪特定函数的调用者(<code>caller</code>)和被调用者(<code>callee</code>),理清复杂的代码执行路径.</li>
+<li><strong>事件跟踪</strong>: 跟踪内核中的特定事件,比如中断、调度、系统调用等,理解系统内部的交互.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>GDB</strong> (配合 kgdb&#x2F;kdb)<ul>
+<li>是什么: <strong>熟悉的用户态GDB调试器</strong>,通过 <code>kgdb</code> 或 <code>kdb</code> 桩(stub)可以用来调试一个正在运行的内核.</li>
+<li>适用场景:<ul>
+<li><strong>内核崩溃&#x2F;死锁现场分析</strong>: 当系统完全卡死(Panic 或 Deadlock)时,可以通过串口或网络连接 <code>kgdb</code>,进行现场勘查.可以查看所有线程的堆栈、检查变量值、内存状态等.</li>
+<li><strong>复杂逻辑的单步调试</strong>: 对于特别复杂的算法或逻辑,可以设置断点,进行单步跟踪,观察每一步的状态变化.这是一种侵入性最强的调试方式.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>perf</strong> (<strong>性能分析工具</strong>)<ul>
+<li>是什么: 一个功能强大的性能分析工具集,基于处理器的性能监控单元(PMU).</li>
+<li>适用场景:<ul>
+<li><strong>CPU 性能瓶颈分析</strong>: <ul>
+<li><strong>perf top 可以实时显示当前系统中CPU消耗最高的函数</strong></li>
+<li><code>perf record</code> 和 <code>perf report</code> 可以生成详细的性能剖析报告,告诉你CPU时间主要花在了哪些函数上</li>
+</ul>
+</li>
+<li>Off-CPU 分析: <strong>分析进程&#x2F;线程因为何种原因</strong>(如等待I&#x2F;O、锁)而<strong>睡眠</strong>,没有在CPU上运行.</li>
+<li><strong>硬件事件分析</strong>: <strong>监控CPU的缓存命中率</strong>(cache misses)、分支预测失败(branch misses)<strong>等底层硬件事件</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-C-虚函数表是怎样的-虚继承和普通继承在内存布局上的区别"><a href="#Q-C-虚函数表是怎样的-虚继承和普通继承在内存布局上的区别" class="headerlink" title="Q: C++虚函数表是怎样的?虚继承和普通继承在内存布局上的区别?"></a>Q: C++虚函数表是怎样的?虚继承和普通继承在内存布局上的区别?</h1><h2 id="A-25"><a href="#A-25" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><p>虚函数表 (vtable)</p>
+<ul>
+<li>核心机制: 当一个<strong>类含有虚函数</strong>时,编译器会<strong>为该类创建一个静态的、唯一的虚函数表</strong>(vtable).vtable本质上是一个函数指针数组,按顺序存放着类中所有虚函数的地址.</li>
+<li>对象模型: <strong>每个包含虚函数的类的实例</strong>,其<strong>内存</strong>布局的<strong>起始位置会包含一个虚函数表指针</strong> (<strong>vptr</strong>),指向该类的vtable.</li>
+<li>多态实现:<ul>
+<li><strong>子类的虚函数表是父类虚函数表的一个完整副本</strong></li>
+<li><strong>虚函数表是类级别的,被该类所有对象共享,类所有实例的vptr指向同一个vtable</strong></li>
+<li>子函数重写:<strong>会覆盖子函数对应的虚函数表的对应条目,更新为重写后函数的地址</strong></li>
+<li>父类型的子类实例调用虚函数,编译器会<strong>根据父类型的信息获取对应虚函数的偏移量</strong>,调用时则是通<strong>过子虚函数表+偏移量正确的找到对应的重写后的函数</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>内存布局区别</p>
+<ul>
+<li><strong>普通继承</strong>: <strong>子类会完整地包含父类的所有成员</strong>(<strong>包括vptr</strong>,如果有的话),然后<strong>再加上自己的成员</strong>.如果有多个父类,就<strong>依次平铺排列</strong>.</li>
+<li><strong>虚继承</strong>(在父类名前加上 virtual 关键字开启 虚继承)<ul>
+<li>目的: <strong>解决菱形继承中</strong>,<strong>最顶层基类成员在最终派生类中出现多次</strong>(冗余、二义性)<strong>的问题</strong>.</li>
+<li>核心区别: <strong>子类不再直接包含基类的成员</strong>,而是<strong>包含一个虚基类表指针</strong> (vbptr).这个<strong>指针指向一个虚基类表</strong>,<strong>表中记录了虚基类成员相对于当前对象地址的偏移量</strong>.</li>
+<li>效果: <strong>无论虚基类被继承多少次</strong>,在最终的派生类对象中,永远<strong>只存在一份唯一的虚基类成员实例</strong>.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-epoll边缘触发和水平触发有什么区别-ET模式下如何避免丢事件"><a href="#Q-epoll边缘触发和水平触发有什么区别-ET模式下如何避免丢事件" class="headerlink" title="Q:epoll边缘触发和水平触发有什么区别?ET模式下如何避免丢事件?"></a>Q:epoll边缘触发和水平触发有什么区别?ET模式下如何避免丢事件?</h1><h2 id="A-26"><a href="#A-26" class="headerlink" title="A:"></a>A:</h2><p><strong>epoll在内核维护一个fd列表,当fd活跃会通知epoll实例,epoll把活跃的列表返回给用户程序</strong></p>
+<ol>
+<li><p>核心区别</p>
+<ul>
+<li><strong>水平触发</strong>-默认模式:<ul>
+<li>条件: <strong>只要文件描述符</strong>(fd)上<strong>的缓冲区还有数据可读</strong>(或还有空间可写),<code>epoll_wait</code> <strong>每次返回都会通知你</strong>.</li>
+<li><strong>类比: 只要电压保持在高电平,告警就一直响</strong>.</li>
+<li>优点: 编程简单,不易出错.即使这次没处理完,下次 <code>epoll_wait</code> 还会提醒你.</li>
+</ul>
+</li>
+<li>边缘触发-高速模式:<ul>
+<li>条件: <strong>仅当 fd 上的状态发生变化时</strong>(例如,数据从无到有,或缓冲区从满到不满),<code>epoll_wait</code> <strong>才会通知你</strong>,并且<strong>只通知一次</strong>.</li>
+<li>类比: 只有在电压从<strong>低电平跳变到高电平的那一瞬间,告警才响一声</strong>.</li>
+<li>优点: 效率更高,因为它避免了 <code>epoll_wait</code> 的重复唤醒.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>ET 模式避免事件丢失</strong></p>
+<ul>
+<li>核心原则: <strong>收到一次通知后,必须循环处理该 fd 上的所有数据</strong>,直到返回 <code>EAGAIN</code> 或 <code>EWOULDBLOCK</code> 错误为止.</li>
+<li>具体做法:<ul>
+<li>原因: 如果不这样做,只 <code>read</code> 一次,而缓冲区里其实还有数据,由于是 ET 模式,<code>epoll_wait</code> 将不会再通知你,导致剩余的数据被丢失.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-实时信号和普通信号的区别-如何保证信号不丢失"><a href="#Q-实时信号和普通信号的区别-如何保证信号不丢失" class="headerlink" title="Q: 实时信号和普通信号的区别?如何保证信号不丢失?"></a>Q: 实时信号和普通信号的区别?如何保证信号不丢失?</h1><h2 id="A-27"><a href="#A-27" class="headerlink" title="A:"></a>A:</h2><ol>
+<li><strong>普通信号</strong><ul>
+<li>范围: <strong>信号值为 1-31</strong>,如 <code>SIGINT</code>, <code>SIGKILL</code>.</li>
+<li>不可靠性:<ul>
+<li><strong>不支持排队</strong>: 如果<strong>一个信号在被处理前被多次发送</strong>,<strong>内核只会将它合并为一次</strong>,最终<strong>只递交一次</strong>.</li>
+<li>无附加信息: <strong>信号本身不携带额外数据</strong>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>实时信号</strong> (Real-time Signals):<ul>
+<li>范围: <strong>信号值为 34-64</strong> (Linux中).</li>
+<li>可靠性:<ul>
+<li>支持排队: <strong>发送多少次</strong>,就会在<strong>接收进程的队列中保留多少次</strong>,<strong>不合并</strong>.</li>
+<li><strong>可携带数据</strong>: 可以通过 <code>sigqueue</code> 发送信号,并附带一个整数或指针值.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>如何<strong>保证信号不丢失</strong>:<ul>
+<li>核心: <strong>在可能产生信号丢失的临界区代码执行前,阻塞该信号；在临界区结束后,再解除阻塞</strong></li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-什么是系统调用"><a href="#Q-什么是系统调用" class="headerlink" title="Q: 什么是系统调用?"></a>Q: 什么是系统调用?</h1><h2 id="A-28"><a href="#A-28" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>核心定义与目的<ul>
+<li><strong>定义</strong>: 系统调用是<strong>操作系统内核提供给用户态应用程序的一个接口</strong>,用于<strong>请求内核提供服务</strong>.</li>
+<li><strong>目的</strong>: 将系统资源的管理置于内核态,<strong>防止用户程序直接操作硬件</strong>或访问任意内存,从而<strong>避免系统崩溃</strong>.</li>
+</ul>
+</li>
+<li>执行流程<ul>
+<li>封装: <strong>应用程序通常不直接执行系统调用</strong>,而是<strong>调用C库</strong>(如glibc)<strong>提供的封装函数</strong>(例如 <code>open()</code>).</li>
+<li>触发: <strong>C库函数设置好系统调用所需的参数</strong>(包括唯一的“<strong>系统调用号</strong>”),然后<strong>执行一条特殊的CPU指令</strong>(如<code>syscall</code>或<code>int 0x80</code>)来<strong>触发一个陷阱</strong> (Trap).</li>
+<li>切换: <strong>CPU检测到陷阱后</strong>,会立即<strong>从用户态切换到内核态</strong>,并<strong>跳转到</strong>内核中预先定义好的入口点——<strong>系统调用处理程序</strong>.</li>
+<li>执行: 内核<strong>根据</strong>传递的“<strong>系统调用号</strong>”,<strong>在系统调用表</strong> (System Call Table) 中<strong>找到对应的内核函数并执行</strong>.</li>
+<li>返回: 内核函数<strong>执行完毕后</strong>,将结果<strong>返回给用户程序</strong>,CPU再从<strong>内核态切换回用户态</strong>,应用程序继续执行.</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-map和unordered-map区别"><a href="#Q-map和unordered-map区别" class="headerlink" title="Q: map和unordered_map区别"></a>Q: map和unordered_map区别</h1><h2 id="A-29"><a href="#A-29" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>核心区别<ul>
+<li><code>map</code>: 基于<strong>红黑树</strong> (Red-Black Tree) 实现.红黑树是一种自平衡的二叉查找树.</li>
+<li><code>unordered_map</code>: 基于<strong>哈希表</strong> (Hash Table) 实现.</li>
+</ul>
+</li>
+<li>主要差异点对比<ul>
+<li>有序性:<ul>
+<li><code>map</code>: <strong>元素会根据键 (key) 自动排序</strong>.遍历时得到的是一个有序序列.</li>
+<li><code>unordered_map</code>: <strong>元素是无序的</strong>,其存储<strong>顺序由哈希函数和哈希冲突解决方法决定</strong>.</li>
+</ul>
+</li>
+<li>效率 (时间复杂度):<ul>
+<li><code>map</code>: 插入、删除、查找操作的时间复杂度都是 <strong>O(log N)</strong>,其中N是元素的数量.<strong>性能非常稳定</strong>.</li>
+<li><code>unordered_map</code>: 在理想情况下(哈希函数良好,冲突少),插入、删除、查找操作的<strong>平均时间复杂度是 O(1)</strong>.但在最坏情况下(所有元素哈希到同一个桶),会<strong>退化到 O(N)</strong>.</li>
+</ul>
+</li>
+<li>内存占用:<ul>
+<li><code>unordered_map</code> <strong>通常会消耗更多的内存</strong>,因为它需要<strong>维护哈希表结构</strong>,为了减少冲突,装载因子通常小于1,会有空间冗余.</li>
+</ul>
+</li>
+<li>对键 (Key) 的要求:<ul>
+<li><code>map</code>: <strong>键必须支持 <code>&lt;</code> 比较运算符</strong>.</li>
+<li><code>unordered_map</code>: <strong>键</strong>必须提供对应的<strong>哈希函数</strong> <code>std::hash&lt;Key&gt;</code> 和 <strong>等于运算符</strong> <code>==</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="Q-说一下PCIE从握手到驱动加载的过程"><a href="#Q-说一下PCIE从握手到驱动加载的过程" class="headerlink" title="Q:说一下PCIE从握手到驱动加载的过程"></a>Q:说一下PCIE从握手到驱动加载的过程</h1><h2 id="A-30"><a href="#A-30" class="headerlink" title="A:"></a>A:</h2><ol>
+<li>阶段一:<strong>物理层链路建立</strong> (握手)<ul>
+<li>上电: PCIe设备上电,<strong>物理层进入链路训练和状态状态机</strong> (LTSSM).</li>
+<li><strong>训练</strong>: <strong>Root Complex</strong> (RC, 如CPU侧的控制器) 和 <strong>Endpoint</strong> (EP, 如M.2 SSD) <strong>的物理层通过交换一系列预定义的训练序列来协商链路参数</strong>,如链路宽度 (x1, x4, x8, x16) 和链路速率 (Gen1-5).</li>
+<li>进入L0状态: <strong>双方协商一致,链路成功建立,进入 L0 状态</strong>,<strong>表明链路已激活</strong>,可以<strong>开始传输TLP事务层数据包</strong>.这是所有后续操作的基础.</li>
+</ul>
+</li>
+<li>阶段二:固件&#x2F;硬件层总线枚举<ul>
+<li>扫描: BIOS或<strong>U-Boot</strong>等固件代码,<strong>从Bus 0开始</strong>,通过 深度优先搜索 (DFS) 的方式扫描所有PCIe总线.</li>
+<li>配置读写: <strong>固件向总线上的每个设备功能</strong> (由 BDF: Bus, Device, Function号唯一标识) <strong>发送配置读请求</strong>,读取其配置空间 (Configuration Space) 头部的 Vendor ID 和 Device ID.</li>
+<li>资源分配: 如果设备存在 (Vendor ID有效),固件会为其分配系统资源,主要是:<ul>
+<li>分配总线号: 如果设备是PCIe桥,会<strong>为桥下方的总线分配新的总线号</strong>.</li>
+<li><strong>分配BAR空间</strong>: 读取设备的基地址寄存器 (BARs) 的大小需求,然后在系统的物理地址空间中为其分配一段内存或I&#x2F;O空间,并<strong>将分配的基地址写回设备的BAR寄存器</strong>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>阶段三:内核初始化与驱动加载<ul>
+<li>Host驱动加载: Linux内核启动,设备树(Device Tree)被解析.其中描述PCIe Host Controller节点的 <code>compatible</code> 属性会匹配到对应的 PCIe主机控制器驱动 并加载它.</li>
+<li>内核重新扫描: <strong>主机控制器驱动初始化后</strong>,Linux<strong>内核的PCIe子系统会重新执行一次完整的总线扫描</strong> (类似阶段二),<strong>忽略固件的扫描结果(但会保留其资源分配结果)</strong>.<code>lspci</code> 命令看到的就是这次内核扫描的结果.</li>
+<li>设备注册: 内核每发现一个设备,就读取其Vendor ID, Device ID, Class Code等信息,并<strong>为其创建一个</strong> <code>pci_dev</code> <strong>结构体</strong>,<strong>注册PCI核心</strong></li>
+<li>驱动匹配与<code>probe</code>:<ul>
+<li>当 <code>pci_dev</code> <strong>注册时</strong>,<strong>PCIe核心会去遍历所有已注册的</strong> <code>pci_driver</code>.</li>
+<li><strong>每个PCIe设备驱动</strong>(如NVMe驱动)都会<strong>有一个</strong> <code>pci_device_id</code>表,里面<strong>定义了它所支持的 {Vendor ID, Device ID} 列表</strong>.</li>
+<li>如果<strong>内核发现一个设备的ID与某个驱动的</strong> <code>id_table</code> 中的<strong>条目匹配</strong>,匹配成功！</li>
+<li>内核<strong>随即调用该驱动的</strong> <code>probe</code> 函数.驱动在 <code>probe</code> <strong>函数中执行初始化工作</strong>,如 <code>pci_enable_device()</code>激活设备,<code>pci_request_regions()</code>声明对BAR空间的占用, <code>pci_iomap()</code> (将BAR对应的物理地址重新映射到内核的虚拟地址空间) 等,完成设备初始化</li>
+<li>向块设备层注册一个新的磁盘设备</li>
+<li>块设备层触发udev等用户空间服务,创建&#x2F;dev设备节点</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Zzkuang
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="http://zhangkuang.asia/2025/09/02/%E5%B5%8C%E5%85%A5%E5%BC%8Flinux%E9%9D%A2%E8%AF%95%E9%A2%98%E6%95%B4%E7%90%86/" title="嵌入式linux面试题整理">http://zhangkuang.asia/2025/09/02/嵌入式linux面试题整理/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/08/24/FRP%E5%AE%9E%E6%88%98-%E4%B8%BAARM%E5%B7%A5%E6%8E%A7%E6%9C%BA%E6%90%AD%E5%BB%BA%E7%A8%B3%E5%AE%9A-%E5%AE%89%E5%85%A8%E7%9A%844G%E8%BF%9C%E7%A8%8BSSH%E8%BF%90%E7%BB%B4%E9%80%9A%E9%81%93/" rel="prev" title="FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道">
+                  <i class="fa fa-angle-left"></i> FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/10/17/windows%E5%AF%86%E9%92%A5%E9%93%BE%E6%8E%A5linux/" rel="next" title="windows密钥链接linux">
+                  windows密钥链接linux <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kuang</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '64px',
+  right: 'unset',
+  left: '32px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+</body>
+</html>

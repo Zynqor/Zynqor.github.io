@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.css" integrity="sha256-uTcjoMD6rPt4OyV3Rs02Slxl0BJGMNVKAm/1eYPt2go=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhangkuang.asia","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.23.2","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="前言 本文目标: 本文依托 Alinx的AX7021B ZYNQ开发板,介绍如何使用Vivado搭建PS与PL的通信的通道,包含AXI DMA,BRAM,以及AXI GPIO,旨在为PS和PL通信提供一个完整的标准流程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zynq-7000 完整硬件平台构建与验证权威指南">
+<meta property="og:url" content="http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="Kuang&#39;s Tech Log">
+<meta property="og:description" content="前言 本文目标: 本文依托 Alinx的AX7021B ZYNQ开发板,介绍如何使用Vivado搭建PS与PL的通信的通道,包含AXI DMA,BRAM,以及AXI GPIO,旨在为PS和PL通信提供一个完整的标准流程">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/20250803184743.png">
+<meta property="og:image" content="http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/20250722114659.png">
+<meta property="og:image" content="http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/20250723224544.png">
+<meta property="article:published_time" content="2025-07-21T07:09:16.000Z">
+<meta property="article:modified_time" content="2025-08-06T01:14:48.000Z">
+<meta property="article:author" content="Zzkuang">
+<meta property="article:tag" content="Vivado">
+<meta property="article:tag" content="Vitis">
+<meta property="article:tag" content="Petalinux">
+<meta property="article:tag" content="AXI-DMA">
+<meta property="article:tag" content="BRAM">
+<meta property="article:tag" content="AXI STREAM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/20250803184743.png">
+
+
+<link rel="canonical" href="http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/","path":"2025/07/21/Zynq-7000-完整硬件平台构建与验证权威指南/","title":"Zynq-7000 完整硬件平台构建与验证权威指南"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Zynq-7000 完整硬件平台构建与验证权威指南 | Kuang's Tech Log</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.umd.js" integrity="sha256-UiSieVaV/DXce2LW7QH+o77w+AIoAvSCPBkezriZ2DQ=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kuang's Tech Log</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">任何资源链接问题或者技术问题欢迎邮件联系讨论</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E6%A6%82%E8%BF%B0"><span class="nav-number">2.</span> <span class="nav-text">项目概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E9%98%B6%E6%AE%B5%EF%BC%9AVivado-%E5%9F%BA%E7%A1%80%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E8%AE%BE%E8%AE%A1%E4%B8%8EBRAM%E5%8D%95%E5%90%91%E9%80%9A%E8%B7%AF"><span class="nav-number">3.</span> <span class="nav-text">第一阶段：Vivado 基础硬件平台设计与BRAM单向通路</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA-Vivado-%E5%B7%A5%E7%A8%8B"><span class="nav-number">3.1.</span> <span class="nav-text">创建 Vivado 工程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8C%87%E5%AE%9A%E7%9B%AE%E6%A0%87%E5%99%A8%E4%BB%B6%EF%BC%88%E5%85%B3%E9%94%AE%E6%AD%A5%E9%AA%A4%EF%BC%89"><span class="nav-number">3.2.</span> <span class="nav-text">指定目标器件（关键步骤）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA-Block-Design-%E4%B8%8E%E9%85%8D%E7%BD%AE-ZYNQ7-PS"><span class="nav-number">3.3.</span> <span class="nav-text">构建 Block Design 与配置 ZYNQ7 PS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MIO-Configuration-%E5%A4%96%E8%AE%BEIO%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.1.</span> <span class="nav-text">MIO Configuration (外设IO配置)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Peripheral-IO-Pins-%E9%85%8D%E7%BD%AEPHY-Reset"><span class="nav-number">3.3.2.</span> <span class="nav-text">Peripheral IO Pins(配置PHY Reset)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Clock-Configuration-%E6%97%B6%E9%92%9F%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.3.</span> <span class="nav-text">Clock Configuration (时钟配置)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DDR-Configuration-DDR%E5%86%85%E5%AD%98%E9%85%8D%E7%BD%AE"><span class="nav-number">3.3.4.</span> <span class="nav-text">DDR Configuration (DDR内存配置)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E9%98%B6%E6%AE%B5%EF%BC%9ABRAM%E5%9B%9E%E7%8E%AF%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF%E6%90%AD%E5%BB%BA"><span class="nav-number">4.</span> <span class="nav-text">第二阶段：BRAM回环数据通路搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E8%AE%BE%E8%AE%A1-Vivado"><span class="nav-number">4.1.</span> <span class="nav-text">硬件平台设计 (Vivado)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E3%80%81%E9%85%8D%E7%BD%AE%E5%B9%B6%E8%BF%9E%E6%8E%A5-PL-%E7%AB%AF-BRAM"><span class="nav-number">4.1.1.</span> <span class="nav-text">添加、配置并连接 PL 端 BRAM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0-CDMA-%E4%B8%8E%E4%B8%AD%E6%96%AD%E9%80%BB%E8%BE%91%E5%AE%9E%E7%8E%B0%E5%9B%9E%E7%8E%AF%E9%80%9A%E8%B7%AF"><span class="nav-number">4.1.2.</span> <span class="nav-text">添加 CDMA 与中断逻辑实现回环通路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E8%83%BD%E5%B9%B6%E8%BF%9E%E6%8E%A5%E4%B8%AD%E6%96%AD%E9%80%9A%E8%B7%AF%EF%BC%88%E5%85%B3%E9%94%AE%E6%AD%A5%E9%AA%A4%EF%BC%89"><span class="nav-number">4.1.3.</span> <span class="nav-text">使能并连接中断通路（关键步骤）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E5%A4%9A%E8%A7%86%E8%A7%92%E5%9C%B0%E5%9D%80"><span class="nav-number">4.1.4.</span> <span class="nav-text">分配多视角地址</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E6%9C%80%E7%BB%88%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0"><span class="nav-number">4.1.5.</span> <span class="nav-text">生成最终硬件平台</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vitis-%E5%AE%8C%E6%95%B4%E5%8A%9F%E8%83%BD%E9%AA%8C%E8%AF%81-BRAM%E5%9B%9E%E7%8E%AF%E9%AA%8C%E8%AF%81"><span class="nav-number">4.2.</span> <span class="nav-text">Vitis 完整功能验证(BRAM回环验证)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0-Vitis-%E5%B7%A5%E7%A8%8B%E7%A1%AC%E4%BB%B6%E8%A7%84%E6%A0%BC"><span class="nav-number">4.2.1.</span> <span class="nav-text">更新 Vitis 工程硬件规格</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E5%86%99%E5%AE%8C%E6%95%B4%E9%AA%8C%E8%AF%81%E4%BB%A3%E7%A0%81"><span class="nav-number">4.2.2.</span> <span class="nav-text">编写完整验证代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E7%A1%AC%E4%BB%B6%E9%AA%8C%E8%AF%81"><span class="nav-number">4.2.3.</span> <span class="nav-text">最终硬件验证</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E9%98%B6%E6%AE%B5-AXI-GPIO%E6%8E%A7%E5%88%B6PL%E7%AB%AFKEY%E4%B8%8ELED"><span class="nav-number">5.</span> <span class="nav-text">第三阶段:  AXI_GPIO控制PL端KEY与LED</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%89%A9%E5%B1%95-Vivado"><span class="nav-number">5.1.</span> <span class="nav-text">硬件平台扩展 (Vivado)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E5%B9%B6%E9%85%8D%E7%BD%AE-AXI-GPIO-IP-%E6%A0%B8"><span class="nav-number">5.1.1.</span> <span class="nav-text">添加并配置 AXI_GPIO IP 核</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%86%E6%88%90-GPIO-%E5%88%B0%E7%B3%BB%E7%BB%9F%E5%B9%B6%E8%BF%9E%E6%8E%A5%E4%B8%AD%E6%96%AD"><span class="nav-number">5.1.2.</span> <span class="nav-text">集成 GPIO 到系统并连接中断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E9%85%8D%E7%89%A9%E7%90%86%E5%BC%95%E8%84%9A%E7%BA%A6%E6%9D%9F-XDC"><span class="nav-number">5.1.3.</span> <span class="nav-text">分配物理引脚约束 (XDC)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E6%9C%80%E7%BB%88%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0-1"><span class="nav-number">5.1.4.</span> <span class="nav-text">生成最终硬件平台</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E9%AA%8C%E8%AF%81%E4%B8%8E%E5%8D%8F%E5%90%8C%E8%B0%83%E8%AF%95-Vitis-Unified-IDE"><span class="nav-number">5.2.</span> <span class="nav-text">软件验证与协同调试 (Vitis Unified IDE)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%B9%B6%E9%85%8D%E7%BD%AE%E8%B0%83%E8%AF%95%E4%BC%9A%E8%AF%9D"><span class="nav-number">5.2.1.</span> <span class="nav-text">创建并配置调试会话</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPIO-%E4%B8%AD%E6%96%AD%E9%AA%8C%E8%AF%81-C-%E4%BB%A3%E7%A0%81"><span class="nav-number">5.2.2.</span> <span class="nav-text">GPIO 中断验证 C 代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%B0%E7%89%88Vitis%E4%B8%AD%E6%96%AD%E9%85%8D%E7%BD%AE%E9%97%AE%E9%A2%98"><span class="nav-number">5.2.3.</span> <span class="nav-text">新版Vitis中断配置问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Vitis-2023-2-API%E5%8F%98%E5%8C%96"><span class="nav-number">5.2.3.1.</span> <span class="nav-text">Vitis 2023.2 API变化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%AD%E6%96%ADID%E6%98%A0%E5%B0%84%E5%85%B3%E9%94%AE%E7%82%B9"><span class="nav-number">5.2.3.2.</span> <span class="nav-text">中断ID映射关键点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%BF%9E%E6%8E%A5%E9%AA%8C%E8%AF%81"><span class="nav-number">5.2.3.3.</span> <span class="nav-text">硬件连接验证</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E9%98%B6%E6%AE%B5-%E6%9E%84%E5%BB%BA%E5%B9%B6%E9%AA%8C%E8%AF%81%E9%AB%98%E6%80%A7%E8%83%BDAXI-Stream%E6%95%B0%E6%8D%AE%E9%80%9A%E8%B7%AF"><span class="nav-number">6.</span> <span class="nav-text">第四阶段: 构建并验证高性能AXI-Stream数据通路</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E5%8D%87%E7%BA%A7%EF%BC%9A%E4%BB%8E%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E5%88%B0%E6%95%B0%E6%8D%AE%E6%B5%81-Vivado"><span class="nav-number">6.1.</span> <span class="nav-text">硬件平台升级：从内存映射到数据流 (Vivado)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AEIP%E7%9A%84%E6%B7%BB%E5%8A%A0%E4%B8%8E%E9%85%8D%E7%BD%AE"><span class="nav-number">6.1.1.</span> <span class="nav-text">关键IP的添加与配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AXI-Direct-Memory-Access-DMA-IP%E6%A0%B8"><span class="nav-number">6.1.1.1.</span> <span class="nav-text">AXI Direct Memory Access (DMA) IP核</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AXI4-Stream-Data-FIFO-IP%E6%A0%B8-%E5%85%B3%E9%94%AE%E4%BC%98%E5%8C%96"><span class="nav-number">6.1.1.2.</span> <span class="nav-text">AXI4-Stream Data FIFO IP核 (关键优化)</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E6%80%A7%E8%83%BD%E7%B3%BB%E7%BB%9F%E6%9E%B6%E6%9E%84%E8%BF%9E%E6%8E%A5"><span class="nav-number">6.1.2.</span> <span class="nav-text">高性能系统架构连接</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BD%BF%E8%83%BD%E5%B9%B6%E8%BF%9E%E6%8E%A5%E9%AB%98%E6%80%A7%E8%83%BDHP%E6%8E%A5%E5%8F%A3%EF%BC%88%E5%85%B3%E9%94%AE%E4%BC%98%E5%8C%96%EF%BC%89"><span class="nav-number">6.1.2.1.</span> <span class="nav-text">使能并连接高性能HP接口（关键优化）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%8F%90%E5%8D%87PL%E6%97%B6%E9%92%9F%E9%A2%91%E7%8E%87%EF%BC%88%E5%85%B3%E9%94%AE%E4%BC%98%E5%8C%96%EF%BC%89"><span class="nav-number">6.1.2.2.</span> <span class="nav-text">提升PL时钟频率（关键优化）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%8C%E6%88%90%E6%95%B0%E6%8D%AE%E6%B5%81%E4%B8%8E%E4%B8%AD%E6%96%AD%E8%BF%9E%E6%8E%A5"><span class="nav-number">6.1.2.3.</span> <span class="nav-text">完成数据流与中断连接</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vitis%E8%A3%B8%E6%9C%BA%E9%AA%8C%E8%AF%81%EF%BC%9A%E7%BC%96%E5%86%99%E7%94%9F%E4%BA%A7%E7%BA%A7%E7%9A%84%E9%AA%8C%E8%AF%81%E7%A8%8B%E5%BA%8F"><span class="nav-number">6.2.</span> <span class="nav-text">Vitis裸机验证：编写生产级的验证程序</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%80%E7%BB%88%E9%AA%8C%E8%AF%81C%E4%BB%A3%E7%A0%81-%E7%BB%8F%E8%BF%87%E5%AE%9E%E9%99%85%E9%AA%8C%E8%AF%81"><span class="nav-number">6.2.1.</span> <span class="nav-text">最终验证C代码 (经过实际验证)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E6%B5%81%E7%A8%8B%E4%B8%8E%E9%A2%84%E6%9C%9F%E7%BB%93%E6%9E%9C"><span class="nav-number">6.2.2.</span> <span class="nav-text">验证流程与预期结果</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%99%84%E5%BD%95A%EF%BC%9A%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98%E4%B8%8E%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">7.</span> <span class="nav-text">附录A：常见问题与解决方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E5%85%B7%E7%89%88%E6%9C%AC%E5%85%BC%E5%AE%B9%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-number">7.1.</span> <span class="nav-text">工具版本兼容性问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BRAM-%E5%9C%B0%E5%9D%80%E5%AE%8F%E7%BC%BA%E5%A4%B1%E9%97%AE%E9%A2%98"><span class="nav-number">7.2.</span> <span class="nav-text">BRAM 地址宏缺失问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E9%85%8D%E7%BD%AE%E9%97%AE%E9%A2%98"><span class="nav-number">7.3.</span> <span class="nav-text">中断配置问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E4%B8%80%E8%87%B4%E6%80%A7%E9%97%AE%E9%A2%98"><span class="nav-number">7.4.</span> <span class="nav-text">缓存一致性问题</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zzkuang"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Zzkuang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/zzkuang" title="Gitee → https:&#x2F;&#x2F;gitee.com&#x2F;zzkuang" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>Gitee</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zzkuang0516@163.com" title="E-Mail → mailto:zzkuang0516@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Zzkuang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Zynq-7000 完整硬件平台构建与验证权威指南 | Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Zynq-7000 完整硬件平台构建与验证权威指南
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-07-21 15:09:16" itemprop="dateCreated datePublished" datetime="2025-07-21T15:09:16+08:00">2025-07-21</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-08-06 09:14:48" itemprop="dateModified" datetime="2025-08-06T09:14:48+08:00">2025-08-06</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><ul>
+<li><strong>本文目标</strong>: 本文依托 Alinx的AX7021B ZYNQ开发板,介绍如何使用Vivado搭建PS与PL的通信的通道,包含AXI DMA,BRAM,以及AXI GPIO,旨在为PS和PL通信提供一个完整的标准流程</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="项目概述"><a href="#项目概述" class="headerlink" title="项目概述"></a>项目概述</h1><p><strong>项目目标:</strong> 创建一个包含 BRAM 和 AXI 接口的基础 Zynq 硬件平台，并使用 Vitis 裸机程序验证其功能，最终实现基于 AXI CDMA 和中断的 PL-PS 数据回环，为后续 PetaLinux 开发奠定经过硬件验证的坚实基础。</p>
+<p><strong>开发环境:</strong></p>
+<ul>
+<li>Vivado 2023.2</li>
+<li>Vitis 2023.2</li>
+<li>目标器件：XC7Z020-2CLG484I</li>
+</ul>
+<hr>
+<h1 id="第一阶段：Vivado-基础硬件平台设计与BRAM单向通路"><a href="#第一阶段：Vivado-基础硬件平台设计与BRAM单向通路" class="headerlink" title="第一阶段：Vivado 基础硬件平台设计与BRAM单向通路"></a>第一阶段：Vivado 基础硬件平台设计与BRAM单向通路</h1><h2 id="创建-Vivado-工程"><a href="#创建-Vivado-工程" class="headerlink" title="创建 Vivado 工程"></a>创建 Vivado 工程</h2><p><strong>操作步骤:</strong></p>
+<ol>
+<li>启动 Vivado 2023.2，点击 <code>Quick Start -&gt; Create Project</code></li>
+<li><strong>Project Name:</strong> 命名为 <code>ZYNQ_7000_AXI_BRAM</code></li>
+<li><strong>Project Location:</strong> 指定一个不包含中文、空格或特殊字符的路径</li>
+<li><strong>Project Type:</strong> 选择 <code>RTL Project</code> 并勾选 <code>Do not specify sources at this time</code></li>
+</ol>
+<p><strong>决策依据与原因:</strong></p>
+<ul>
+<li><strong>命名规范:</strong> 硬件开发工具链对特殊字符路径的兼容性较差，从源头避免能省去未来很多麻烦</li>
+<li><strong>项目类型:</strong> 我们将采用自顶向下的设计方法，从一个空白的 Block Design 画布开始，通过集成 IP 核来构建系统</li>
+</ul>
+<h2 id="指定目标器件（关键步骤）"><a href="#指定目标器件（关键步骤）" class="headerlink" title="指定目标器件（关键步骤）"></a>指定目标器件（关键步骤）</h2><p><strong>信息收集:</strong></p>
+<ul>
+<li><strong>芯片丝印:</strong> <code>XC7Z020CLG484ABX1813</code> (提供了基础型号和封装)</li>
+<li><strong>用户手册:</strong> <code>XC7Z020-2CLG484I</code> (提供了最关键的<strong>速度等级 <code>-2</code></strong> 和温度等级 <code>I</code>)</li>
+</ul>
+<p><strong>决策:</strong> 我们必须使用用户手册提供的更详细的型号，因为<strong>速度等级 (<code>-2</code>)</strong> 对 Vivado 的时序分析至关重要。丝印信息仅用于交叉验证。</p>
+<p><strong>操作步骤:</strong></p>
+<ol>
+<li>在 <code>Default Part</code> 页面，确保处于 <code>Parts</code> 标签页</li>
+<li>使用 <code>Filters</code> (筛选器) 精确定位：<ul>
+<li><strong>Family:</strong> <code>Zynq-7000</code></li>
+<li><strong>Package:</strong> <code>clg484</code></li>
+<li><strong>Speed:</strong> <code>-2</code></li>
+</ul>
+</li>
+<li>从筛选后的列表中选择 <code>xc7z020clg484-2</code>，点击 <code>Next</code> 并 <code>Finish</code> 完成工程创建</li>
+</ol>
+<p><strong>决策依据与原因:</strong></p>
+<ul>
+<li>选择 <code>Parts</code> 而非 <code>Boards</code> 提供了最大的灵活性，适用于任何没有预装 BSP 的开发板</li>
+<li>准确的速度等级确保了 Vivado 时序分析的准确性，是硬件能否稳定运行的根本保证</li>
+</ul>
+<h2 id="构建-Block-Design-与配置-ZYNQ7-PS"><a href="#构建-Block-Design-与配置-ZYNQ7-PS" class="headerlink" title="构建 Block Design 与配置 ZYNQ7 PS"></a>构建 Block Design 与配置 ZYNQ7 PS</h2><p><strong>创建画布:</strong></p>
+<ol>
+<li>在 <code>Flow Navigator -&gt; IP INTEGRATOR</code> 下，点击 <code>Create Block Design</code></li>
+<li>使用默认名 <code>design_1</code> 创建</li>
+<li>点击加号 <code>+</code> 图标，搜索并添加 <code>ZYNQ7 Processing System</code> IP 核</li>
+</ol>
+<p><strong>配置 ZYNQ7 PS:</strong> 双击 Zynq IP 核打开 <code>Re-customize IP</code> 窗口，依据手册信息逐项配置：</p>
+<h3 id="MIO-Configuration-外设IO配置"><a href="#MIO-Configuration-外设IO配置" class="headerlink" title="MIO Configuration (外设IO配置)"></a>MIO Configuration (外设IO配置)</h3><p><strong>信息来源:</strong> 手册指出核心板 USB-UART 连接到 MIO 14&#x2F;15 (<code>UART 0</code>)，底板串口连接到 MIO 12&#x2F;13 (<code>UART 1</code>)；PS 端以太网连接到 MIO 16..27 和 MIO 52..53</p>
+<p><strong>配置操作:</strong></p>
+<ul>
+<li>启用 <code>UART 0</code> (分配到 <code>MIO 14..15</code>)</li>
+<li>启用 <code>UART 1</code> (分配到 <code>MIO 12..13</code>)</li>
+<li>启用 <code>ENET 0</code> (分配到 <code>MIO 16..27</code> 和 <code>MIO 52..53</code>),并配置电平标准<code>HSTL1.8V</code></li>
+<li>启用 <code>GPIO</code> 并分配到 <code>MIO</code>（以太网 PHY 复位信号连接到 <code>PS_MIO7</code>）</li>
+<li>将 <code>Bank 0 IO Voltage</code> 设为 <code>LVCMOS33</code>，<code>Bank 1 IO Voltage</code> 设为 <code>LVCMOS18</code></li>
+</ul>
+<p><strong>配置解释</strong></p>
+<p>HSTL1.8V vs LVCMOS18</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>HSTL1.8V</th>
+<th>LVCMOS18</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>全称</strong></td>
+<td>High Speed Transceiver Logic</td>
+<td>标准低功耗I&#x2F;O</td>
+</tr>
+<tr>
+<td><strong>驱动能力</strong></td>
+<td>24-48mA</td>
+<td>2-12mA</td>
+</tr>
+<tr>
+<td><strong>应用场景</strong></td>
+<td>高速接口（RGMII、DDR）</td>
+<td>一般I&#x2F;O（GPIO、UART）</td>
+</tr>
+<tr>
+<td><strong>阻抗匹配</strong></td>
+<td>50Ω，适合高频信号</td>
+<td>阻抗要求宽松</td>
+</tr>
+<tr>
+<td><strong>信号完整性</strong></td>
+<td>优秀的噪声抑制</td>
+<td>一般</td>
+</tr>
+</tbody></table>
+<p>为什么以太网需要HSTL1.8V：</p>
+<ul>
+<li>RGMII接口工作频率高（125MHz）</li>
+<li>需要精确的时序和信号完整性</li>
+<li>PHY芯片通常要求HSTL标准的驱动强度</li>
+</ul>
+<h3 id="Peripheral-IO-Pins-配置PHY-Reset"><a href="#Peripheral-IO-Pins-配置PHY-Reset" class="headerlink" title="Peripheral IO Pins(配置PHY Reset)"></a>Peripheral IO Pins(配置PHY Reset)</h3><p><strong>配置操作</strong>:</p>
+<ul>
+<li><p>勾选：<code>GPIO MIO </code>-&gt;<code>Ethernet Phy Reset</code>,配置网口复位引脚</p>
+</li>
+<li><p>管脚指定：设置为MIO 7（根据开发板手册）</p>
+</li>
+</ul>
+<img src="/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/20250803184743.png" class="" title="Ethernet Phy Reset管脚配置">
+
+<p><strong>配置解释</strong></p>
+<blockquote>
+<p>系统上电 → GPIO拉低PHY复位引脚 → 延时等待 → GPIO拉高释放复位 → PHY芯片内部初始化 → 寄存器配置完成 → MDIO通信建立 → 网卡可用</p>
+</blockquote>
+<h3 id="Clock-Configuration-时钟配置"><a href="#Clock-Configuration-时钟配置" class="headerlink" title="Clock Configuration (时钟配置)"></a>Clock Configuration (时钟配置)</h3><p><strong>信息来源:</strong> 手册指出一个 <code>33.3333MHz</code> 晶振提供给 PS 系统</p>
+<p><strong>配置操作:</strong></p>
+<ul>
+<li>将 <code>Input Frequency (PS_CLK)</code> 精确设置为 <code>33.333333</code></li>
+<li>保持 <code>CPU Clock Ratio</code> 为 <code>6:2:1</code>，这将使 CPU 运行在约 <code>667MHz</code></li>
+</ul>
+<h3 id="DDR-Configuration-DDR内存配置"><a href="#DDR-Configuration-DDR内存配置" class="headerlink" title="DDR Configuration (DDR内存配置)"></a>DDR Configuration (DDR内存配置)</h3><p><strong>信息来源:</strong> 手册指出内存由两片美光 <code>MT41K256M16TW-107</code> 组成，总线宽度 32-bit，运行速度 533MHz (1066 MT&#x2F;s)。开发板实际焊接的是兼容型号海力士 <code>H5TQ4G63AFR-PBI</code></p>
+<p><strong>决策:</strong> 由于 Vivado 的 <code>Memory Part</code> 列表中没有海力士的型号，我们采纳手册的建议，使用兼容性最好的美光型号进行配置</p>
+<p><strong>配置操作:</strong></p>
+<ol>
+<li>在 <code>Memory Part</code> 下拉列表中，选择最接近的 <code>MT41K256M16 RE-125</code></li>
+<li><code>Effective DRAM Bus Width</code> 确认选择 <code>32 Bit</code></li>
+<li>其他时序参数（CAS Latency等）由 Vivado 根据所选型号自动填充，<strong>无需修改</strong></li>
+</ol>
+<p>点击 <code>OK</code> 保存 PS 配置。运行<strong>Block Automation</strong>连接DDR和FIXED_IO。至此，一个最小化的、可引导的 Zynq 核心系统构建完成。</p>
+<hr>
+<h1 id="第二阶段：BRAM回环数据通路搭建"><a href="#第二阶段：BRAM回环数据通路搭建" class="headerlink" title="第二阶段：BRAM回环数据通路搭建"></a>第二阶段：BRAM回环数据通路搭建</h1><p><strong>目标:</strong> 在已验证的基础硬件平台上，实现BRAM回环数据通路</p>
+<h2 id="硬件平台设计-Vivado"><a href="#硬件平台设计-Vivado" class="headerlink" title="硬件平台设计 (Vivado)"></a>硬件平台设计 (Vivado)</h2><h3 id="添加、配置并连接-PL-端-BRAM"><a href="#添加、配置并连接-PL-端-BRAM" class="headerlink" title="添加、配置并连接 PL 端 BRAM"></a>添加、配置并连接 PL 端 BRAM</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li>在画布上添加 <code>AXI BRAM Controller</code> 和 <code>Block Memory Generator</code></li>
+</ol>
+<ul>
+<li><p><strong>【技术原理补充】为什么需要这两个IP核？</strong></p>
+<ul>
+<li><p><strong>Block Memory Generator (BMG)：</strong></p>
+<ul>
+<li><p><strong>本质：</strong> 纯粹的存储资源，是 FPGA 内部 Block RAM 的封装</p>
+</li>
+<li><p><strong>接口：</strong> 提供原生的 BRAM 接口（地址、数据、使能、写使能等信号）</p>
+</li>
+<li><p><strong>特点：</strong> 没有总线协议概念，不能直接连接到 AXI 总线</p>
+</li>
+<li><p><strong>类比：</strong> 相当于一个”裸露”的存储芯片</p>
+</li>
+</ul>
+</li>
+<li><p><strong>AXI BRAM Controller (ABC)：</strong></p>
+<ul>
+<li><strong>本质：</strong> AXI 总线协议转换器<ul>
+<li>功能：<ul>
+<li>作为 AXI Slave，响应来自 PS 的总线访问</li>
+<li>将 AXI 读写事务转换为 BRAM 的原生控制信号</li>
+<li>处理 AXI 协议的握手、突发传输、错误响应等复杂逻辑</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>类比：相当于存储芯片的”控制器芯片</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>完整的 PS 访问 BRAM 数据流程</strong></p>
+<blockquote>
+<p>第1步：PS 发起访问<br>PS CPU 执行: Xil_Out32(0x40000000, data)<br>↓<br>生成 AXI Write 事务 (地址 + 数据 + 控制信号)</p>
+<p>第2步：AXI 总线路由<br>AXI SmartConnect 根据地址译码<br>↓<br>将事务路由到 AXI BRAM Controller 的 S_AXI 接口</p>
+<p>第3步：协议转换<br>AXI BRAM Controller 接收 AXI 事务<br>↓<br>解析 AXI 协议：地址、数据、字节使能等<br>↓<br>转换为 BRAM 原生信号：</p>
+<ul>
+<li><p>bram_addr &#x3D; AXI地址的低位部分</p>
+</li>
+<li><p>bram_din &#x3D; AXI写数据  </p>
+</li>
+<li><p>bram_we &#x3D; 根据AXI写使能生成</p>
+</li>
+<li><p>bram_en &#x3D; 1 (使能BRAM)</p>
+</li>
+</ul>
+<p>第4步：BRAM 存储操作<br>Block Memory Generator 接收控制信号<br>    ↓<br>将数据写入指定地址的存储单元</p>
+<p>第5步：响应返回<br>AXI BRAM Controller 向 PS 发送 AXI Write Response<br>    ↓<br>PS 收到写操作完成确认</p>
+</blockquote>
+</li>
+</ul>
+<ol start="2">
+<li><strong>配置 <code>Block Memory Generator</code>:</strong><ul>
+<li><code>Mode:</code> 设为 <code>BRAM Controller</code> (让其与控制器自动匹配接口)</li>
+<li><code>Memory Type:</code> 设为 <code>True Dual Port RAM</code> (为未来扩展保留双端口)</li>
+<li><code>Port A Options -&gt; Write Depth:</code> 设为 <code>2048</code> (创建 8KB 容量)</li>
+</ul>
+</li>
+<li><strong>配置 <code>AXI BRAM Controller</code>:</strong><ul>
+<li>确认 <code>Number of BRAM Interfaces</code> 为 <code>1</code>，以确保只使用 BRAM 的一个端口，释放另一个端口</li>
+</ul>
+</li>
+<li><strong>自动化连接:</strong><ul>
+<li>点击 <code>Run Block Automation</code> 连接 PS 的 DDR 和 FIXED_IO</li>
+<li>点击 <code>Run Connection Automation</code> 连接 PS、AXI 总线和 BRAM。Vivado 会自动添加 <code>AXI SmartConnect</code> 和 <code>Processor System Reset</code> IP</li>
+</ul>
+</li>
+<li><strong>地址分配:</strong><ul>
+<li>切换到 <code>Address Editor</code> 标签页，为 <code>/axi_bram_controller_0</code> 分配一个地址（如 <code>0x40000000</code>），并确认其 <code>Range</code> 为 <code>8K</code></li>
+</ul>
+</li>
+</ol>
+<p><strong>决策依据与原因:</strong> 我们搭建了一条从 PS 到 PL 的完整数据通路。PS (Master) -&gt; AXI总线 -&gt; BRAM控制器 (Slave) -&gt; BRAM。为 <strong>AXI BRAM Controller</strong> 分配地址，是让 PS 能够通过 AXI 总线访问 BRAM 的关键</p>
+<h3 id="添加-CDMA-与中断逻辑实现回环通路"><a href="#添加-CDMA-与中断逻辑实现回环通路" class="headerlink" title="添加 CDMA 与中断逻辑实现回环通路"></a>添加 CDMA 与中断逻辑实现回环通路</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li><p><strong>添加第二个 BRAM 控制器:</strong> 点击 <code>+</code> 添加 <code>AXI BRAM Controller</code> (<code>axi_bram_ctrl_1</code>)。双击确认其 <code>Number of BRAM Interfaces</code> 为 <code>1</code></p>
+<blockquote>
+<p>PS → AXI BRAM Controller #0 → BRAM Port A (作为数据源) </p>
+<p>PS → AXI BRAM Controller #1 → BRAM Port B (作为数据目标) </p>
+<p>CDMA → 可同时访问两个控制器 → 实现高效数据搬运</p>
+</blockquote>
+</li>
+<li><p><strong>添加 CDMA 引擎:</strong> 点击 <code>+</code> 添加 <code>AXI CDMA</code> (<code>axi_cdma_0</code>)。双击并<strong>取消勾选 <code>Enable Scatter Gather</code></strong></p>
+<ul>
+<li><p><strong>什么是 AXI CDMA？</strong> <strong>CDMA (Central Direct Memory Access)：</strong></p>
+<ul>
+<li><strong>本质：</strong> 专用的数据搬运引擎，独立于 CPU 运行</li>
+<li><strong>角色：</strong> 在 AXI 总线上既是 Master（发起数据访问）又有 Slave 接口（接收配置命令）</li>
+<li><strong>核心价值：</strong> 将 CPU 从繁重的数据拷贝任务中解放出来</li>
+</ul>
+</li>
+<li><p>数据流程</p>
+<blockquote>
+<p>系统数据流设计： </p>
+<ol>
+<li><p>PS 配置阶段：</p>
+<p>PS (AXI Master) → CDMA S_AXI_LITE (配置接口)   </p>
+<p>配置：源地址、目标地址、传输长度 </p>
+</li>
+<li><p>数据搬运阶段：   </p>
+<p>CDMA M_AXI (数据Master) → AXI总线 → BRAM Controller #0 (读取数据)  </p>
+<p>CDMA M_AXI (数据Master) → AXI总线 → BRAM Controller #1 (写入数据)</p>
+</li>
+<li><p>完成通知阶段：   CDMA → 中断信号 → PS (任务完成通知)</p>
+</li>
+</ol>
+</blockquote>
+</li>
+<li><p><strong>为什么禁用 Scatter Gather？</strong></p>
+<p><strong>Scatter Gather 模式：</strong></p>
+<ul>
+<li><strong>功能：</strong> 支持复杂的、非连续的内存访问模式</li>
+<li><strong>适用场景：</strong> 需要在多个分散的内存块间进行复杂数据重组</li>
+<li><strong>成本：</strong> 需要额外的描述符内存、更复杂的控制逻辑</li>
+</ul>
+<p><strong>Simple Transfer 模式（我们的选择）：</strong></p>
+<ul>
+<li><strong>功能：</strong> 点对点的连续数据传输</li>
+<li><strong>适用场景：</strong> 简单的内存拷贝、缓冲区交换</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>添加中断合并器:</strong> 点击 <code>+</code> 添加 <code>Concat</code> (<code>xlconcat_0</code>)。双击并设置 <code>Number of Ports</code> 为 <code>1</code></p>
+<ul>
+<li><p><strong>【技术原理补充】中断合并器的系统作用</strong></p>
+<ul>
+<li>Zynq 中断系统硬件基础<ul>
+<li>PS 端有 <strong>IRQ_F2P[15:0]</strong> 共 16 条从 PL 到 PS 的中断线,每条中断线都是 <strong>1 位宽度</strong>，互相独立,每条线只能连接一个信号源</li>
+<li><strong>Concat (xlconcat)</strong> 的作用是将多个 1 位输入信号按顺序拼接成一个多位输出信号, 输入和输出位宽相等，Concat 不压缩信息，只是重新组织信号</li>
+</ul>
+</li>
+<li>什么时候需要 Concat？<ul>
+<li><strong>节省连接线:</strong> 在复杂设计中整理信号</li>
+<li><strong>信号重组:</strong> 将分散的中断信号组织成总线形式</li>
+<li><strong>接口匹配:</strong> 某些 IP 需要总线形式的中断输入</li>
+</ul>
+</li>
+<li>大量中断源的解决方案,当中断源大于十六时,使用AXI Interrupt Controller</li>
+</ul>
+</li>
+<li><p><strong>为什么当前只配置 1 个端口？</strong></p>
+<p><strong>当前系统分析：</strong></p>
+<ul>
+<li>只有 CDMA 一个中断源</li>
+<li>理论上可以直接连接到 PS</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>决策依据与原因:</strong></p>
+<ul>
+<li><code>axi_bram_ctrl_1</code>: 用于连接 <code>True Dual Port RAM</code> 的第二个端口 (<code>PORTB</code>)，创建独立的读出通道</li>
+<li><code>AXI CDMA</code>: 这是实现硬件数据搬运的核心，它能作为独立的 AXI Master，在不同地址间传输数据，从而将 CPU 从繁重的拷贝任务中解放出来。禁用 <code>Scatter Gather</code> 是为了节省资源，因为我们只需要简单的点对点传输</li>
+<li><code>Concat</code>: 这是连接 PL 中断源到 PS 中断端口的标准工程实践。即使只有一个中断源，使用它也能保证设计的规范性和未来扩展性</li>
+</ul>
+<h3 id="使能并连接中断通路（关键步骤）"><a href="#使能并连接中断通路（关键步骤）" class="headerlink" title="使能并连接中断通路（关键步骤）"></a>使能并连接中断通路（关键步骤）</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li><strong>使能 PS 中断端口:</strong> 双击 Zynq IP 核，进入 <code>Interrupts -&gt; Fabric Interrupts</code>，勾选 <code>IRQ_F2P[15:0]</code>，点击 <code>OK</code>。此时 Zynq IP 上会出现 <code>IRQ_F2P</code> 端口</li>
+<li><strong>自动连接 AXI 总线:</strong> 点击 <code>Run Connection Automation</code>，勾选所有新添加的 IP（<code>axi_bram_ctrl_1</code> 和 <code>axi_cdma_0</code>），让 Vivado 自动连接时钟、复位和数据总线</li>
+<li><strong>手动连接数据与中断:</strong><ul>
+<li>将 <code>blk_mem_gen_0</code> 的 <code>BRAM_PORTB</code> 连接到 <code>axi_bram_ctrl_1</code> 的 <code>BRAM_PORTA</code></li>
+<li>将 <code>axi_cdma_0</code> 的 <code>cdma_introut</code> 连接到 <code>xlconcat_0</code> 的 <code>In0</code></li>
+<li>将 <code>xlconcat_0</code> 的 <code>dout</code> 连接到 Zynq IP 的 <code>IRQ_F2P[0:0]</code></li>
+</ul>
+</li>
+</ol>
+<p><strong>决策依据与原因:</strong></p>
+<ul>
+<li>我们必须先在 Zynq 内部”打开”接收中断的大门，对应的物理端口才会出现</li>
+<li>我们构建了一条完整的中断信号物理链路：CDMA (事件发生) -&gt; Concat (信号捆绑) -&gt; Zynq PS (信号接收)。这是实现中断功能的硬件基础</li>
+</ul>
+<h3 id="分配多视角地址"><a href="#分配多视角地址" class="headerlink" title="分配多视角地址"></a>分配多视角地址</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li>切换到 <code>Address Editor</code> 标签页</li>
+<li><strong>配置 PS 视角:</strong> 确保下拉菜单为 <code>/processing_system7_0/Data</code>，右键点击空白处并选择 <code>Assign All</code></li>
+<li><strong>配置 CDMA 视角:</strong> 切换下拉菜单为 <code>/axi_cdma_0/Data</code>，再次 <code>Assign All</code></li>
+</ol>
+<p><strong>决策依据与原因:</strong> <strong>地址映射是基于”访问者”的视角。</strong></p>
+<ul>
+<li><strong>PS 视角</strong>: PS 作为主控制器，需要知道所有外设的地址，以便配置它们（配置 CDMA）和与它们交换数据（读写两个 BRAM）</li>
+<li><strong>CDMA 视角</strong>: CDMA 作为数据搬运工，它只需要知道”从哪搬”（源 BRAM 地址）和”往哪搬”（目标 BRAM 地址）。它不需要知道自己的配置地址，因此其 <code>S_AXI_LITE</code> 接口在此视图中被<strong>正确地 <code>Excluded</code></strong></li>
+</ul>
+<h3 id="生成最终硬件平台"><a href="#生成最终硬件平台" class="headerlink" title="生成最终硬件平台"></a>生成最终硬件平台</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li><strong><code>Validate Design</code> (F6):</strong> 确保所有连接和配置无误</li>
+<li><strong><code>Create HDL Wrapper</code>:</strong> 更新顶层封装</li>
+<li><strong><code>Generate Bitstream</code>:</strong> 生成最终的比特流</li>
+<li><strong><code>Export Hardware</code>:</strong> 导出包含最新设计和比特流的 <code>.xsa</code> 文件</li>
+</ol>
+<p><strong>决策依据与原因:</strong> 至此，我们得到了一份<strong>经过完整硬件设计、包含高级功能</strong>的硬件平台文件，它是我们进行最终软件验证的”黄金标准版”蓝图。</p>
+<hr>
+<h2 id="Vitis-完整功能验证-BRAM回环验证"><a href="#Vitis-完整功能验证-BRAM回环验证" class="headerlink" title="Vitis 完整功能验证(BRAM回环验证)"></a>Vitis 完整功能验证(BRAM回环验证)</h2><p><strong>目标:</strong> 编写一个综合性的裸机程序，验证 CDMA 数据回环和中断通知机制的正确性。</p>
+<h3 id="更新-Vitis-工程硬件规格"><a href="#更新-Vitis-工程硬件规格" class="headerlink" title="更新 Vitis 工程硬件规格"></a>更新 Vitis 工程硬件规格</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li>若无 Vitis 工程，则从 Vivado 启动 <code>Vitis IDE</code> 并创建一个</li>
+<li>若已有工程，则在 Vitis 中双击 Platform 的 <code>platform.spr</code> 文件，<strong>更新硬件规格 (Hardware Specification) 为我们最新导出的 <code>.xsa</code> 文件</strong></li>
+<li>右键 Platform 工程，选择 <strong><code>Build Project</code></strong>，强制 Vitis 重新解析硬件并生成 BSP</li>
+</ol>
+<p><strong>决策依据与原因:</strong> 这是解决我们在调试中遇到的**”软硬件不匹配”**问题的根本方法。必须确保 Vitis 的 BSP 是基于最终的、正确的 <code>.xsa</code> 文件生成的。</p>
+<h3 id="编写完整验证代码"><a href="#编写完整验证代码" class="headerlink" title="编写完整验证代码"></a>编写完整验证代码</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li>在 <code>app_component/src</code> 目录下，用以下经过最终验证的 <code>main.c</code> 代码替换原有内容</li>
+<li>右键应用工程 -&gt; <code>Build Project</code></li>
+</ol>
+<p><strong>关键代码修正与说明:</strong></p>
+<ul>
+<li><strong>手动定义 BRAM 地址:</strong> 由于 Vitis BSP 不为 BRAM Controller 生成宏，我们根据 Device Tree 和 Address Editor 的信息，在代码中手动定义 <code>BRAM_A_BASE_ADDR</code> 和 <code>BRAM_B_BASE_ADDR</code></li>
+<li><strong>使用确切的宏:</strong> <code>DEVICE_ID</code> 和中断相关的掩码宏，全部使用从官方 <code>xaxicdma_hw.h</code> 头文件中确认的、确切的名称，如 <code>XAXICDMA_XR_IRQ_ALL_MASK</code></li>
+<li><strong>中断号</strong>: 中断ID <code>CDMA_INTR_ID</code> 直接使用 <code>XPAR_FABRIC...</code> 宏，这是最可靠的方式</li>
+<li><strong>中断处理</strong>: 采用最经典、最兼容的模式：自定义中断处理函数 <code>CdmaIntrHandler</code>，并将其直接连接到 GIC。函数内部通过 <code>XAxiCdma_IntrGetStatus</code> 和 <code>XAxiCdma_IntrAck</code> 进行状态获取和清除</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/******************************************************************************</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* Copyright (C) 2010 - 2023, Xilinx, Inc. All rights reserved.</span></span><br><span class="line"><span class="comment">* SPDX-License-Identifier: MIT</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* 这是经过源码验证的 AXI CDMA 回环测试代码，使用直接寄存器访问</span></span><br><span class="line"><span class="comment">* 处理中断，适配 Vitis 2023.2 驱动行为。</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">******************************************************************************/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/***************************** Include Files *********************************/</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xparameters.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xaxicdma.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xaxicdma_hw.h&quot;</span>  <span class="comment">// ** 必须包含此文件以获取寄存器偏移量和掩码 **</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xscugic.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xil_exception.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xil_printf.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xil_cache.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xstatus.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/************************** Constant Definitions *****************************/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// --- 手动定义缺失的 BRAM 控制器基地址 ---</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BRAM_A_BASE_ADDR   0x40000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BRAM_B_BASE_ADDR   0x40001000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// --- 根据您的 xparameters.h 确定的确切基地址 ---</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMA_BASE_ADDR     XPAR_AXI_CDMA_0_BASEADDR</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INTC_BASE_ADDR     XPAR_XSCUGIC_0_BASEADDR</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// --- Zynq-7000 PL-&gt;PS 中断号 IRQ_F2P[0] 固定为 61 ---</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMA_INTR_ID       61</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DATA_SIZE          10</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/************************** Variable Definitions *****************************/</span></span><br><span class="line"><span class="type">static</span> XAxiCdma AxiCdmaInstance;</span><br><span class="line"><span class="type">static</span> XScuGic IntcInstance;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">volatile</span> <span class="type">int</span> TransferDone;</span><br><span class="line"><span class="type">static</span> <span class="keyword">volatile</span> <span class="type">int</span> TransferError;</span><br><span class="line"></span><br><span class="line"><span class="comment">/************************** Function Prototypes ******************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">SetupCdma</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">SetupInterruptSystem</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">CdmaIntrHandler</span><span class="params">(<span class="type">void</span> *CallbackRef)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line">    u8 SourceBuffer[DATA_SIZE];</span><br><span class="line">    u8 DestBuffer[DATA_SIZE];</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 重新初始化缓存系统以确保一致性</span></span><br><span class="line">    Xil_DCacheDisable();</span><br><span class="line">    Xil_DCacheEnable();</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;\r\n--- AXI CDMA Loopback Test (Direct Register Access Version) ---\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    u8 *SourceBram = (u8 *)BRAM_A_BASE_ADDR;</span><br><span class="line">    u8 *DestBram = (u8 *)BRAM_B_BASE_ADDR;</span><br><span class="line"></span><br><span class="line">    Status = SetupCdma();</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;CDMA setup failed!\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Status = SetupInterruptSystem();</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;Interrupt setup failed!\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;Preparing source data and writing to BRAM_A...\r\n&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; DATA_SIZE; i++) &#123;</span><br><span class="line">        SourceBuffer[i] = i + <span class="number">0xA0</span>;</span><br><span class="line">        SourceBram[i] = SourceBuffer[i];</span><br><span class="line">    &#125;</span><br><span class="line">    Xil_DCacheFlushRange((UINTPTR)SourceBram, DATA_SIZE);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;Starting CDMA Simple Transfer...\r\n&quot;</span>);</span><br><span class="line">    TransferDone = <span class="number">0</span>;</span><br><span class="line">    TransferError = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    Status = XAxiCdma_SimpleTransfer(&amp;AxiCdmaInstance, (UINTPTR)SourceBram, </span><br><span class="line">                                     (UINTPTR)DestBram, DATA_SIZE, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;CDMA SimpleTransfer failed with status: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;Waiting for interrupt...\r\n&quot;</span>);</span><br><span class="line">    <span class="keyword">while</span> (!TransferDone &amp;&amp; !TransferError) &#123; <span class="comment">/* Wait */</span> &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (TransferError) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;CDMA transfer finished with an error!\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;CDMA transfer finished successfully!\r\n&quot;</span>);</span><br><span class="line">        xil_printf(<span class="string">&quot;Reading data back from BRAM_B for verification...\r\n&quot;</span>);</span><br><span class="line">        Xil_DCacheInvalidateRange((UINTPTR)DestBram, DATA_SIZE);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; DATA_SIZE; i++) &#123;</span><br><span class="line">            DestBuffer[i] = DestBram[i];</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; DATA_SIZE; i++) &#123;</span><br><span class="line">            <span class="keyword">if</span> (SourceBuffer[i] != DestBuffer[i]) &#123;</span><br><span class="line">                xil_printf(<span class="string">&quot;Verification FAILED at index %d! Sent %02X, Got %02X\r\n&quot;</span>, </span><br><span class="line">                          i, SourceBuffer[i], DestBuffer[i]);</span><br><span class="line">                <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        xil_printf(<span class="string">&quot;Data verification PASSED!\r\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;--- Test Finished ---\r\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">SetupCdma</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    XAxiCdma_Config *CdmaCfg;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使用基地址查找配置，避免依赖可能不存在的 DEVICE_ID 宏</span></span><br><span class="line">    CdmaCfg = XAxiCdma_LookupConfig(CDMA_BASE_ADDR);</span><br><span class="line">    <span class="keyword">if</span> (!CdmaCfg) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;No CDMA config found for base address 0x%08X\r\n&quot;</span>, CDMA_BASE_ADDR);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Status = XAxiCdma_CfgInitialize(&amp;AxiCdmaInstance, CdmaCfg, CdmaCfg-&gt;BaseAddress);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;CDMA initialization failed with status: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 验证 Simple Mode</span></span><br><span class="line">    <span class="keyword">if</span> (!XAxiCdma_IsSimpleMode(&amp;AxiCdmaInstance)) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;CDMA is NOT in Simple Mode - check Vivado configuration!\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    xil_printf(<span class="string">&quot;CDMA is in Simple Mode\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使能所有类型的中断</span></span><br><span class="line">    XAxiCdma_IntrEnable(&amp;AxiCdmaInstance, XAXICDMA_XR_IRQ_ALL_MASK);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">SetupInterruptSystem</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line">    XScuGic_Config *IntcConfig;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 使用基地址查找配置，避免依赖可能不存在的 DEVICE_ID 宏</span></span><br><span class="line">    IntcConfig = XScuGic_LookupConfig(INTC_BASE_ADDR);</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">NULL</span> == IntcConfig) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;No GIC config found for base address 0x%08X\r\n&quot;</span>, INTC_BASE_ADDR);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Status = XScuGic_CfgInitialize(&amp;IntcInstance, IntcConfig, IntcConfig-&gt;CpuBaseAddress);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;GIC initialization failed with status: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Status = XScuGic_Connect(&amp;IntcInstance, CDMA_INTR_ID,</span><br><span class="line">                             (Xil_InterruptHandler)CdmaIntrHandler,</span><br><span class="line">                             (<span class="type">void</span> *)&amp;AxiCdmaInstance);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;GIC connect failed with status: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    XScuGic_Enable(&amp;IntcInstance, CDMA_INTR_ID);</span><br><span class="line"></span><br><span class="line">    Xil_ExceptionInit();</span><br><span class="line">    Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,</span><br><span class="line">                                 (Xil_ExceptionHandler)XScuGic_InterruptHandler,</span><br><span class="line">                                 &amp;IntcInstance);</span><br><span class="line">    Xil_ExceptionEnable();</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;Interrupt system setup completed\r\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 中断处理函数，使用直接寄存器访问方式</span></span><br><span class="line"><span class="comment">* 这是为了匹配 Vitis 2023.2 驱动的实际行为</span></span><br><span class="line"><span class="comment">******************************************************************************/</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">CdmaIntrHandler</span><span class="params">(<span class="type">void</span> *CallbackRef)</span></span><br><span class="line">&#123;</span><br><span class="line">    u32 IntrStatus;</span><br><span class="line">    XAxiCdma *CdmaInstancePtr = (XAxiCdma *)CallbackRef;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// --- 关键修正: 直接读写寄存器 ---</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">// 1. 读取中断状态寄存器 (SR) 来获取中断状态</span></span><br><span class="line">    <span class="comment">//    使用 xaxicdma_hw.h 中定义的 XAxiCdma_ReadReg 宏</span></span><br><span class="line">    IntrStatus = XAxiCdma_ReadReg(CdmaInstancePtr-&gt;BaseAddr, XAXICDMA_SR_OFFSET);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 2. 清除已触发的中断 (通过向状态寄存器(SR)写回对应位来清除)</span></span><br><span class="line">    <span class="comment">//    使用 xaxicdma_hw.h 中定义的 XAxiCdma_WriteReg 宏</span></span><br><span class="line">    XAxiCdma_WriteReg(CdmaInstancePtr-&gt;BaseAddr, XAXICDMA_SR_OFFSET,</span><br><span class="line">                      IntrStatus &amp; XAXICDMA_XR_IRQ_ALL_MASK);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 3. 检查具体是哪种中断</span></span><br><span class="line">    <span class="keyword">if</span> (IntrStatus &amp; XAXICDMA_XR_IRQ_ERROR_MASK) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;CDMA Error Interrupt: 0x%08X\r\n&quot;</span>, IntrStatus);</span><br><span class="line">        TransferError = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (IntrStatus &amp; XAXICDMA_XR_IRQ_IOC_MASK) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;CDMA Transfer Complete Interrupt Received!\r\n&quot;</span>);</span><br><span class="line">        TransferDone = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键代码改进说明:</strong></p>
+<ol>
+<li><p><strong>使用基地址而非设备ID</strong></p>
+<ul>
+<li><p><strong>原因:</strong> 某些BSP生成过程中可能不会生成设备ID宏，使用基地址更可靠</p>
+</li>
+<li><p><strong>改进:</strong> <code>XAxiCdma_LookupConfig(CDMA_BASE_ADDR)</code> 而非依赖可能不存在的设备ID</p>
+</li>
+</ul>
+</li>
+<li><p><strong>直接寄存器访问处理中断</strong></p>
+<ul>
+<li><p><strong>原因:</strong> 匹配Vitis 2023.2驱动的实际底层行为，更稳定可靠</p>
+</li>
+<li><p><strong>改进:</strong> 使用 <code>XAxiCdma_ReadReg/WriteReg</code> 直接操作CDMA状态寄存器</p>
+</li>
+</ul>
+</li>
+<li><p><strong>固定中断号使用</strong></p>
+<ul>
+<li><p><strong>原因:</strong> Zynq-7000 的 IRQ_F2P[0] 中断号在所有系统中都是固定的61</p>
+</li>
+<li><p><strong>改进:</strong> 直接使用 <code>#define CDMA_INTR_ID 61</code> 避免依赖生成的宏</p>
+</li>
+</ul>
+</li>
+<li><p><strong>增强的缓存处理</strong></p>
+<ul>
+<li><p><strong>原因:</strong> 确保DMA传输前后的数据一致性</p>
+</li>
+<li><p><strong>改进:</strong> 在程序开始时重新初始化缓存系统</p>
+</li>
+</ul>
+</li>
+<li><p><strong>更细粒度的数据类型</strong></p>
+<ul>
+<li><p><strong>原因:</strong> 使用字节级操作可以更精确地验证DMA传输</p>
+</li>
+<li><p><strong>改进:</strong> 使用 <code>u8</code> 数组而非 <code>u32</code>，提高测试覆盖率</p>
+</li>
+</ul>
+</li>
+</ol>
+<p><strong>决策依据与原因:</strong> 这份代码解决了Vitis 2023.2工具链中的几个关键问题：</p>
+<ol>
+<li>BSP自动生成宏的不确定性</li>
+<li>驱动API在不同版本间的兼容性差异</li>
+<li>中断处理机制的底层实现细节</li>
+<li>缓存一致性在DMA操作中的重要性</li>
+</ol>
+<p>这是经过实际验证、针对您的硬件平台和开发环境优化的最终版本。</p>
+<h3 id="最终硬件验证"><a href="#最终硬件验证" class="headerlink" title="最终硬件验证"></a>最终硬件验证</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li>连接开发板的 JTAG 和 UART 端口</li>
+<li>在 Vitis 中，右键应用工程 -&gt; <code>Launch -&gt; Launch on Hardware</code></li>
+</ol>
+<p><strong>预期结果:</strong> 在 Vitis 的串口终端 (Serial Terminal) 中，将按顺序打印出以下信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">--- AXI CDMA Loopback Test ---</span><br><span class="line">CDMA is in Simple Mode</span><br><span class="line">Preparing source data and writing to BRAM_A...</span><br><span class="line">Starting CDMA Simple Transfer...</span><br><span class="line">Waiting for interrupt...</span><br><span class="line">CDMA Transfer Complete Interrupt Received!</span><br><span class="line">CDMA transfer finished successfully!</span><br><span class="line">Reading data back from BRAM_B for verification...</span><br><span class="line">Data verification PASSED!</span><br><span class="line">--- Test Finished ---</span><br></pre></td></tr></table></figure>
+
+<p><strong>最终结论:</strong> <strong>项目成功！</strong> 打印出 <code>Data verification PASSED!</code> 意味着我们设计的整个系统——从 PS 的 DDR，到 AXI 总线，到 PL 端的 BRAM 和 CDMA，再到中断返回 PS——形成了一个完美闭环。这份 <code>.xsa</code> 硬件平台现在可以被认为是<strong>完全经过验证、100% 可靠</strong>的，可以充满信心地交付给 PetaLinux 进行后续的系统开发。</p>
+<hr>
+<h1 id="第三阶段-AXI-GPIO控制PL端KEY与LED"><a href="#第三阶段-AXI-GPIO控制PL端KEY与LED" class="headerlink" title="第三阶段:  AXI_GPIO控制PL端KEY与LED"></a>第三阶段:  AXI_GPIO控制PL端KEY与LED</h1><p><strong>目标:</strong> 在已验证的 BRAM+CDMA 硬件平台基础上，进一步集成 AXI GPIO IP 核，实现由 PL 端物理按键触发中断，PS 端软件响应并控制 PL 端 LED 亮灭的完整 I&#x2F;O 闭环。此阶段将深入验证 PL-PS 中断合并、软件中断处理及 GPIO 驱动的使用。</p>
+<h2 id="硬件平台扩展-Vivado"><a href="#硬件平台扩展-Vivado" class="headerlink" title="硬件平台扩展 (Vivado)"></a>硬件平台扩展 (Vivado)</h2><h3 id="添加并配置-AXI-GPIO-IP-核"><a href="#添加并配置-AXI-GPIO-IP-核" class="headerlink" title="添加并配置 AXI_GPIO IP 核"></a>添加并配置 AXI_GPIO IP 核</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li>在已有的 Block Design 画布中，点击 <code>+</code> 添加 <code>AXI GPIO</code> IP 核 (<code>axi_gpio_0</code>)。</li>
+<li>双击该 IP 核，打开 <code>Re-customize IP</code> 窗口进行精确配置：<ul>
+<li><strong>勾选 <code>Enable Dual Channel</code></strong>，为输入和输出创建独立通道。</li>
+<li><strong>通道 1 (GPIO):</strong><ul>
+<li><strong>勾选 <code>All Inputs</code></strong>。</li>
+<li>将 <strong><code>GPIO Width</code></strong> 设置为 <strong><code>1</code></strong>。(用于连接单个按键)</li>
+</ul>
+</li>
+<li><strong>通道 2 (GPIO2):</strong><ul>
+<li><strong>勾选 <code>All Outputs</code></strong>。</li>
+<li>将 <strong><code>GPIO Width</code></strong> 设置为 <strong><code>1</code></strong>。(用于控制单个 LED)</li>
+</ul>
+</li>
+<li><strong>勾选 <code>Enable Interrupt</code></strong>，为 IP 核添加中断输出端口。</li>
+</ul>
+</li>
+</ol>
+<p><strong>决策依据与原因:</strong></p>
+<ul>
+<li><strong>双通道:</strong> 将输入（按键）和输出（LED）在逻辑上分离，使驱动代码更清晰，每个通道可以独立控制。</li>
+<li><strong>精确位宽:</strong> 将位宽设为 <code>1</code>，与我们的物理目标（1个按key，1个LED）完全匹配，可以最大化地节省 PL 逻辑资源，并使设计意图明确化。</li>
+<li><strong>使能中断:</strong> 这是实现“按键按下，软件才响应”这一低功耗、高效率模式的硬件基础。</li>
+</ul>
+<h3 id="集成-GPIO-到系统并连接中断"><a href="#集成-GPIO-到系统并连接中断" class="headerlink" title="集成 GPIO 到系统并连接中断"></a>集成 GPIO 到系统并连接中断</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li><strong>连接 AXI 总线:</strong> 点击 <code>Run Connection Automation</code>，在弹出的窗口中仅勾选新添加的 <code>/axi_gpio_0</code>，让 Vivado 自动完成其 <code>S_AXI</code> 从接口、时钟和复位信号的连接。</li>
+<li><strong>扩展并连接中断:</strong><ul>
+<li>双击项目中已有的 <code>xlconcat_0</code> IP 核，将其 <strong><code>Number of Ports</code> 从 <code>1</code> 修改为 <code>2</code></strong>。</li>
+<li>确认 CDMA 的中断输出仍连接在 <code>In0</code> 端口。</li>
+<li>将 <code>axi_gpio_0</code> 的 <code>ip2intc_irpt</code> 输出端口，手动连接到 <code>xlconcat_0</code> 的 <strong><code>In1</code></strong> 输入端口。</li>
+</ul>
+</li>
+<li><strong>引出物理端口:</strong><ul>
+<li>右键点击 <code>axi_gpio_0</code> 上的 <code>gpio_io_i</code> 端口 -&gt; <code>Create Port...</code> -&gt; 命名为 <code>key_pl</code>。</li>
+<li>右键点击 <code>axi_gpio_0</code> 上的 <code>gpio2_io_o</code> 端口 -&gt; <code>Create Port...</code> -&gt; 命名为 <code>led_pl</code>。</li>
+</ul>
+</li>
+<li><strong>分配地址:</strong><ul>
+<li>切换到 <code>Address Editor</code>，在 <code>/processing_system7_0/Data</code> 视图下，为新出现的 <code>/axi_gpio_0</code> 分配地址（如 <code>0x41200000</code>）。</li>
+</ul>
+</li>
+</ol>
+<p><strong>决策依据与原因:</strong></p>
+<ul>
+<li><strong>中断合并:</strong> 扩展 <code>xlconcat</code> 而非新增，是处理多中断源的标准工程实践，保证了系统的可扩展性，并维持了原有 CDMA 中断通路的完整性。</li>
+<li><strong>引出端口:</strong> <code>Create Port</code> 是将 Block Design 内部的逻辑信号“暴露”到顶层设计的唯一方法，是后续进行物理引脚约束的前提。</li>
+<li><strong>分配地址:</strong> 为 AXI GPIO 分配地址，是让 PS 能够通过总线找到并配置它的“门牌号”。</li>
+</ul>
+<h3 id="分配物理引脚约束-XDC"><a href="#分配物理引脚约束-XDC" class="headerlink" title="分配物理引脚约束 (XDC)"></a>分配物理引脚约束 (XDC)</h3><p><strong>信息来源:</strong> 核心板原理图指出，目标按键连接到 FPGA 的 <code>A17</code> 引脚，目标 LED 连接到 <code>A16</code> 引脚，其 IO Bank 供电为 3.3V。</p>
+<p><strong>操作步骤:</strong></p>
+<ol>
+<li>在 <code>Flow Navigator</code> 中，点击 <code>Open Implemented Design</code>。</li>
+<li>在 Vitis 顶部菜单栏选择 <code>Window -&gt; I/O Ports</code> 打开引脚分配窗口。</li>
+<li>找到 <code>key_pl</code> 端口：<ul>
+<li><strong>Package Pin:</strong> 输入 <code>A17</code></li>
+<li><strong>I&#x2F;O Std:</strong> 选择 <code>LVCMOS33</code></li>
+</ul>
+</li>
+<li>找到 <code>led_pl</code> 端口：<ul>
+<li><strong>Package Pin:</strong> 输入 <code>A16</code></li>
+<li><strong>I&#x2F;O Std:</strong> 选择 <code>LVCMOS33</code></li>
+</ul>
+</li>
+<li>按 <code>Ctrl + S</code> 保存，将约束写入项目的 XDC 文件中。</li>
+</ol>
+<p><strong>决策依据与原因:</strong> 这是连接逻辑设计与物理现实的关键一步。<code>Package Pin</code> 确保信号能驱动正确的外部硬件，<code>I/O Std</code> 确保电气电平兼容，防止器件损坏。</p>
+<h3 id="生成最终硬件平台-1"><a href="#生成最终硬件平台-1" class="headerlink" title="生成最终硬件平台"></a>生成最终硬件平台</h3><p><strong>操作步骤:</strong></p>
+<img src="/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/20250722114659.png" class="" title="Block Design截图">
+
+<ol>
+<li><strong><code>Validate Design</code> (F6):</strong> 检查最终设计。</li>
+<li><strong><code>Create HDL Wrapper</code>:</strong> 更新顶层封装。</li>
+<li><strong><code>Generate Bitstream</code>:</strong> 生成包含所有硬件逻辑（CDMA + GPIO）的比特流。</li>
+<li><strong><code>Export Hardware</code>:</strong> 导出包含最新设计和比特流的 <code>.xsa</code> 文件，作为 Vitis 软件开发的输入。</li>
+</ol>
+<hr>
+<h2 id="软件验证与协同调试-Vitis-Unified-IDE"><a href="#软件验证与协同调试-Vitis-Unified-IDE" class="headerlink" title="软件验证与协同调试 (Vitis Unified IDE)"></a>软件验证与协同调试 (Vitis Unified IDE)</h2><h3 id="创建并配置调试会话"><a href="#创建并配置调试会话" class="headerlink" title="创建并配置调试会话"></a>创建并配置调试会话</h3><p><strong>操作步骤:</strong></p>
+<ol>
+<li>更新 Vitis Platform 的硬件规格，指向最新导出的 <code>.xsa</code> 文件，并重建 BSP。</li>
+<li>在左侧活动栏进入 <code>Run and Debug</code> 视图。</li>
+<li>点击齿轮图标 <strong><code>⚙️</code></strong> 创建或修改 <code>launch.json</code> 文件。</li>
+<li>在图形化配置页面，确保以下关键项被正确设置：<ul>
+<li><strong>✅ <code>Program Device</code></strong> 必须勾选。</li>
+<li><strong><code>Bitstream File</code></strong> 指向包含 GPIO 设计的最新 <code>.bit</code> 文件。</li>
+<li><strong><code>APPLICATION</code></strong> 指向您编译的 GPIO 测试程序的 <code>.elf</code> 文件。</li>
+</ul>
+</li>
+</ol>
+<p><strong>决策依据与原因:</strong> <code>Program Device</code> 是确保 PL 端硬件（包括 AXI GPIO 和 ILA）在软件运行前被正确配置的<strong>核心开关</strong>。Vitis 2023.2 会基于此设置，在后台自动查找并关联同名的 <code>.ltx</code> 探针文件。</p>
+<h3 id="GPIO-中断验证-C-代码"><a href="#GPIO-中断验证-C-代码" class="headerlink" title="GPIO 中断验证 C 代码"></a>GPIO 中断验证 C 代码</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/***************************** Include Files *********************************/</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xparameters.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xparameters_ps.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xgpio.h&quot;</span>        </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xscugic.h&quot;</span>      </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xil_exception.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xil_printf.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sleep.h&quot;</span>        <span class="comment">// 添加延时函数支持</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/************************** Constant Definitions *****************************/</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_BASEADDR       XPAR_XGPIO_0_BASEADDR</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INTC_DEVICE_ID      XPAR_SCUGIC_SINGLE_DEVICE_ID</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUTTON_CHANNEL      2  <span class="comment">// 按键在通道2</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LED_CHANNEL         1  <span class="comment">// LED在通道1</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTERRUPT_ID   XPS_FPGA1_INT_ID    <span class="comment">// 62</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 去抖参数</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEBOUNCE_DELAY_MS   30    <span class="comment">// 去抖延时50毫秒</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEBOUNCE_COUNT      3     <span class="comment">// 连续稳定读取次数</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/************************** Variable Definitions *****************************/</span></span><br><span class="line">XGpio Gpio;               </span><br><span class="line">XScuGic IntcInstance;     </span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">volatile</span> u32 led_state = <span class="number">0</span>;  <span class="comment">// LED状态：0=熄灭，1=点亮</span></span><br><span class="line"><span class="type">static</span> <span class="keyword">volatile</span> u32 debounce_flag = <span class="number">0</span>;  <span class="comment">// 去抖标志：1=正在去抖中</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/************************** Function Prototypes ******************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">SetupGpio</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">SetupInterrupts</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">GpioIntrHandler</span><span class="params">(<span class="type">void</span> *CallbackRef)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">IsButtonPressed</span><span class="params">(<span class="type">void</span>)</span>;  <span class="comment">// 按键去抖检测函数</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line">    </span><br><span class="line">    xil_printf(<span class="string">&quot;\r\n=== 带去抖功能的按键LED切换系统 ===\r\n&quot;</span>);</span><br><span class="line">    xil_printf(<span class="string">&quot;功能：按键触发中断 → 去抖检测 → LED切换\r\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 初始化GPIO</span></span><br><span class="line">    Status = SetupGpio();</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;❌ GPIO初始化失败\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置中断系统</span></span><br><span class="line">    Status = SetupInterrupts();</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;❌ 中断设置失败\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    xil_printf(<span class="string">&quot;✅ 系统就绪，请按按键测试...\r\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 主循环</span></span><br><span class="line">    <span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">// 什么都不做，等待中断</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">SetupGpio</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    XGpio_Config *ConfigPtr;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line">    </span><br><span class="line">    xil_printf(<span class="string">&quot;--- GPIO初始化 ---\r\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    ConfigPtr = XGpio_LookupConfig(GPIO_BASEADDR);</span><br><span class="line">    <span class="keyword">if</span> (ConfigPtr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Status = XGpio_CfgInitialize(&amp;Gpio, ConfigPtr, ConfigPtr-&gt;BaseAddress);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 配置GPIO方向</span></span><br><span class="line">    XGpio_SetDataDirection(&amp;Gpio, BUTTON_CHANNEL, <span class="number">0xFFFFFFFF</span>);  <span class="comment">// 按键输入</span></span><br><span class="line">    XGpio_SetDataDirection(&amp;Gpio, LED_CHANNEL, <span class="number">0x00000000</span>);     <span class="comment">// LED输出</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置LED初始状态为熄灭</span></span><br><span class="line">    led_state = <span class="number">0</span>;</span><br><span class="line">    XGpio_DiscreteWrite(&amp;Gpio, LED_CHANNEL, led_state);</span><br><span class="line">    xil_printf(<span class="string">&quot;LED初始状态: 熄灭\r\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 配置GPIO中断</span></span><br><span class="line">    XGpio_InterruptClear(&amp;Gpio, XGPIO_IR_CH2_MASK);</span><br><span class="line">    XGpio_InterruptEnable(&amp;Gpio, XGPIO_IR_CH2_MASK);</span><br><span class="line">    XGpio_InterruptGlobalEnable(&amp;Gpio);</span><br><span class="line">    </span><br><span class="line">    xil_printf(<span class="string">&quot;✅ GPIO配置完成\r\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">SetupInterrupts</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    XScuGic_Config *IntcConfig;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line">    </span><br><span class="line">    xil_printf(<span class="string">&quot;--- 中断设置 ---\r\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 初始化中断控制器</span></span><br><span class="line">    IntcConfig = XScuGic_LookupConfig(INTC_DEVICE_ID);</span><br><span class="line">    <span class="keyword">if</span> (IntcConfig == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    Status = XScuGic_CfgInitialize(&amp;IntcInstance, IntcConfig, IntcConfig-&gt;CpuBaseAddress);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置异常处理</span></span><br><span class="line">    Xil_ExceptionInit();</span><br><span class="line">    Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,</span><br><span class="line">                                 (Xil_ExceptionHandler)XScuGic_InterruptHandler,</span><br><span class="line">                                 &amp;IntcInstance);</span><br><span class="line">    Xil_ExceptionEnable();</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置中断优先级和触发类型</span></span><br><span class="line">    XScuGic_SetPriorityTriggerType(&amp;IntcInstance, GPIO_INTERRUPT_ID, <span class="number">0xA0</span>, <span class="number">0x3</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 连接中断处理函数</span></span><br><span class="line">    Status = XScuGic_Connect(&amp;IntcInstance, GPIO_INTERRUPT_ID,</span><br><span class="line">                             (Xil_ExceptionHandler)GpioIntrHandler,</span><br><span class="line">                             (<span class="type">void</span> *)&amp;Gpio);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 使能中断</span></span><br><span class="line">    XScuGic_Enable(&amp;IntcInstance, GPIO_INTERRUPT_ID);</span><br><span class="line">    </span><br><span class="line">    xil_printf(<span class="string">&quot;✅ 中断设置完成 (ID: %d)\r\n&quot;</span>, GPIO_INTERRUPT_ID);</span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">// 按键去抖检测函数</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">IsButtonPressed</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    u32 button_state;</span><br><span class="line">    <span class="type">int</span> stable_count = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 连续检测按键状态</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; DEBOUNCE_COUNT; i++) &#123;</span><br><span class="line">        button_state = XGpio_DiscreteRead(&amp;Gpio, BUTTON_CHANNEL);</span><br><span class="line">        <span class="keyword">if</span> (button_state == <span class="number">0</span>) &#123;  <span class="comment">// 按键按下（假设按下为0）</span></span><br><span class="line">            stable_count++;</span><br><span class="line">        &#125;</span><br><span class="line">        usleep(<span class="number">10000</span>);  <span class="comment">// 延时10毫秒</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 如果连续检测都是按下状态，认为是有效按键</span></span><br><span class="line">    <span class="keyword">return</span> (stable_count == DEBOUNCE_COUNT);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">GpioIntrHandler</span><span class="params">(<span class="type">void</span> *CallbackRef)</span></span><br><span class="line">&#123;</span><br><span class="line">    XGpio *GpioPtr = (XGpio *)CallbackRef;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 清除中断</span></span><br><span class="line">    XGpio_InterruptClear(GpioPtr, XGPIO_IR_CH2_MASK);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 如果正在去抖处理中，直接返回</span></span><br><span class="line">    <span class="keyword">if</span> (debounce_flag) &#123;</span><br><span class="line">        XGpio_InterruptEnable(GpioPtr, XGPIO_IR_CH2_MASK);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设置去抖标志</span></span><br><span class="line">    debounce_flag = <span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 延时去抖</span></span><br><span class="line">    usleep(DEBOUNCE_DELAY_MS * <span class="number">1000</span>);  <span class="comment">// 转换为微秒</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 检测按键是否真的被按下</span></span><br><span class="line">    <span class="keyword">if</span> (IsButtonPressed()) &#123;</span><br><span class="line">        <span class="comment">// 切换LED状态</span></span><br><span class="line">        led_state = !led_state;</span><br><span class="line">        XGpio_DiscreteWrite(GpioPtr, LED_CHANNEL, led_state);</span><br><span class="line">        </span><br><span class="line">        xil_printf(<span class="string">&quot;💡 LED切换为: %s\r\n&quot;</span>, led_state ? <span class="string">&quot;点亮&quot;</span> : <span class="string">&quot;熄灭&quot;</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 等待按键释放，避免连续触发</span></span><br><span class="line">        <span class="keyword">while</span> (XGpio_DiscreteRead(GpioPtr, BUTTON_CHANNEL) == <span class="number">0</span>) &#123;</span><br><span class="line">            usleep(<span class="number">10000</span>);  <span class="comment">// 10毫秒检测一次</span></span><br><span class="line">        &#125;</span><br><span class="line">        usleep(<span class="number">50000</span>);  <span class="comment">// 按键释放后再等待50毫秒</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 清除去抖标志</span></span><br><span class="line">    debounce_flag = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 重新使能中断</span></span><br><span class="line">    XGpio_InterruptEnable(GpioPtr, XGPIO_IR_CH2_MASK);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="新版Vitis中断配置问题"><a href="#新版Vitis中断配置问题" class="headerlink" title="新版Vitis中断配置问题"></a>新版Vitis中断配置问题</h3><h4 id="Vitis-2023-2-API变化"><a href="#Vitis-2023-2-API变化" class="headerlink" title="Vitis 2023.2 API变化"></a><strong>Vitis 2023.2 API变化</strong></h4><p><strong>重要变化：设备初始化方式改变</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ❌ 旧版本方式（不再适用）</span></span><br><span class="line">XGpio_Initialize(&amp;Gpio, DEVICE_ID);</span><br><span class="line"></span><br><span class="line"><span class="comment">// ✅ 新版本方式（Vitis 2023.2+）</span></span><br><span class="line">ConfigPtr = XGpio_LookupConfig(XPAR_XGPIO_0_BASEADDR);  <span class="comment">// 使用BASEADDR</span></span><br><span class="line">XGpio_CfgInitialize(&amp;Gpio, ConfigPtr, ConfigPtr-&gt;BaseAddress);</span><br></pre></td></tr></table></figure>
+
+<h4 id="中断ID映射关键点"><a href="#中断ID映射关键点" class="headerlink" title="中断ID映射关键点"></a>中断ID映射关键点</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 必须包含PS中断定义</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xparameters_ps.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 正确的中断ID映射</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> GPIO_INTERRUPT_ID   XPS_FPGA1_INT_ID    <span class="comment">// 62 (IRQ_F2P[1])</span></span></span><br><span class="line"><span class="comment">// 如果连接到IRQ_F2P[0]，则使用 XPS_FPGA0_INT_ID (61)</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="硬件连接验证"><a href="#硬件连接验证" class="headerlink" title="硬件连接验证"></a>硬件连接验证</h4><ul>
+<li>AXI GPIO <code>ip2intc_irpt</code> → xlconcat <code>In1</code> → PS <code>IRQ_F2P[1]</code></li>
+<li>对应中断ID：62 (<code>XPS_FPGA1_INT_ID</code>)</li>
+</ul>
+<h1 id="第四阶段-构建并验证高性能AXI-Stream数据通路"><a href="#第四阶段-构建并验证高性能AXI-Stream数据通路" class="headerlink" title="第四阶段: 构建并验证高性能AXI-Stream数据通路"></a>第四阶段: 构建并验证高性能AXI-Stream数据通路</h1><p><strong>目标:</strong> 在前序硬件平台基础上，集成 <strong>AXI DMA</strong>，构建一个连接 PS-DDR 与 PL 的高性能 AXI-Stream 数据通路。通过实现一个带缓冲的硬件回环，并编写一份功能完整、符合 Vitis 2023.2 SDT 规范的裸机程序，深度验证该数据通路的正确性、稳定性与中断机制。</p>
+<p><strong>核心理念:</strong> 本阶段从“功能实现”迈向“<strong>性能与鲁棒性设计</strong>”。每一个新增的IP和配置决策，都旨在解决一个潜在的系统瓶颈或时序风险，并确保软件验证的全面性。</p>
+<hr>
+<h2 id="硬件平台升级：从内存映射到数据流-Vivado"><a href="#硬件平台升级：从内存映射到数据流-Vivado" class="headerlink" title="硬件平台升级：从内存映射到数据流 (Vivado)"></a>硬件平台升级：从内存映射到数据流 (Vivado)</h2><p>在此阶段，我们进行一次重大的架构升级，引入**数据流（Stream）**的概念，其核心是构建一条从内存出发，经过PL，再回到内存的高速公路。</p>
+<h3 id="关键IP的添加与配置"><a href="#关键IP的添加与配置" class="headerlink" title="关键IP的添加与配置"></a>关键IP的添加与配置</h3><h4 id="AXI-Direct-Memory-Access-DMA-IP核"><a href="#AXI-Direct-Memory-Access-DMA-IP核" class="headerlink" title="AXI Direct Memory Access (DMA) IP核"></a><strong>AXI Direct Memory Access (DMA) IP核</strong></h4><p><strong>操作步骤:</strong></p>
+<ol>
+<li>在 Block Design 画布中，点击 <code>+</code> 添加 <strong><code>AXI Direct Memory Access</code></strong> IP核。</li>
+<li>双击 IP 核进行配置 (<code>Re-customize IP</code>):<ul>
+<li><strong>取消勾选 <code>Enable Scatter Gather Engine</code></strong>: 我们采用简单的点对点连续数据传输（Simple Mode），禁用此高级功能可节省大量逻辑资源并简化软件。</li>
+<li><strong><code>Width of Buffer Length Register</code></strong> 修改为 <strong><code>23</code></strong>: 将单次最大传输长度从默认的16KB提升至8MB，为处理大数据块提供充足的裕量。</li>
+<li>保持 <code>Enable Write Channel (S2MM)</code> 和 <code>Enable Read Channel (MM2S)</code> 勾选，因为我们需要完整的读写双向通路。</li>
+</ul>
+</li>
+</ol>
+<p><strong>【技术原理补充】为什么是AXI DMA，而不是AXI CDMA？</strong></p>
+<ul>
+<li><strong>角色不同</strong>: <code>AXI CDMA</code> 是 <strong>内存到内存</strong> 的搬运工，工作在地址世界。而 <code>AXI DMA</code> 是 <strong>内存与数据流</strong> 之间的桥梁，它能将内存中的数据打包成 AXI-Stream 数据流（MM2S），也能将数据流解包存回内存（S2MM）。它是连接两个世界的唯一通道。</li>
+<li><strong>我们的需求</strong>: 要搭建 AXI-Stream 通路，AXI DMA 是必选项。</li>
+</ul>
+<h4 id="AXI4-Stream-Data-FIFO-IP核-关键优化"><a href="#AXI4-Stream-Data-FIFO-IP核-关键优化" class="headerlink" title="AXI4-Stream Data FIFO IP核 (关键优化)"></a><strong>AXI4-Stream Data FIFO IP核 (关键优化)</strong></h4><p><strong>操作步骤:</strong></p>
+<ol>
+<li>点击 <code>+</code> 添加 <strong><code>AXI4-Stream Data FIFO</code></strong> IP核。</li>
+<li>双击进行配置:<ul>
+<li>保持 <code>FIFO Depth</code> 为默认的 <code>512</code> 或 <code>1024</code>。</li>
+<li>其他参数如 <code>TDATA Width</code> 保持 <code>Auto</code>，它会自动匹配连接的 AXI-Stream 总线宽度。</li>
+</ul>
+</li>
+</ol>
+<p><strong>【决策依据与原因】为什么要在回环中插入一个FIFO？</strong><br>这是一个从“能用”到“好用”的关键决策。直接将DMA的输出<code>M_AXIS_MM2S</code>连接到输入<code>S_AXIS_S2MM</code>在功能上可行，但存在风险：</p>
+<ol>
+<li><strong>时序风险</strong>: <code>TVALID</code>&#x2F;<code>TREADY</code> 握手信号路径过长，可能导致时序违规。FIFO作为一个独立的、带寄存器的模块，能将这条关键路径切断，提供<strong>时序隔离</strong>，极大提升系统稳定性。</li>
+<li><strong>流控缓冲</strong>: AXI DMA的读写引擎是两个独立的模块。在某些极端情况下，读引擎（MM2S）可能瞬间高速发送数据，而写引擎（S2MM）恰好有微小延迟。FIFO提供了<strong>数据缓冲区</strong>，能平滑这种速率上的微小不匹配，防止数据丢失或总线死锁。</li>
+</ol>
+<h3 id="高性能系统架构连接"><a href="#高性能系统架构连接" class="headerlink" title="高性能系统架构连接"></a>高性能系统架构连接</h3><h4 id="使能并连接高性能HP接口（关键优化）"><a href="#使能并连接高性能HP接口（关键优化）" class="headerlink" title="使能并连接高性能HP接口（关键优化）"></a><strong>使能并连接高性能HP接口（关键优化）</strong></h4><p><strong>操作步骤:</strong></p>
+<ol>
+<li>双击 <strong>ZYNQ7 Processing System</strong> IP核。</li>
+<li>导航至 <code>PS-PL Configuration -&gt; HP Slave AXI Interface</code>。</li>
+<li><strong>勾选 <code>S AXI HP0 interface</code></strong> 并点击 <code>OK</code>。Zynq IP上会出现一个新的64位从端口 <code>S_AXI_HP0</code>。</li>
+<li>运行 <code>Run Connection Automation</code>，在为 <code>axi_dma_0</code> 的 <code>M_AXI_MM2S</code> 和 <code>M_AXI_S2MM</code> 接口选择主接口时，<strong>手动指定</strong>或确保 Vivado 自动选择了连接到新出现的 <strong><code>S_AXI_HP0</code></strong> 端口的总线。</li>
+</ol>
+<p><strong>【决策依据与原因】为什么必须用HP口，而不能用GP口？</strong><br>这是性能的根本保障。</p>
+<ul>
+<li><strong>控制路径 vs 数据路径</strong>: PS上有两种PS-PL接口：<ul>
+<li><code>M_AXI_GP (General Purpose)</code>: 32位，低带宽，用于<strong>控制流</strong>，如CPU写IP核的配置寄存器。</li>
+<li><code>S_AXI_HP (High Performance)</code>: 64位，高带宽，直连DDR控制器，专为<strong>数据流</strong>设计。</li>
+</ul>
+</li>
+<li><strong>带宽匹配</strong>: DMA的高速数据搬运，必须依赖HP接口提供的高速公路。如果连接到GP口，相当于让跑车跑乡间小路，性能将严重受限。</li>
+</ul>
+<h4 id="提升PL时钟频率（关键优化）"><a href="#提升PL时钟频率（关键优化）" class="headerlink" title="提升PL时钟频率（关键优化）"></a><strong>提升PL时钟频率（关键优化）</strong></h4><p><strong>操作步骤:</strong></p>
+<ol>
+<li>双击 <strong>ZYNQ7 Processing System</strong> IP核。</li>
+<li>导航至 <code>Clock Configuration -&gt; PL Fabric Clocks</code>。</li>
+<li>将 <strong><code>FCLK_CLK0</code></strong> 的 <code>Requested Frequency</code> 修改为 <strong><code>100 MHz</code></strong>。</li>
+</ol>
+<p><strong>决策依据与原因:</strong> 100MHz是AXI接口事实上的标准工作频率。它不仅能提供比默认50MHz高一倍的数据吞吐量，而且对于现代IP核来说，在这个频率下更容易实现时序收敛。</p>
+<h4 id="完成数据流与中断连接"><a href="#完成数据流与中断连接" class="headerlink" title="完成数据流与中断连接"></a><strong>完成数据流与中断连接</strong></h4><p><strong>操作步骤:</strong></p>
+<ol>
+<li><strong>【最终】数据流连接 (经过FIFO缓冲)</strong>:<ul>
+<li>将 <code>axi_dma_0</code> 的 <code>M_AXIS_MM2S</code> 输出端口连接到 <strong><code>axis_data_fifo_0</code></strong> 的 <code>S_AXIS</code> 输入端口。</li>
+<li>将 <strong><code>axis_data_fifo_0</code></strong> 的 <code>M_AXIS</code> 输出端口连接到 <code>axi_dma_0</code> 的 <code>S_AXIS_S2MM</code> 输入端口。</li>
+</ul>
+</li>
+<li><strong>中断连接</strong>:<ul>
+<li>双击 <code>xlconcat_0</code>，将 <code>Number of Ports</code> 从2扩展到<strong>4</strong>。</li>
+<li><code>axi_dma_0</code> 的 <code>mm2s_introut</code> → <code>xlconcat_0</code> 的 <code>In2</code></li>
+<li><code>axi_dma_0</code> 的 <code>s2mm_introut</code> → <code>xlconcat_0</code> 的 <code>In3</code></li>
+</ul>
+</li>
+</ol>
+<img src="/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/20250723224544.png" class="" title="Block Design截图">
+
+<hr>
+<h2 id="Vitis裸机验证：编写生产级的验证程序"><a href="#Vitis裸机验证：编写生产级的验证程序" class="headerlink" title="Vitis裸机验证：编写生产级的验证程序"></a>Vitis裸机验证：编写生产级的验证程序</h2><p>在硬件平台升级后，我们必须编写一个与之匹配的裸机程序来验证其功能。这份最终的验证代码，不仅适配 Vitis 2023.2 的 SDT 流程，更在功能上进行了增强，包含了多次传输、超时等待、详尽的状态打印等专业特性。</p>
+<h3 id="最终验证C代码-经过实际验证"><a href="#最终验证C代码-经过实际验证" class="headerlink" title="最终验证C代码 (经过实际验证)"></a>最终验证C代码 (经过实际验证)</h3><p><em>(注意：这份代码直接来自您提供的、已验证成功的版本，体现了更完整的测试逻辑)</em></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br><span class="line">372</span><br><span class="line">373</span><br><span class="line">374</span><br><span class="line">375</span><br><span class="line">376</span><br><span class="line">377</span><br><span class="line">378</span><br><span class="line">379</span><br><span class="line">380</span><br><span class="line">381</span><br><span class="line">382</span><br><span class="line">383</span><br><span class="line">384</span><br><span class="line">385</span><br><span class="line">386</span><br><span class="line">387</span><br><span class="line">388</span><br><span class="line">389</span><br><span class="line">390</span><br><span class="line">391</span><br><span class="line">392</span><br><span class="line">393</span><br><span class="line">394</span><br><span class="line">395</span><br><span class="line">396</span><br><span class="line">397</span><br><span class="line">398</span><br><span class="line">399</span><br><span class="line">400</span><br><span class="line">401</span><br><span class="line">402</span><br><span class="line">403</span><br><span class="line">404</span><br><span class="line">405</span><br><span class="line">406</span><br><span class="line">407</span><br><span class="line">408</span><br><span class="line">409</span><br><span class="line">410</span><br><span class="line">411</span><br><span class="line">412</span><br><span class="line">413</span><br><span class="line">414</span><br><span class="line">415</span><br><span class="line">416</span><br><span class="line">417</span><br><span class="line">418</span><br><span class="line">419</span><br><span class="line">420</span><br><span class="line">421</span><br><span class="line">422</span><br><span class="line">423</span><br><span class="line">424</span><br><span class="line">425</span><br><span class="line">426</span><br><span class="line">427</span><br><span class="line">428</span><br><span class="line">429</span><br><span class="line">430</span><br><span class="line">431</span><br><span class="line">432</span><br><span class="line">433</span><br><span class="line">434</span><br><span class="line">435</span><br><span class="line">436</span><br><span class="line">437</span><br><span class="line">438</span><br><span class="line">439</span><br><span class="line">440</span><br><span class="line">441</span><br><span class="line">442</span><br><span class="line">443</span><br><span class="line">444</span><br><span class="line">445</span><br><span class="line">446</span><br><span class="line">447</span><br><span class="line">448</span><br><span class="line">449</span><br><span class="line">450</span><br><span class="line">451</span><br><span class="line">452</span><br><span class="line">453</span><br><span class="line">454</span><br><span class="line">455</span><br><span class="line">456</span><br><span class="line">457</span><br><span class="line">458</span><br><span class="line">459</span><br><span class="line">460</span><br><span class="line">461</span><br><span class="line">462</span><br><span class="line">463</span><br><span class="line">464</span><br><span class="line">465</span><br><span class="line">466</span><br><span class="line">467</span><br><span class="line">468</span><br><span class="line">469</span><br><span class="line">470</span><br><span class="line">471</span><br><span class="line">472</span><br><span class="line">473</span><br><span class="line">474</span><br><span class="line">475</span><br><span class="line">476</span><br><span class="line">477</span><br><span class="line">478</span><br><span class="line">479</span><br><span class="line">480</span><br><span class="line">481</span><br><span class="line">482</span><br><span class="line">483</span><br><span class="line">484</span><br><span class="line">485</span><br><span class="line">486</span><br><span class="line">487</span><br><span class="line">488</span><br><span class="line">489</span><br><span class="line">490</span><br><span class="line">491</span><br><span class="line">492</span><br><span class="line">493</span><br><span class="line">494</span><br><span class="line">495</span><br><span class="line">496</span><br><span class="line">497</span><br><span class="line">498</span><br><span class="line">499</span><br><span class="line">500</span><br><span class="line">501</span><br><span class="line">502</span><br><span class="line">503</span><br><span class="line">504</span><br><span class="line">505</span><br><span class="line">506</span><br><span class="line">507</span><br><span class="line">508</span><br><span class="line">509</span><br><span class="line">510</span><br><span class="line">511</span><br><span class="line">512</span><br><span class="line">513</span><br><span class="line">514</span><br><span class="line">515</span><br><span class="line">516</span><br><span class="line">517</span><br><span class="line">518</span><br><span class="line">519</span><br><span class="line">520</span><br><span class="line">521</span><br><span class="line">522</span><br><span class="line">523</span><br><span class="line">524</span><br><span class="line">525</span><br><span class="line">526</span><br><span class="line">527</span><br><span class="line">528</span><br><span class="line">529</span><br><span class="line">530</span><br><span class="line">531</span><br><span class="line">532</span><br><span class="line">533</span><br><span class="line">534</span><br><span class="line">535</span><br><span class="line">536</span><br><span class="line">537</span><br><span class="line">538</span><br><span class="line">539</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/******************************************************************************</span></span><br><span class="line"><span class="comment">* Copyright (C) 2010 - 2022 Xilinx, Inc.  All rights reserved.</span></span><br><span class="line"><span class="comment">* Copyright (C) 2022 - 2023 Advanced Micro Devices, Inc.  All rights reserved.</span></span><br><span class="line"><span class="comment">* SPDX-License-Identifier: MIT</span></span><br><span class="line"><span class="comment">******************************************************************************/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @file axi_stream_loopback_intr.c</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * AXI Stream回环测试 - 中断版本</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 基于成功的轮询版本修改，使用中断方式处理DMA传输完成</span></span><br><span class="line"><span class="comment"> * 中断连接：xlconcat In2(MM2S)=63, In3(S2MM)=64</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> ******************************************************************************/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/***************************** Include Files *********************************/</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xaxidma.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xparameters.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xil_exception.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xdebug.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xil_util.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xscugic.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;xil_printf.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;sleep.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/******************** Constant Definitions **********************************/</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 硬件相关常量（与成功的轮询版本一致）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DMA_DEV_ID              XPAR_XAXIDMA_0_BASEADDR</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DDR_BASE_ADDR           XPAR_PS7_DDR_0_BASEADDRESS</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MEM_BASE_ADDR           (DDR_BASE_ADDR + 0x1000000)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 缓冲区地址定义 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> TX_BUFFER_BASE          (MEM_BASE_ADDR + 0x00100000)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RX_BUFFER_BASE          (MEM_BASE_ADDR + 0x00200000)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RX_BUFFER_HIGH          (MEM_BASE_ADDR + 0x004FFFFF)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 中断配置 - 根据您的xlconcat连接 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> TX_INTR_ID              63    <span class="comment">// MM2S中断 → xlconcat In2 → XPS_FPGA2_INT_ID</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RX_INTR_ID              64    <span class="comment">// S2MM中断 → xlconcat In3 → XPS_FPGA3_INT_ID</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INTC_DEVICE_ID          XPAR_XSCUGIC_0_BASEADDR</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 中断控制器类型定义 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INTC                    XScuGic</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INTC_HANDLER            XScuGic_InterruptHandler</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 测试参数（与成功的轮询版本一致） */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAX_PKT_LEN             0x20        <span class="comment">// 32字节</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> TEST_START_VALUE        0xC         </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NUMBER_OF_TRANSFERS     5           </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> POLL_TIMEOUT_COUNTER    1000000U    </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RESET_TIMEOUT_COUNTER   10000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NUMBER_OF_EVENTS        1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/************************** Function Prototypes ******************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">XAxiDma_SimpleIntrExample</span><span class="params">(UINTPTR BaseAddress)</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">CheckData</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">PrintDMAStatus</span><span class="params">(XAxiDma *AxiDmaPtr)</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">TxIntrHandler</span><span class="params">(<span class="type">void</span> *Callback)</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">RxIntrHandler</span><span class="params">(<span class="type">void</span> *Callback)</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">SetupIntrSystem</span><span class="params">(INTC *IntcInstancePtr,</span></span><br><span class="line"><span class="params">                          XAxiDma *AxiDmaPtr, u16 TxIntrId, u16 RxIntrId)</span>;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">DisableIntrSystem</span><span class="params">(INTC *IntcInstancePtr,</span></span><br><span class="line"><span class="params">                             u16 TxIntrId, u16 RxIntrId)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/************************** Variable Definitions *****************************/</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Device instance definitions</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">static</span> XAxiDma AxiDma;      <span class="comment">/* XAxiDma实例 */</span></span><br><span class="line"><span class="type">static</span> INTC Intc;           <span class="comment">/* 中断控制器实例 */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * 中断处理程序用于通知应用程序上下文事件的标志</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">volatile</span> u32 TxDone;</span><br><span class="line"><span class="keyword">volatile</span> u32 RxDone;</span><br><span class="line"><span class="keyword">volatile</span> u32 Error;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 主函数</span></span><br><span class="line"><span class="comment">******************************************************************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;\r\n=== AXI Stream回环测试开始 (中断版本) ===\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 运行中断传输示例 */</span></span><br><span class="line">    Status = XAxiDma_SimpleIntrExample(XPAR_XAXIDMA_0_BASEADDR);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;AXI Stream回环测试失败\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;成功完成AXI Stream回环测试\r\n&quot;</span>);</span><br><span class="line">    xil_printf(<span class="string">&quot;=== 测试程序结束 ===\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 中断模式的简单传输示例</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* @param    BaseAddress 是XAxiDma实例的基地址</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* @return</span></span><br><span class="line"><span class="comment">*       - XST_SUCCESS 如果示例成功完成</span></span><br><span class="line"><span class="comment">*       - XST_FAILURE 如果发生错误</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">******************************************************************************/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">XAxiDma_SimpleIntrExample</span><span class="params">(UINTPTR BaseAddress)</span></span><br><span class="line">&#123;</span><br><span class="line">    XAxiDma_Config *CfgPtr;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line">    <span class="type">int</span> Tries = NUMBER_OF_TRANSFERS;</span><br><span class="line">    <span class="type">int</span> Index;</span><br><span class="line">    u8 *TxBufferPtr;</span><br><span class="line">    u8 *RxBufferPtr;</span><br><span class="line">    u8 Value;</span><br><span class="line"></span><br><span class="line">    TxBufferPtr = (u8 *)TX_BUFFER_BASE;</span><br><span class="line">    RxBufferPtr = (u8 *)RX_BUFFER_BASE;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;测试配置:\r\n&quot;</span>);</span><br><span class="line">    xil_printf(<span class="string">&quot;- DMA基地址: 0x%08x\r\n&quot;</span>, BaseAddress);</span><br><span class="line">    xil_printf(<span class="string">&quot;- TX中断ID: %d\r\n&quot;</span>, TX_INTR_ID);</span><br><span class="line">    xil_printf(<span class="string">&quot;- RX中断ID: %d\r\n&quot;</span>, RX_INTR_ID);</span><br><span class="line">    xil_printf(<span class="string">&quot;- 数据包长度: %d 字节\r\n&quot;</span>, MAX_PKT_LEN);</span><br><span class="line">    xil_printf(<span class="string">&quot;- 传输次数: %d\r\n&quot;</span>, NUMBER_OF_TRANSFERS);</span><br><span class="line">    xil_printf(<span class="string">&quot;- TX缓冲区: 0x%08x\r\n&quot;</span>, TX_BUFFER_BASE);</span><br><span class="line">    xil_printf(<span class="string">&quot;- RX缓冲区: 0x%08x\r\n&quot;</span>, RX_BUFFER_BASE);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 初始化XAxiDma设备 */</span></span><br><span class="line">    CfgPtr = XAxiDma_LookupConfig(BaseAddress);</span><br><span class="line">    <span class="keyword">if</span> (!CfgPtr) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;错误：找不到DMA配置，基地址: 0x%08x\r\n&quot;</span>, BaseAddress);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    Status = XAxiDma_CfgInitialize(&amp;AxiDma, CfgPtr);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;错误：DMA初始化失败，状态: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (XAxiDma_HasSg(&amp;AxiDma)) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;错误：设备配置为SG模式，此测试需要Simple DMA模式\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;DMA初始化成功，工作在Simple DMA模式\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 复位DMA以确保干净的状态 */</span></span><br><span class="line">    xil_printf(<span class="string">&quot;复位DMA...\r\n&quot;</span>);</span><br><span class="line">    XAxiDma_Reset(&amp;AxiDma);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/* 等待复位完成 */</span></span><br><span class="line">    <span class="type">int</span> ResetTimeout = RESET_TIMEOUT_COUNTER;</span><br><span class="line">    <span class="keyword">while</span> (!XAxiDma_ResetIsDone(&amp;AxiDma) &amp;&amp; ResetTimeout &gt; <span class="number">0</span>) &#123;</span><br><span class="line">        ResetTimeout--;</span><br><span class="line">        usleep(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (ResetTimeout == <span class="number">0</span>) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;警告：DMA复位超时\r\n&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;DMA复位完成\r\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 设置中断系统 */</span></span><br><span class="line">    xil_printf(<span class="string">&quot;设置中断系统...\r\n&quot;</span>);</span><br><span class="line">    Status = SetupIntrSystem(&amp;Intc, &amp;AxiDma, TX_INTR_ID, RX_INTR_ID);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;错误：中断系统设置失败，状态码: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    xil_printf(<span class="string">&quot;中断系统设置成功\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 禁用所有中断后再设置 */</span></span><br><span class="line">    XAxiDma_IntrDisable(&amp;AxiDma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);</span><br><span class="line">    XAxiDma_IntrDisable(&amp;AxiDma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 使能所有中断 */</span></span><br><span class="line">    XAxiDma_IntrEnable(&amp;AxiDma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);</span><br><span class="line">    XAxiDma_IntrEnable(&amp;AxiDma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 初始化发送缓冲区 */</span></span><br><span class="line">    Value = TEST_START_VALUE;</span><br><span class="line">    <span class="keyword">for</span> (Index = <span class="number">0</span>; Index &lt; MAX_PKT_LEN; Index++) &#123;</span><br><span class="line">        TxBufferPtr[Index] = Value;</span><br><span class="line">        Value = (Value + <span class="number">1</span>) &amp; <span class="number">0xFF</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 刷新缓存（如果数据缓存启用） */</span></span><br><span class="line">    Xil_DCacheFlushRange((UINTPTR)TxBufferPtr, MAX_PKT_LEN);</span><br><span class="line">    Xil_DCacheFlushRange((UINTPTR)RxBufferPtr, MAX_PKT_LEN);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;缓冲区初始化完成\r\n&quot;</span>);</span><br><span class="line">    xil_printf(<span class="string">&quot;发送数据: 0x%02x, 0x%02x, 0x%02x, 0x%02x...\r\n&quot;</span>,</span><br><span class="line">              TxBufferPtr[<span class="number">0</span>], TxBufferPtr[<span class="number">1</span>], TxBufferPtr[<span class="number">2</span>], TxBufferPtr[<span class="number">3</span>]);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 打印初始DMA状态 */</span></span><br><span class="line">    xil_printf(<span class="string">&quot;\r\n初始DMA状态:\r\n&quot;</span>);</span><br><span class="line">    PrintDMAStatus(&amp;AxiDma);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 执行多次传输测试 */</span></span><br><span class="line">    <span class="keyword">for</span> (Index = <span class="number">0</span>; Index &lt; Tries; Index++) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;\r\n--- 第 %d/%d 次传输 ---\r\n&quot;</span>, Index + <span class="number">1</span>, Tries);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 初始化传输标志 */</span></span><br><span class="line">        TxDone = <span class="number">0</span>;</span><br><span class="line">        RxDone = <span class="number">0</span>;</span><br><span class="line">        Error = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 清空接收缓冲区 */</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; MAX_PKT_LEN; i++) &#123;</span><br><span class="line">            RxBufferPtr[i] = <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        Xil_DCacheFlushRange((UINTPTR)RxBufferPtr, MAX_PKT_LEN);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 启动接收传输 - 必须先启动接收 */</span></span><br><span class="line">        Status = XAxiDma_SimpleTransfer(&amp;AxiDma, (UINTPTR)RxBufferPtr,</span><br><span class="line">                                       MAX_PKT_LEN, XAXIDMA_DEVICE_TO_DMA);</span><br><span class="line">        <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">            xil_printf(<span class="string">&quot;错误：启动接收传输失败，状态: %d\r\n&quot;</span>, Status);</span><br><span class="line">            PrintDMAStatus(&amp;AxiDma);</span><br><span class="line">            <span class="keyword">goto</span> Done;</span><br><span class="line">        &#125;</span><br><span class="line">        xil_printf(<span class="string">&quot;接收传输启动成功\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 启动发送传输 */</span></span><br><span class="line">        Status = XAxiDma_SimpleTransfer(&amp;AxiDma, (UINTPTR)TxBufferPtr,</span><br><span class="line">                                       MAX_PKT_LEN, XAXIDMA_DMA_TO_DEVICE);</span><br><span class="line">        <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">            xil_printf(<span class="string">&quot;错误：启动发送传输失败，状态: %d\r\n&quot;</span>, Status);</span><br><span class="line">            PrintDMAStatus(&amp;AxiDma);</span><br><span class="line">            <span class="keyword">goto</span> Done;</span><br><span class="line">        &#125;</span><br><span class="line">        xil_printf(<span class="string">&quot;发送传输启动成功\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        xil_printf(<span class="string">&quot;等待传输完成...\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 检查是否有错误 */</span></span><br><span class="line">        Status = Xil_WaitForEventSet(POLL_TIMEOUT_COUNTER, NUMBER_OF_EVENTS, &amp;Error);</span><br><span class="line">        <span class="keyword">if</span> (Status == XST_SUCCESS &amp;&amp; Error) &#123;</span><br><span class="line">            xil_printf(<span class="string">&quot;错误：传输过程中发生错误\r\n&quot;</span>);</span><br><span class="line">            PrintDMAStatus(&amp;AxiDma);</span><br><span class="line">            <span class="keyword">goto</span> Done;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 等待发送完成 */</span></span><br><span class="line">        Status = Xil_WaitForEventSet(POLL_TIMEOUT_COUNTER, NUMBER_OF_EVENTS, &amp;TxDone);</span><br><span class="line">        <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">            xil_printf(<span class="string">&quot;错误：发送传输超时，状态: %d\r\n&quot;</span>, Status);</span><br><span class="line">            PrintDMAStatus(&amp;AxiDma);</span><br><span class="line">            <span class="keyword">goto</span> Done;</span><br><span class="line">        &#125;</span><br><span class="line">        xil_printf(<span class="string">&quot;发送传输完成\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 等待接收完成 */</span></span><br><span class="line">        Status = Xil_WaitForEventSet(POLL_TIMEOUT_COUNTER, NUMBER_OF_EVENTS, &amp;RxDone);</span><br><span class="line">        <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">            xil_printf(<span class="string">&quot;错误：接收传输超时，状态: %d\r\n&quot;</span>, Status);</span><br><span class="line">            PrintDMAStatus(&amp;AxiDma);</span><br><span class="line">            <span class="keyword">goto</span> Done;</span><br><span class="line">        &#125;</span><br><span class="line">        xil_printf(<span class="string">&quot;接收传输完成\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 打印传输完成后的DMA状态 */</span></span><br><span class="line">        PrintDMAStatus(&amp;AxiDma);</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* 检查接收的数据 */</span></span><br><span class="line">        Status = CheckData();</span><br><span class="line">        <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">            xil_printf(<span class="string">&quot;错误：第 %d 次传输的数据校验失败\r\n&quot;</span>, Index + <span class="number">1</span>);</span><br><span class="line">            <span class="keyword">goto</span> Done;</span><br><span class="line">        &#125;</span><br><span class="line">        xil_printf(<span class="string">&quot;第 %d 次传输数据校验成功！\r\n&quot;</span>, Index + <span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;\r\n所有 %d 次传输测试成功！\r\n&quot;</span>, Tries);</span><br><span class="line"></span><br><span class="line">Done:</span><br><span class="line">    <span class="comment">/* 禁用TX和RX中断 */</span></span><br><span class="line">    DisableIntrSystem(&amp;Intc, TX_INTR_ID, RX_INTR_ID);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* 检查DMA传输后的数据缓冲区</span></span><br><span class="line"><span class="comment">******************************************************************************/</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">CheckData</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    u8 *RxPacket;</span><br><span class="line">    <span class="type">int</span> Index = <span class="number">0</span>;</span><br><span class="line">    u8 Value;</span><br><span class="line"></span><br><span class="line">    RxPacket = (u8 *)RX_BUFFER_BASE;</span><br><span class="line">    Value = TEST_START_VALUE;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 在接收数据之前失效目标缓冲区，以防数据缓存启用 */</span></span><br><span class="line">    Xil_DCacheInvalidateRange((UINTPTR)RxPacket, MAX_PKT_LEN);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (Index = <span class="number">0</span>; Index &lt; MAX_PKT_LEN; Index++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (RxPacket[Index] != Value) &#123;</span><br><span class="line">            xil_printf(<span class="string">&quot;数据错误 位置 %d: 实际 0x%02x / 期望 0x%02x\r\n&quot;</span>,</span><br><span class="line">                      Index, (<span class="type">unsigned</span> <span class="type">int</span>)RxPacket[Index],</span><br><span class="line">                      (<span class="type">unsigned</span> <span class="type">int</span>)Value);</span><br><span class="line">            </span><br><span class="line">            <span class="comment">/* 打印更多调试信息 */</span></span><br><span class="line">            xil_printf(<span class="string">&quot;接收到的前8个字节: &quot;</span>);</span><br><span class="line">            <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; <span class="number">8</span> &amp;&amp; i &lt; MAX_PKT_LEN; i++) &#123;</span><br><span class="line">                xil_printf(<span class="string">&quot;0x%02x &quot;</span>, RxPacket[i]);</span><br><span class="line">            &#125;</span><br><span class="line">            xil_printf(<span class="string">&quot;\r\n&quot;</span>);</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">        &#125;</span><br><span class="line">        Value = (Value + <span class="number">1</span>) &amp; <span class="number">0xFF</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 打印DMA状态寄存器信息</span></span><br><span class="line"><span class="comment"> ******************************************************************************/</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">PrintDMAStatus</span><span class="params">(XAxiDma *AxiDmaPtr)</span></span><br><span class="line">&#123;</span><br><span class="line">    u32 TxStatus, RxStatus;</span><br><span class="line">    </span><br><span class="line">    TxStatus = XAxiDma_ReadReg(AxiDmaPtr-&gt;RegBase, XAXIDMA_TX_OFFSET + XAXIDMA_SR_OFFSET);</span><br><span class="line">    RxStatus = XAxiDma_ReadReg(AxiDmaPtr-&gt;RegBase, XAXIDMA_RX_OFFSET + XAXIDMA_SR_OFFSET);</span><br><span class="line">    </span><br><span class="line">    xil_printf(<span class="string">&quot;  TX状态: 0x%08x &quot;</span>, TxStatus);</span><br><span class="line">    <span class="keyword">if</span> (TxStatus &amp; <span class="number">0x1</span>) xil_printf(<span class="string">&quot;[HALTED] &quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (TxStatus &amp; <span class="number">0x2</span>) xil_printf(<span class="string">&quot;[IDLE] &quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (TxStatus &amp; <span class="number">0x4000</span>) xil_printf(<span class="string">&quot;[ERR_IRQ] &quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (TxStatus &amp; <span class="number">0x1000</span>) xil_printf(<span class="string">&quot;[IOC_IRQ] &quot;</span>);</span><br><span class="line">    xil_printf(<span class="string">&quot;忙状态: %s\r\n&quot;</span>, XAxiDma_Busy(AxiDmaPtr, XAXIDMA_DMA_TO_DEVICE) ? <span class="string">&quot;忙&quot;</span> : <span class="string">&quot;空闲&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    xil_printf(<span class="string">&quot;  RX状态: 0x%08x &quot;</span>, RxStatus);</span><br><span class="line">    <span class="keyword">if</span> (RxStatus &amp; <span class="number">0x1</span>) xil_printf(<span class="string">&quot;[HALTED] &quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (RxStatus &amp; <span class="number">0x2</span>) xil_printf(<span class="string">&quot;[IDLE] &quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (RxStatus &amp; <span class="number">0x4000</span>) xil_printf(<span class="string">&quot;[ERR_IRQ] &quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (RxStatus &amp; <span class="number">0x1000</span>) xil_printf(<span class="string">&quot;[IOC_IRQ] &quot;</span>);</span><br><span class="line">    xil_printf(<span class="string">&quot;忙状态: %s\r\n&quot;</span>, XAxiDma_Busy(AxiDmaPtr, XAXIDMA_DEVICE_TO_DMA) ? <span class="string">&quot;忙&quot;</span> : <span class="string">&quot;空闲&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * DMA TX中断处理函数</span></span><br><span class="line"><span class="comment"> ******************************************************************************/</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">TxIntrHandler</span><span class="params">(<span class="type">void</span> *Callback)</span></span><br><span class="line">&#123;</span><br><span class="line">    u32 IrqStatus;</span><br><span class="line">    <span class="type">int</span> TimeOut;</span><br><span class="line">    XAxiDma *AxiDmaInst = (XAxiDma *)Callback;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 读取挂起的中断 */</span></span><br><span class="line">    IrqStatus = XAxiDma_IntrGetIrq(AxiDmaInst, XAXIDMA_DMA_TO_DEVICE);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 确认挂起的中断 */</span></span><br><span class="line">    XAxiDma_IntrAckIrq(AxiDmaInst, IrqStatus, XAXIDMA_DMA_TO_DEVICE);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;TX中断: IrqStatus=0x%08x\r\n&quot;</span>, IrqStatus);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 如果没有中断被断言，我们不做任何事情 */</span></span><br><span class="line">    <span class="keyword">if</span> (!(IrqStatus &amp; XAXIDMA_IRQ_ALL_MASK)) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 如果错误中断被断言，设置错误标志，重置硬件以从错误中恢复 */</span></span><br><span class="line">    <span class="keyword">if</span> ((IrqStatus &amp; XAXIDMA_IRQ_ERROR_MASK)) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;TX中断: 检测到错误，错误掩码=0x%08x\r\n&quot;</span>, IrqStatus &amp; XAXIDMA_IRQ_ERROR_MASK);</span><br><span class="line">        Error = <span class="number">1</span>;</span><br><span class="line">        XAxiDma_Reset(AxiDmaInst);</span><br><span class="line"></span><br><span class="line">        TimeOut = RESET_TIMEOUT_COUNTER;</span><br><span class="line">        <span class="keyword">while</span> (TimeOut) &#123;</span><br><span class="line">            <span class="keyword">if</span> (XAxiDma_ResetIsDone(AxiDmaInst)) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            TimeOut -= <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 如果完成中断被断言，则设置TxDone标志 */</span></span><br><span class="line">    <span class="keyword">if</span> ((IrqStatus &amp; XAXIDMA_IRQ_IOC_MASK)) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;TX中断: 传输完成\r\n&quot;</span>);</span><br><span class="line">        TxDone = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * DMA RX中断处理函数</span></span><br><span class="line"><span class="comment"> ******************************************************************************/</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">RxIntrHandler</span><span class="params">(<span class="type">void</span> *Callback)</span></span><br><span class="line">&#123;</span><br><span class="line">    u32 IrqStatus;</span><br><span class="line">    <span class="type">int</span> TimeOut;</span><br><span class="line">    XAxiDma *AxiDmaInst = (XAxiDma *)Callback;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 读取挂起的中断 */</span></span><br><span class="line">    IrqStatus = XAxiDma_IntrGetIrq(AxiDmaInst, XAXIDMA_DEVICE_TO_DMA);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 确认挂起的中断 */</span></span><br><span class="line">    XAxiDma_IntrAckIrq(AxiDmaInst, IrqStatus, XAXIDMA_DEVICE_TO_DMA);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;RX中断: IrqStatus=0x%08x\r\n&quot;</span>, IrqStatus);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 如果没有中断被断言，我们不做任何事情 */</span></span><br><span class="line">    <span class="keyword">if</span> (!(IrqStatus &amp; XAXIDMA_IRQ_ALL_MASK)) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 如果错误中断被断言，设置错误标志，重置硬件以从错误中恢复 */</span></span><br><span class="line">    <span class="keyword">if</span> ((IrqStatus &amp; XAXIDMA_IRQ_ERROR_MASK)) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;RX中断: 检测到错误，错误掩码=0x%08x\r\n&quot;</span>, IrqStatus &amp; XAXIDMA_IRQ_ERROR_MASK);</span><br><span class="line">        Error = <span class="number">1</span>;</span><br><span class="line">        XAxiDma_Reset(AxiDmaInst);</span><br><span class="line"></span><br><span class="line">        TimeOut = RESET_TIMEOUT_COUNTER;</span><br><span class="line">        <span class="keyword">while</span> (TimeOut) &#123;</span><br><span class="line">            <span class="keyword">if</span> (XAxiDma_ResetIsDone(AxiDmaInst)) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            TimeOut -= <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 如果完成中断被断言，则设置RxDone标志 */</span></span><br><span class="line">    <span class="keyword">if</span> ((IrqStatus &amp; XAXIDMA_IRQ_IOC_MASK)) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;RX中断: 传输完成\r\n&quot;</span>);</span><br><span class="line">        RxDone = <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 设置中断系统</span></span><br><span class="line"><span class="comment"> ******************************************************************************/</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">SetupIntrSystem</span><span class="params">(INTC *IntcInstancePtr,</span></span><br><span class="line"><span class="params">                          XAxiDma *AxiDmaPtr, u16 TxIntrId, u16 RxIntrId)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> Status;</span><br><span class="line">    XScuGic_Config *IntcConfig;</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;  正在查找中断控制器配置...\r\n&quot;</span>);</span><br><span class="line">    <span class="comment">/* 初始化中断控制器驱动 */</span></span><br><span class="line">    IntcConfig = XScuGic_LookupConfig(INTC_DEVICE_ID);</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">NULL</span> == IntcConfig) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;  错误：找不到中断控制器配置\r\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    xil_printf(<span class="string">&quot;  中断控制器配置查找成功\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;  正在初始化中断控制器...\r\n&quot;</span>);</span><br><span class="line">    Status = XScuGic_CfgInitialize(IntcInstancePtr, IntcConfig,</span><br><span class="line">                                  IntcConfig-&gt;CpuBaseAddress);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;  错误：中断控制器初始化失败，状态: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> XST_FAILURE;</span><br><span class="line">    &#125;</span><br><span class="line">    xil_printf(<span class="string">&quot;  中断控制器初始化成功\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;  正在设置中断优先级和触发类型...\r\n&quot;</span>);</span><br><span class="line">    <span class="comment">/* 设置中断优先级和触发类型 */</span></span><br><span class="line">    XScuGic_SetPriorityTriggerType(IntcInstancePtr, TxIntrId, <span class="number">0xA0</span>, <span class="number">0x3</span>);</span><br><span class="line">    XScuGic_SetPriorityTriggerType(IntcInstancePtr, RxIntrId, <span class="number">0xA0</span>, <span class="number">0x3</span>);</span><br><span class="line">    xil_printf(<span class="string">&quot;  中断优先级设置完成\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;  正在连接TX中断处理程序...\r\n&quot;</span>);</span><br><span class="line">    <span class="comment">/* 连接设备驱动程序处理程序 */</span></span><br><span class="line">    Status = XScuGic_Connect(IntcInstancePtr, TxIntrId,</span><br><span class="line">                            (Xil_InterruptHandler)TxIntrHandler,</span><br><span class="line">                            AxiDmaPtr);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;  错误：TX中断连接失败，状态: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> Status;</span><br><span class="line">    &#125;</span><br><span class="line">    xil_printf(<span class="string">&quot;  TX中断处理程序连接成功\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;  正在连接RX中断处理程序...\r\n&quot;</span>);</span><br><span class="line">    Status = XScuGic_Connect(IntcInstancePtr, RxIntrId,</span><br><span class="line">                            (Xil_InterruptHandler)RxIntrHandler,</span><br><span class="line">                            AxiDmaPtr);</span><br><span class="line">    <span class="keyword">if</span> (Status != XST_SUCCESS) &#123;</span><br><span class="line">        xil_printf(<span class="string">&quot;  错误：RX中断连接失败，状态: %d\r\n&quot;</span>, Status);</span><br><span class="line">        <span class="keyword">return</span> Status;</span><br><span class="line">    &#125;</span><br><span class="line">    xil_printf(<span class="string">&quot;  RX中断处理程序连接成功\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;  正在使能中断...\r\n&quot;</span>);</span><br><span class="line">    <span class="comment">/* 使能中断 */</span></span><br><span class="line">    XScuGic_Enable(IntcInstancePtr, TxIntrId);</span><br><span class="line">    XScuGic_Enable(IntcInstancePtr, RxIntrId);</span><br><span class="line">    xil_printf(<span class="string">&quot;  中断使能完成\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    xil_printf(<span class="string">&quot;  正在设置异常处理...\r\n&quot;</span>);</span><br><span class="line">    <span class="comment">/* 从硬件使能中断 */</span></span><br><span class="line">    Xil_ExceptionInit();</span><br><span class="line">    Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,</span><br><span class="line">                                (Xil_ExceptionHandler)INTC_HANDLER,</span><br><span class="line">                                (<span class="type">void</span> *)IntcInstancePtr);</span><br><span class="line">    Xil_ExceptionEnable();</span><br><span class="line">    xil_printf(<span class="string">&quot;  异常处理设置完成\r\n&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> XST_SUCCESS;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*****************************************************************************/</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 禁用DMA引擎的中断</span></span><br><span class="line"><span class="comment"> ******************************************************************************/</span></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">DisableIntrSystem</span><span class="params">(INTC *IntcInstancePtr,</span></span><br><span class="line"><span class="params">                             u16 TxIntrId, u16 RxIntrId)</span></span><br><span class="line">&#123;</span><br><span class="line">    XScuGic_Disconnect(IntcInstancePtr, TxIntrId);</span><br><span class="line">    XScuGic_Disconnect(IntcInstancePtr, RxIntrId);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="验证流程与预期结果"><a href="#验证流程与预期结果" class="headerlink" title="验证流程与预期结果"></a>验证流程与预期结果</h3><ol>
+<li><strong>更新平台与构建</strong>: 在Vitis中更新Platform的硬件规格为最新的<code>.xsa</code>文件，并重建项目。</li>
+<li><strong>配置运行环境</strong>: 在<code>Run/Debug Configurations</code>中，<strong>必须确保<code>Program Device</code>被勾选</strong>，以保证最新的比特流被下载到PL端。</li>
+<li><strong>执行与观察</strong>: 程序运行后，串口终端应按顺序、逐一打印出每次传输的详细日志。</li>
+</ol>
+<p><strong>预期最终结果:</strong><br>串口终端将清晰地展示5次完整的传输、握手、数据校验过程，最终打印出成功信息：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">--- 第 5/5 次传输 ---</span><br><span class="line">接收传输启动成功</span><br><span class="line">发送传输启动成功</span><br><span class="line">等待传输完成...</span><br><span class="line">TX中断: IrqStatus=0x00001000</span><br><span class="line">TX中断: 传输完成</span><br><span class="line">发送传输完成</span><br><span class="line">RX中断: IrqStatus=0x00001000</span><br><span class="line">RX中断: 传输完成</span><br><span class="line">接收传输完成</span><br><span class="line">  TX状态: 0x00001002 [IDLE] [IOC_IRQ] 忙状态: 空闲</span><br><span class="line">  RX状态: 0x00001002 [IDLE] [IOC_IRQ] 忙状态: 空闲</span><br><span class="line">第 5 次传输数据校验成功！</span><br><span class="line"></span><br><span class="line">所有 5 次传输测试成功！</span><br><span class="line">成功完成AXI Stream回环测试</span><br><span class="line">=== 测试程序结束 ===</span><br></pre></td></tr></table></figure>
+
+<p><strong>最终结论:</strong> <code>所有 5 次传输测试成功！</code>的打印结果，标志着我们成功构建并验证了一个高性能、高鲁棒性的 AXI-Stream 数据通路。这份经过专业级裸机程序严格验证的 <code>.xsa</code> 硬件平台，现在可以作为一份100%可靠的、高质量的蓝图，交付给 PetaLinux 进行后续的驱动开发和应用层实现。</p>
+<h1 id="附录A：常见问题与解决方案"><a href="#附录A：常见问题与解决方案" class="headerlink" title="附录A：常见问题与解决方案"></a>附录A：常见问题与解决方案</h1><h2 id="工具版本兼容性问题"><a href="#工具版本兼容性问题" class="headerlink" title="工具版本兼容性问题"></a>工具版本兼容性问题</h2><p><strong>问题:</strong> Vitis 2023.2 中某些传统的 BSP 函数被废弃 <strong>解决方案:</strong></p>
+<ul>
+<li><p>避免使用 <code>platform.h</code> 和 <code>init_platform()</code>, Vitis BSP (v9.0) 已废弃 <code>platform.h</code> 及 <code>init_platform()</code></p>
+</li>
+<li><p>直接使用 <code>xil_printf.h</code> 中的函数</p>
+</li>
+<li><p>参考官方驱动源码确认正确的API</p>
+</li>
+<li><p><strong>Vitis 2023.2引入了SDT流程</strong>，API发生重大变化</p>
+<ul>
+<li><p><strong>中断ID不再从xparameters.h获取</strong>，需要从xparameters_ps.h获取</p>
+</li>
+<li><p><strong>初始化方式改为基于BASEADDR</strong>，不再使用DEVICE_ID</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="BRAM-地址宏缺失问题"><a href="#BRAM-地址宏缺失问题" class="headerlink" title="BRAM 地址宏缺失问题"></a>BRAM 地址宏缺失问题</h2><p><strong>问题:</strong> Vitis BSP 不自动为 BRAM Controller 生成地址宏 <strong>解决方案:</strong></p>
+<ul>
+<li>根据 Address Editor 中的配置手动定义地址</li>
+<li>交叉验证 Device Tree 中的地址信息</li>
+<li>在代码中使用明确的数值地址</li>
+</ul>
+<h2 id="中断配置问题"><a href="#中断配置问题" class="headerlink" title="中断配置问题"></a>中断配置问题</h2><p><strong>问题:</strong> 中断无法正常触发或处理 <strong>解决方案:</strong></p>
+<ul>
+<li>确保在 Vivado 中正确使能了 IRQ_F2P 端口</li>
+<li>检查中断连接链路的完整性</li>
+<li>使用官方推荐的中断处理模式</li>
+<li>正确配置 GIC 和异常处理</li>
+</ul>
+<h2 id="缓存一致性问题"><a href="#缓存一致性问题" class="headerlink" title="缓存一致性问题"></a>缓存一致性问题</h2><p><strong>问题:</strong> DMA 传输后数据不一致 <strong>解决方案:</strong></p>
+<ul>
+<li>在 DMA 传输前使用 <code>Xil_DCacheFlushRange()</code></li>
+<li>在读取 DMA 结果前使用 <code>Xil_DCacheInvalidateRange()</code></li>
+<li>确保地址对齐要求</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Zzkuang
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="http://zhangkuang.asia/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/" title="Zynq-7000 完整硬件平台构建与验证权威指南">http://zhangkuang.asia/2025/07/21/Zynq-7000-完整硬件平台构建与验证权威指南/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Vivado/" rel="tag"># Vivado</a>
+              <a href="/tags/Vitis/" rel="tag"># Vitis</a>
+              <a href="/tags/Petalinux/" rel="tag"># Petalinux</a>
+              <a href="/tags/AXI-DMA/" rel="tag"># AXI-DMA</a>
+              <a href="/tags/BRAM/" rel="tag"># BRAM</a>
+              <a href="/tags/AXI-STREAM/" rel="tag"># AXI STREAM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/07/20/AI%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8Zynq/" rel="prev" title="AI快速入门Zynq">
+                  <i class="fa fa-angle-left"></i> AI快速入门Zynq
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/07/22/%E9%85%8D%E7%BD%AE-Windows-CLion-%E4%B8%BA-PetaLinux-%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%BF%9B%E8%A1%8C%E8%BF%9C%E7%A8%8B%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91/" rel="next" title="配置 Windows CLion 为 PetaLinux 虚拟机进行远程交叉编译">
+                  配置 Windows CLion 为 PetaLinux 虚拟机进行远程交叉编译 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kuang</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '64px',
+  right: 'unset',
+  left: '32px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+</body>
+</html>

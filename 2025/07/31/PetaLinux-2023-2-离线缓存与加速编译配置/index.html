@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.css" integrity="sha256-uTcjoMD6rPt4OyV3Rs02Slxl0BJGMNVKAm/1eYPt2go=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhangkuang.asia","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.23.2","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="前言 本文目标:为 PetaLinux 开发者提供一个标准化的流程，通过使用 AMD 官方提供的离线缓存包，彻底解决因网络问题导致的编译失败，并极大地加速后续项目的构建速度。我们将配置两种核心缓存：  sstate-cache (编译状态缓存): 存储已编译好的软件组件，避免重复编译  downloads (下载镜像): 存储所有需要的源代码压缩包，避免重复下载">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PetaLinux 2023.2 离线缓存与加速编译配置">
+<meta property="og:url" content="http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/index.html">
+<meta property="og:site_name" content="Kuang&#39;s Tech Log">
+<meta property="og:description" content="前言 本文目标:为 PetaLinux 开发者提供一个标准化的流程，通过使用 AMD 官方提供的离线缓存包，彻底解决因网络问题导致的编译失败，并极大地加速后续项目的构建速度。我们将配置两种核心缓存：  sstate-cache (编译状态缓存): 存储已编译好的软件组件，避免重复编译  downloads (下载镜像): 存储所有需要的源代码压缩包，避免重复下载">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/image-20250725203102550.png">
+<meta property="og:image" content="http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/image-20250725203122383.png">
+<meta property="article:published_time" content="2025-07-31T11:56:27.000Z">
+<meta property="article:modified_time" content="2025-08-03T15:27:45.000Z">
+<meta property="article:author" content="Zzkuang">
+<meta property="article:tag" content="Zynq">
+<meta property="article:tag" content="Petalinux">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/image-20250725203102550.png">
+
+
+<link rel="canonical" href="http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/","path":"2025/07/31/PetaLinux-2023-2-离线缓存与加速编译配置/","title":"PetaLinux 2023.2 离线缓存与加速编译配置"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PetaLinux 2023.2 离线缓存与加速编译配置 | Kuang's Tech Log</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.umd.js" integrity="sha256-UiSieVaV/DXce2LW7QH+o77w+AIoAvSCPBkezriZ2DQ=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kuang's Tech Log</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">任何资源链接问题或者技术问题欢迎邮件联系讨论</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E6%8F%90%E6%9D%A1%E4%BB%B6"><span class="nav-number">2.</span> <span class="nav-text">前提条件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E5%88%9B%E5%BB%BA%E5%B9%B6%E5%87%86%E5%A4%87%E7%BC%93%E5%AD%98%E7%9B%AE%E5%BD%95"><span class="nav-number">3.</span> <span class="nav-text">第一步：创建并准备缓存目录</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E9%A1%B6%E5%B1%82%E5%8F%8A%E5%AD%90%E7%9B%AE%E5%BD%95"><span class="nav-number">3.1.</span> <span class="nav-text">创建顶层及子目录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%86%E6%96%B0%E5%88%9B%E5%BB%BA%E7%9B%AE%E5%BD%95%E7%9A%84%E6%89%80%E6%9C%89%E6%9D%83%E8%B5%8B%E4%BA%88%E5%BD%93%E5%89%8D%E7%94%A8%E6%88%B7"><span class="nav-number">3.2.</span> <span class="nav-text">将新创建目录的所有权赋予当前用户</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E8%A7%A3%E5%8E%8B%E7%BC%93%E5%AD%98%E6%96%87%E4%BB%B6%E5%88%B0%E6%8C%87%E5%AE%9A%E7%9B%AE%E5%BD%95"><span class="nav-number">4.</span> <span class="nav-text">第二步：解压缓存文件到指定目录</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E9%85%8D%E7%BD%AE-PetaLinux-%E9%A1%B9%E7%9B%AE%E4%BB%A5%E4%BD%BF%E7%94%A8%E6%9C%AC%E5%9C%B0%E7%BC%93%E5%AD%98"><span class="nav-number">5.</span> <span class="nav-text">第三步：配置 PetaLinux 项目以使用本地缓存</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E6%AD%A5%E9%AA%A4"><span class="nav-number">5.1.</span> <span class="nav-text">配置步骤</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E9%AA%8C%E8%AF%81%E9%85%8D%E7%BD%AE"><span class="nav-number">6.</span> <span class="nav-text">第四步：验证配置</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zzkuang"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Zzkuang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/zzkuang" title="Gitee → https:&#x2F;&#x2F;gitee.com&#x2F;zzkuang" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>Gitee</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zzkuang0516@163.com" title="E-Mail → mailto:zzkuang0516@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Zzkuang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PetaLinux 2023.2 离线缓存与加速编译配置 | Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PetaLinux 2023.2 离线缓存与加速编译配置
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-07-31 19:56:27" itemprop="dateCreated datePublished" datetime="2025-07-31T19:56:27+08:00">2025-07-31</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-08-03 23:27:45" itemprop="dateModified" datetime="2025-08-03T23:27:45+08:00">2025-08-03</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><ul>
+<li><p><strong>本文目标</strong>:为 PetaLinux 开发者提供一个标准化的流程，通过使用 AMD 官方提供的离线缓存包，彻底解决因网络问题导致的编译失败，并极大地加速后续项目的构建速度。我们将配置两种核心缓存：</p>
+<ul>
+<li><p><strong>sstate-cache (编译状态缓存)</strong>: 存储已编译好的软件组件，避免重复编译</p>
+</li>
+<li><p><strong>downloads (下载镜像)</strong>: 存储所有需要的源代码压缩包，避免重复下载</p>
+</li>
+</ul>
+</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="前提条件"><a href="#前提条件" class="headerlink" title="前提条件"></a>前提条件</h1><p>你已经从 AMD 官网下载了以下两个针对你目标架构的缓存文件,下载链接为<a target="_blank" rel="noopener" href="https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools/archive.html">https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools/archive.html</a></p>
+<ul>
+<li>arm sstate-cache: 用于 Zynq-7000 系列 (32位 ARM)<ul>
+<li>文件名示例: <code>sstate_arm_2023.2_10121051.tar.gz</code></li>
+</ul>
+</li>
+<li>Downloads: 包含所有架构通用的源代码<ul>
+<li>文件名示例: <code>downloads_2023.2_10121051.tar.gz</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="第一步：创建并准备缓存目录"><a href="#第一步：创建并准备缓存目录" class="headerlink" title="第一步：创建并准备缓存目录"></a>第一步：创建并准备缓存目录</h1><p>为了让缓存能够被所有 PetaLinux 项目共享，我们将其存放在一个全局的、统一的系统路径下（例如 <code>/opt/petalinux/</code>）。</p>
+<h2 id="创建顶层及子目录"><a href="#创建顶层及子目录" class="headerlink" title="创建顶层及子目录"></a>创建顶层及子目录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /opt/petalinux/2023.2/sstate-cache</span><br><span class="line"><span class="built_in">sudo</span> <span class="built_in">mkdir</span> -p /opt/petalinux/2023.2/downloads</span><br></pre></td></tr></table></figure>
+
+<h2 id="将新创建目录的所有权赋予当前用户"><a href="#将新创建目录的所有权赋予当前用户" class="headerlink" title="将新创建目录的所有权赋予当前用户"></a>将新创建目录的所有权赋予当前用户</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> <span class="built_in">chown</span> -R <span class="variable">$USER</span>:<span class="variable">$USER</span> /opt/petalinux/</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意</strong>: <code>$USER</code> 是一个系统变量，会自动替换为你的用户名（例如: kuang）</p>
+</blockquote>
+<h1 id="第二步：解压缓存文件到指定目录"><a href="#第二步：解压缓存文件到指定目录" class="headerlink" title="第二步：解压缓存文件到指定目录"></a>第二步：解压缓存文件到指定目录</h1><p>接下来，我们将下载好的缓存压缩包解压到刚刚创建好的对应目录中。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 假设你的下载文件存放在 ~/workspace/ 目录</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 解压 sstate-cache 缓存包到 sstate-cache 目录</span></span><br><span class="line"><span class="comment">#    请将文件名替换为你实际下载的文件名</span></span><br><span class="line">tar -xzvf ~/workspace/sstate_arm_2023.2_10121051.tar.gz -C /opt/petalinux/2023.2/sstate-cache/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 解压 downloads 源码包到 downloads 目录</span></span><br><span class="line"><span class="comment">#    请将文件名替换为你实际下载的文件名</span></span><br><span class="line">tar -xzvf ~/workspace/downloads_2023.2_10121051.tar.gz -C /opt/petalinux/2023.2/downloads/</span><br></pre></td></tr></table></figure>
+
+<img src="/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/image-20250725203102550.png" class="" title="Downloads目录下的内容">
+
+<img src="/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/image-20250725203122383.png" class="" title="sstate目录下的内容">
+
+<p>完成这一步后，你的全局缓存已经准备就绪。</p>
+<h1 id="第三步：配置-PetaLinux-项目以使用本地缓存"><a href="#第三步：配置-PetaLinux-项目以使用本地缓存" class="headerlink" title="第三步：配置 PetaLinux 项目以使用本地缓存"></a>第三步：配置 PetaLinux 项目以使用本地缓存</h1><p>这是最关键的一步。你需要在你的每一个 PetaLinux 项目中修改配置文件，让构建系统（Yocto）明确地知道去哪里寻找和使用这些本地缓存。</p>
+<h2 id="配置步骤"><a href="#配置步骤" class="headerlink" title="配置步骤"></a>配置步骤</h2><ol>
+<li><p><strong>修改项目配置</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">petalinux-config</span><br></pre></td></tr></table></figure>
+
+<p>在配置界面中：</p>
+<ul>
+<li><strong>取消勾选</strong> <code>Yocto Settings → Enable Network sstate feeds</code></li>
+<li><strong>勾选</strong> <code>Yocto Settings → Enable BB No Network</code></li>
+<li>配置Add pre-mirror url为<code>file:///opt/petalinux/2023.2/downloads/downloads/</code></li>
+<li>配置Local sstate feeds settings为<code>/opt/petalinux/2023.2/sstate-cache/arm</code></li>
+</ul>
+</li>
+<li><p>使用 <code>cd</code> 命令进入你的 PetaLinux 项目根目录</p>
+</li>
+<li><p>打开 <code>project-spec/meta-user/conf/petalinuxbsp.conf</code> 文件,在文件的最上方，添加以下内容：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">User Configuration</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">OE_TERMINAL = <span class="string">&quot;tmux&quot;</span></span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置下载和缓存目录</span></span><br><span class="line">DL_DIR = &quot;/opt/petalinux/2023.2/downloads/downloads&quot;</span><br><span class="line">SSTATE_DIR = &quot;/opt/petalinux/2023.2/sstate-cache/arm&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用新语法的 PREMIRRORS 配置</span></span><br><span class="line">PREMIRRORS:prepend = &quot; \</span><br><span class="line">git://.*/.* file:///opt/petalinux/2023.2/downloads/downloads/ \n \</span><br><span class="line">gitsm://.*/.* file:///opt/petalinux/2023.2/downloads/downloads/ \n \</span><br><span class="line">ftp://.*/.* file:///opt/petalinux/2023.2/downloads/downloads/ \n \</span><br><span class="line">http://.*/.* file:///opt/petalinux/2023.2/downloads/downloads/ \n \</span><br><span class="line">https://.*/.* file:///opt/petalinux/2023.2/downloads/downloads/ \n \</span><br><span class="line">&quot;</span><br></pre></td></tr></table></figure></li>
+<li><p>对于2023.2版本,还需要在downloads&#x2F;downloads文件夹下补充两个文件<code>git2_github.com.Xilinx.linux-xlnx.git.tar.gz</code>,<code>git2_git.yoctoproject.org.yocto-kernel-cache.tar.gz</code>,<code>git2_github.com.Xilinx.device-tree-xlnx.git.tar.gz</code>和<code>git2_github.com.Xilinx.u-boot-xlnx.git.tar.gz</code></p>
+<ul>
+<li>补充文件可以在<a target="_blank" rel="noopener" href="http://petalinux.xilinx.com/sswreleases/rel-v2023/downloads/%E6%89%BE%E5%88%B0">http://petalinux.xilinx.com/sswreleases/rel-v2023/downloads/找到</a></li>
+</ul>
+</li>
+</ol>
+<h1 id="第四步：验证配置"><a href="#第四步：验证配置" class="headerlink" title="第四步：验证配置"></a>第四步：验证配置</h1><p>保存 <code>petalinuxbsp.conf</code> 文件后，即可开始构建项目来验证配置是否生效。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 执行构建命令</span></span><br><span class="line">petalinux-build</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Zzkuang
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/" title="PetaLinux 2023.2 离线缓存与加速编译配置">http://zhangkuang.asia/2025/07/31/PetaLinux-2023-2-离线缓存与加速编译配置/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Zynq/" rel="tag"># Zynq</a>
+              <a href="/tags/Petalinux/" rel="tag"># Petalinux</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/07/30/163%E9%82%AE%E7%AE%B1%E9%82%AE%E4%BB%B6%E9%80%9A%E7%9F%A5%E5%8A%9F%E8%83%BD%E9%85%8D%E7%BD%AE/" rel="prev" title="163邮箱邮件通知功能配置">
+                  <i class="fa fa-angle-left"></i> 163邮箱邮件通知功能配置
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/08/03/Petalinux%E7%8E%AF%E5%A2%83%E4%B8%8BBRAM%E9%80%9A%E8%AE%AF%E6%8C%87%E5%8D%97/" rel="next" title="Petalinux环境下BRAM通讯指南">
+                  Petalinux环境下BRAM通讯指南 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kuang</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '64px',
+  right: 'unset',
+  left: '32px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+</body>
+</html>

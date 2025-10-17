@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.css" integrity="sha256-uTcjoMD6rPt4OyV3Rs02Slxl0BJGMNVKAm/1eYPt2go=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhangkuang.asia","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.23.2","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="前言 本文目标: 为处于任何网络环境下的ARM工控机,搭建一套稳定、安全、可扩展的远程SSH运维通道.解决设备位于4G网络、NAT内网等无法直接访问的痛点,实现对多台设备的统一、便捷管理.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道">
+<meta property="og:url" content="http://zhangkuang.asia/2025/08/24/FRP%E5%AE%9E%E6%88%98-%E4%B8%BAARM%E5%B7%A5%E6%8E%A7%E6%9C%BA%E6%90%AD%E5%BB%BA%E7%A8%B3%E5%AE%9A-%E5%AE%89%E5%85%A8%E7%9A%844G%E8%BF%9C%E7%A8%8BSSH%E8%BF%90%E7%BB%B4%E9%80%9A%E9%81%93/index.html">
+<meta property="og:site_name" content="Kuang&#39;s Tech Log">
+<meta property="og:description" content="前言 本文目标: 为处于任何网络环境下的ARM工控机,搭建一套稳定、安全、可扩展的远程SSH运维通道.解决设备位于4G网络、NAT内网等无法直接访问的痛点,实现对多台设备的统一、便捷管理.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-08-24T10:00:59.000Z">
+<meta property="article:modified_time" content="2025-08-24T10:14:42.907Z">
+<meta property="article:author" content="Zzkuang">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="FRP">
+<meta property="article:tag" content="内外穿透">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://zhangkuang.asia/2025/08/24/FRP%E5%AE%9E%E6%88%98-%E4%B8%BAARM%E5%B7%A5%E6%8E%A7%E6%9C%BA%E6%90%AD%E5%BB%BA%E7%A8%B3%E5%AE%9A-%E5%AE%89%E5%85%A8%E7%9A%844G%E8%BF%9C%E7%A8%8BSSH%E8%BF%90%E7%BB%B4%E9%80%9A%E9%81%93/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://zhangkuang.asia/2025/08/24/FRP%E5%AE%9E%E6%88%98-%E4%B8%BAARM%E5%B7%A5%E6%8E%A7%E6%9C%BA%E6%90%AD%E5%BB%BA%E7%A8%B3%E5%AE%9A-%E5%AE%89%E5%85%A8%E7%9A%844G%E8%BF%9C%E7%A8%8BSSH%E8%BF%90%E7%BB%B4%E9%80%9A%E9%81%93/","path":"2025/08/24/FRP实战-为ARM工控机搭建稳定-安全的4G远程SSH运维通道/","title":"FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道 | Kuang's Tech Log</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.umd.js" integrity="sha256-UiSieVaV/DXce2LW7QH+o77w+AIoAvSCPBkezriZ2DQ=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kuang's Tech Log</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">任何资源链接问题或者技术问题欢迎邮件联系讨论</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%91%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%AB%AF-frps-%E9%83%A8%E7%BD%B2-%E6%90%AD%E5%BB%BA%E6%88%91%E4%BB%AC%E7%9A%84%E2%80%9C%E4%B8%AD%E7%BB%A7%E6%80%BB%E6%9C%BA%E2%80%9D"><span class="nav-number">2.</span> <span class="nav-text">云服务器端(frps)部署 - 搭建我们的“中继总机”</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C-%E4%B8%8B%E8%BD%BD%E5%B9%B6%E8%A7%A3%E5%8E%8BFRP"><span class="nav-number">2.1.</span> <span class="nav-text">准备工作:下载并解压FRP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE-%E7%BC%96%E5%86%99-frps-ini"><span class="nav-number">2.2.</span> <span class="nav-text">核心配置:编写 frps.ini</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E5%85%A8%E5%8A%A0%E5%9B%BA-%E9%85%8D%E7%BD%AE%E9%98%B2%E7%81%AB%E5%A2%99"><span class="nav-number">2.3.</span> <span class="nav-text">安全加固:配置防火墙</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C-%E9%85%8D%E7%BD%AESystemd%E5%AE%88%E6%8A%A4%E6%9C%8D%E5%8A%A1"><span class="nav-number">2.4.</span> <span class="nav-text">稳定运行:配置Systemd守护服务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B7%A5%E6%8E%A7%E6%9C%BA%E7%AB%AF-frpc-%E9%83%A8%E7%BD%B2-%E8%AE%A9%E8%AE%BE%E5%A4%87%E4%B8%BB%E5%8A%A8%E6%8A%A5%E5%88%B0"><span class="nav-number">3.</span> <span class="nav-text">工控机端(frpc)部署 - 让设备主动报到</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C-%E4%B8%8B%E8%BD%BD%E5%B9%B6%E8%A7%A3%E5%8E%8BFRP-ARM%E7%89%88"><span class="nav-number">3.1.</span> <span class="nav-text">准备工作:下载并解压FRP(ARM版)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E9%85%8D%E7%BD%AE-%E7%BC%96%E5%86%99-frpc-ini"><span class="nav-number">3.2.</span> <span class="nav-text">核心配置:编写 frpc.ini</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%B3%E5%AE%9A%E8%BF%90%E8%A1%8C-%E9%85%8D%E7%BD%AESystemd%E5%AE%88%E6%8A%A4%E6%9C%8D%E5%8A%A1-1"><span class="nav-number">3.3.</span> <span class="nav-text">稳定运行:配置Systemd守护服务</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81%E6%88%90%E6%9E%9C-%E5%AE%9E%E7%8E%B0%E9%A6%96%E6%AC%A1%E8%BF%9C%E7%A8%8B%E7%A9%BF%E9%80%8F"><span class="nav-number">4.</span> <span class="nav-text">验证成果:实现首次远程穿透</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A8%AA%E5%90%91%E6%89%A9%E5%B1%95-%E7%AE%A1%E7%90%86%E5%A4%9A%E5%8F%B0%E8%AE%BE%E5%A4%87"><span class="nav-number">5.</span> <span class="nav-text">横向扩展:管理多台设备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%89%B9%E9%87%8F%E9%83%A8%E7%BD%B2-%E9%95%9C%E5%83%8F%E7%81%8C%E8%A3%85%E7%9A%84%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="nav-number">6.</span> <span class="nav-text">批量部署:镜像灌装的最佳实践</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zzkuang"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Zzkuang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/zzkuang" title="Gitee → https:&#x2F;&#x2F;gitee.com&#x2F;zzkuang" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>Gitee</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zzkuang0516@163.com" title="E-Mail → mailto:zzkuang0516@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://zhangkuang.asia/2025/08/24/FRP%E5%AE%9E%E6%88%98-%E4%B8%BAARM%E5%B7%A5%E6%8E%A7%E6%9C%BA%E6%90%AD%E5%BB%BA%E7%A8%B3%E5%AE%9A-%E5%AE%89%E5%85%A8%E7%9A%844G%E8%BF%9C%E7%A8%8BSSH%E8%BF%90%E7%BB%B4%E9%80%9A%E9%81%93/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Zzkuang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道 | Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+      
+
+      <time title="Created: 2025-08-24 18:00:59 / Modified: 18:14:42" itemprop="dateCreated datePublished" datetime="2025-08-24T18:00:59+08:00">2025-08-24</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><ul>
+<li><strong>本文目标</strong>: 为处于任何网络环境下的ARM工控机,搭建一套稳定、安全、可扩展的远程SSH运维通道.解决设备位于4G网络、NAT内网等无法直接访问的痛点,实现对多台设备的统一、便捷管理.</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="云服务器端-frps-部署-搭建我们的“中继总机”"><a href="#云服务器端-frps-部署-搭建我们的“中继总机”" class="headerlink" title="云服务器端(frps)部署 - 搭建我们的“中继总机”"></a>云服务器端(frps)部署 - 搭建我们的“中继总机”</h1><p>云服务器是整个远程体系的中枢,它的配置关乎所有设备能否正常接入.</p>
+<h2 id="准备工作-下载并解压FRP"><a href="#准备工作-下载并解压FRP" class="headerlink" title="准备工作:下载并解压FRP"></a>准备工作:下载并解压FRP</h2><p>首先,我们通过SSH登录云服务器.我的服务器是标准的<code>x86_64</code>架构,因此选择<code>linux_amd64</code>版本.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 前往FRP的GitHub Release页面获取最新版本链接</span></span><br><span class="line"><span class="comment"># https://github.com/fatedier/frp/releases</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载并解压(请注意替换为最新版本号)</span></span><br><span class="line">wget https://github.com/fatedier/frp/releases/download/v0.59.0/frp_0.59.0_linux_amd64.tar.gz</span><br><span class="line">tar -zxvf frp_0.59.0_linux_amd64.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入目录方便后续操作</span></span><br><span class="line"><span class="built_in">cd</span> frp_0.59.0_linux_amd64</span><br></pre></td></tr></table></figure>
+
+<h2 id="核心配置-编写-frps-ini"><a href="#核心配置-编写-frps-ini" class="headerlink" title="核心配置:编写 frps.ini"></a>核心配置:编写 frps.ini</h2><p>我们需要编辑服务端配置文件 <code>frps.ini</code>,为我们的“总机”设定规则.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano frps.ini</span><br></pre></td></tr></table></figure>
+
+<p>我采用了极简且安全的配置,清空文件后写入以下内容:</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="comment"># frps服务监听的端口,用于接收客户端的连接</span></span><br><span class="line"><span class="attr">bind_port</span> = <span class="number">7000</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 认证令牌(token),客户端必须提供相同的token才能连接</span></span><br><span class="line"><span class="comment"># 这是我们安全体系的第一道防线,务必设置为一个高强度的随机字符串！</span></span><br><span class="line"><span class="attr">token</span> = aL8kR2jP9bX7yZcE_a_very_long_and_random_string</span><br></pre></td></tr></table></figure>
+
+<h2 id="安全加固-配置防火墙"><a href="#安全加固-配置防火墙" class="headerlink" title="安全加固:配置防火墙"></a>安全加固:配置防火墙</h2><p>遵循“最小权限”原则,我们只向公网暴露绝对必要的端口.</p>
+<ul>
+<li><code>7000/tcp</code>: FRP服务端监听端口,供所有客户端连接.</li>
+<li><code>6001/tcp</code>: 我规划的第一个设备的远程SSH映射端口.</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 以ufw防火墙为例</span></span><br><span class="line"><span class="built_in">sudo</span> ufw allow 7000/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw allow 6001/tcp</span><br><span class="line"><span class="built_in">sudo</span> ufw reload</span><br></pre></td></tr></table></figure>
+
+<h2 id="稳定运行-配置Systemd守护服务"><a href="#稳定运行-配置Systemd守护服务" class="headerlink" title="稳定运行:配置Systemd守护服务"></a>稳定运行:配置Systemd守护服务</h2><p>为了让<code>frps</code>能在后台稳定运行并实现开机自启,我们为它创建一个Systemd服务.这是生产环境的标配.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> nano /etc/systemd/system/frps.service</span><br></pre></td></tr></table></figure>
+
+<p>写入以下服务配置(<strong>注意:<code>ExecStart</code>中的路径必须是您服务器上的绝对路径</strong>):</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=FRP Server</span><br><span class="line"><span class="attr">After</span>=network.target</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span>=simple</span><br><span class="line"><span class="attr">User</span>=root</span><br><span class="line"><span class="attr">ExecStart</span>=/path/to/your/frp_folder/frps -c /path/to/your/frp_folder/frps.ini</span><br><span class="line"><span class="attr">Restart</span>=<span class="literal">on</span>-failure</span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>最后,启动并设置开机自启:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> frps</span><br><span class="line"><span class="built_in">sudo</span> systemctl start frps</span><br><span class="line"><span class="built_in">sudo</span> systemctl status frps  <span class="comment"># 检查状态,确保显示 active (running)</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="工控机端-frpc-部署-让设备主动报到"><a href="#工控机端-frpc-部署-让设备主动报到" class="headerlink" title="工控机端(frpc)部署 - 让设备主动报到"></a>工控机端(frpc)部署 - 让设备主动报到</h1><p>现在轮到我们的主角——ARM工控机.我们需要在其上部署<code>frpc</code>客户端.</p>
+<h2 id="准备工作-下载并解压FRP-ARM版"><a href="#准备工作-下载并解压FRP-ARM版" class="headerlink" title="准备工作:下载并解压FRP(ARM版)"></a>准备工作:下载并解压FRP(ARM版)</h2><p>我的工控机是<code>aarch64</code>架构,因此必须下载<code>linux_arm64</code>版本,这一点至关重要.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 登录工控机后执行</span></span><br><span class="line">wget https://github.com/fatedier/frp/releases/download/v0.59.0/frp_0.59.0_linux_arm64.tar.gz</span><br><span class="line">tar -zxvf frp_0.59.0_linux_arm64.tar.gz</span><br><span class="line"><span class="built_in">cd</span> frp_0.59.0_linux_arm64</span><br></pre></td></tr></table></figure>
+
+<h2 id="核心配置-编写-frpc-ini"><a href="#核心配置-编写-frpc-ini" class="headerlink" title="核心配置:编写 frpc.ini"></a>核心配置:编写 frpc.ini</h2><p>同样,我们编辑客户端配置文件 <code>frpc.ini</code>,告诉它如何找到“总机”.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nano frpc.ini</span><br></pre></td></tr></table></figure>
+
+<p>清空并写入以下配置:</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[common]</span></span><br><span class="line"><span class="comment"># 云服务器的公网IP</span></span><br><span class="line"><span class="attr">server_addr</span> = <span class="number">123.45</span>.<span class="number">67.89</span></span><br><span class="line"><span class="comment"># 云服务器的监听端口</span></span><br><span class="line"><span class="attr">server_port</span> = <span class="number">7000</span></span><br><span class="line"><span class="comment"># 认证令牌,必须与服务端frps.ini中的token完全一致</span></span><br><span class="line"><span class="attr">token</span> = aL8kR2jP9bX7yZcE_a_very_long_and_random_string</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启用TLS加密,保障客户端到服务端的通信安全</span></span><br><span class="line"><span class="attr">tls_enable</span> = <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 为这台设备的SSH隧道命名</span></span><br><span class="line"><span class="section">[ssh_A]</span></span><br><span class="line"><span class="attr">type</span> = tcp</span><br><span class="line"><span class="attr">local_ip</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="comment"># 本地SSH服务的端口号</span></span><br><span class="line"><span class="attr">local_port</span> = <span class="number">22</span></span><br><span class="line"><span class="comment"># 映射到云服务器的远程端口号</span></span><br><span class="line"><span class="attr">remote_port</span> = <span class="number">6001</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="稳定运行-配置Systemd守护服务-1"><a href="#稳定运行-配置Systemd守护服务-1" class="headerlink" title="稳定运行:配置Systemd守护服务"></a>稳定运行:配置Systemd守护服务</h2><p>与服务端一样,我们也为客户端配置守护服务,确保其断线重连和开机自启.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> nano /etc/systemd/system/frpc.service</span><br></pre></td></tr></table></figure>
+
+<p>写入配置(<strong>同样,注意<code>ExecStart</code>中的路径必须是工控机上的绝对路径</strong>):</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[Unit]</span></span><br><span class="line"><span class="attr">Description</span>=FRP Client</span><br><span class="line"><span class="attr">After</span>=network.target</span><br><span class="line"></span><br><span class="line"><span class="section">[Service]</span></span><br><span class="line"><span class="attr">Type</span>=simple</span><br><span class="line"><span class="attr">User</span>=root</span><br><span class="line"><span class="attr">ExecStart</span>=/path/to/your/frp_folder/frpc -c /path/to/your/frp_folder/frpc.ini</span><br><span class="line"><span class="attr">Restart</span>=<span class="literal">on</span>-failure</span><br><span class="line"></span><br><span class="line"><span class="section">[Install]</span></span><br><span class="line"><span class="attr">WantedBy</span>=multi-user.target</span><br></pre></td></tr></table></figure>
+
+<p>启动并设置开机自启:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">sudo</span> systemctl daemon-reload</span><br><span class="line"><span class="built_in">sudo</span> systemctl <span class="built_in">enable</span> frpc</span><br><span class="line"><span class="built_in">sudo</span> systemctl start frpc</span><br><span class="line"><span class="built_in">sudo</span> systemctl status frpc <span class="comment"># 检查状态</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="验证成果-实现首次远程穿透"><a href="#验证成果-实现首次远程穿透" class="headerlink" title="验证成果:实现首次远程穿透"></a>验证成果:实现首次远程穿透</h1><p>所有铺垫工作完成,激动人心的时刻到了.现在,我可以在我的本地电脑上,打开终端,执行一条简单的命令:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ssh &lt;工控机用户名&gt;@&lt;云服务器IP&gt; -p &lt;远程端口&gt;</span></span><br><span class="line">ssh root@123.45.67.89 -p 6001</span><br></pre></td></tr></table></figure>
+
+<p>输入工控机的密码后,我成功登录了！这标志着我们的远程运维通道已经完全打通.</p>
+<h1 id="横向扩展-管理多台设备"><a href="#横向扩展-管理多台设备" class="headerlink" title="横向扩展:管理多台设备"></a>横向扩展:管理多台设备</h1><p>这套架构的美妙之处在于其强大的扩展性.当我需要接入第二台、第三台设备时,操作非常简单.</p>
+<ul>
+<li><strong>服务端</strong>:只需在防火墙上为新设备开放一个新的远程端口即可(如<code>6002</code>).</li>
+<li><strong>客户端</strong>:在新设备上部署<code>frpc</code>,修改其<code>frpc.ini</code>文件中的<strong>隧道名称</strong>和**<code>remote_port</code>**,确保它们是唯一的.</li>
+</ul>
+<p>例如,为“工控机B”的配置:</p>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ... [common]部分不变 ...</span></span><br><span class="line"></span><br><span class="line"><span class="section">[ssh_B]</span>              <span class="comment"># 独一无二的隧道名</span></span><br><span class="line"><span class="attr">type</span> = tcp</span><br><span class="line"><span class="attr">local_ip</span> = <span class="number">127.0</span>.<span class="number">0.1</span></span><br><span class="line"><span class="attr">local_port</span> = <span class="number">22</span></span><br><span class="line"><span class="attr">remote_port</span> = <span class="number">6002</span>   <span class="comment"># 独一无二的远程端口</span></span><br></pre></td></tr></table></figure>
+
+<p>这样,我便可以通过访问服务器的<code>6002</code>端口来单独管理工控机B.</p>
+<h1 id="批量部署-镜像灌装的最佳实践"><a href="#批量部署-镜像灌装的最佳实践" class="headerlink" title="批量部署:镜像灌装的最佳实践"></a>批量部署:镜像灌装的最佳实践</h1><p>对于批量生产,我采用了镜像灌装的方式.但需要注意,直接复制镜像会导致所有设备的<code>frpc.ini</code>配置冲突.我的最佳实践流程是:</p>
+<ol>
+<li>制作一个包含FRP程序和<code>frpc.service</code>的“模板镜像”.</li>
+<li>将镜像灌装到新设备.</li>
+<li><strong>在新设备首次开机后,必须执行一个初始化脚本或手动修改<code>frpc.ini</code>文件,为其分配一个唯一的隧道名和<code>remote_port</code>.</strong></li>
+<li>最后重启<code>frpc</code>服务 (<code>systemctl restart frpc</code>),使新配置生效.</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Zzkuang
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="http://zhangkuang.asia/2025/08/24/FRP%E5%AE%9E%E6%88%98-%E4%B8%BAARM%E5%B7%A5%E6%8E%A7%E6%9C%BA%E6%90%AD%E5%BB%BA%E7%A8%B3%E5%AE%9A-%E5%AE%89%E5%85%A8%E7%9A%844G%E8%BF%9C%E7%A8%8BSSH%E8%BF%90%E7%BB%B4%E9%80%9A%E9%81%93/" title="FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道">http://zhangkuang.asia/2025/08/24/FRP实战-为ARM工控机搭建稳定-安全的4G远程SSH运维通道/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"># Linux</a>
+              <a href="/tags/FRP/" rel="tag"># FRP</a>
+              <a href="/tags/%E5%86%85%E5%A4%96%E7%A9%BF%E9%80%8F/" rel="tag"># 内外穿透</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/08/15/%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%A7%8B%E6%8B%9B%E7%9F%A5%E8%AF%86%E7%82%B9%E6%A2%B3%E7%90%86/" rel="prev" title="嵌入式软件工程师秋招知识点梳理">
+                  <i class="fa fa-angle-left"></i> 嵌入式软件工程师秋招知识点梳理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/09/02/%E5%B5%8C%E5%85%A5%E5%BC%8Flinux%E9%9D%A2%E8%AF%95%E9%A2%98%E6%95%B4%E7%90%86/" rel="next" title="嵌入式linux面试题整理">
+                  嵌入式linux面试题整理 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kuang</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '64px',
+  right: 'unset',
+  left: '32px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+</body>
+</html>

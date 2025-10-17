@@ -1,0 +1,2529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.css" integrity="sha256-uTcjoMD6rPt4OyV3Rs02Slxl0BJGMNVKAm/1eYPt2go=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhangkuang.asia","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.23.2","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="前言 本文目标:梳理ARM&#x2F;ZYNQ相关方向的嵌入式软件工程师的秋招面试准备">
+<meta property="og:type" content="article">
+<meta property="og:title" content="嵌入式软件工程师秋招知识点梳理">
+<meta property="og:url" content="http://zhangkuang.asia/2025/08/15/%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%A7%8B%E6%8B%9B%E7%9F%A5%E8%AF%86%E7%82%B9%E6%A2%B3%E7%90%86/index.html">
+<meta property="og:site_name" content="Kuang&#39;s Tech Log">
+<meta property="og:description" content="前言 本文目标:梳理ARM&#x2F;ZYNQ相关方向的嵌入式软件工程师的秋招面试准备">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-08-15T12:04:31.000Z">
+<meta property="article:modified_time" content="2025-09-12T08:04:01.857Z">
+<meta property="article:author" content="Zzkuang">
+<meta property="article:tag" content="Zynq">
+<meta property="article:tag" content="Petalinux">
+<meta property="article:tag" content="C++">
+<meta property="article:tag" content="秋招">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://zhangkuang.asia/2025/08/15/%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%A7%8B%E6%8B%9B%E7%9F%A5%E8%AF%86%E7%82%B9%E6%A2%B3%E7%90%86/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://zhangkuang.asia/2025/08/15/%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%A7%8B%E6%8B%9B%E7%9F%A5%E8%AF%86%E7%82%B9%E6%A2%B3%E7%90%86/","path":"2025/08/15/嵌入式软件工程师秋招知识点梳理/","title":"嵌入式软件工程师秋招知识点梳理"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>嵌入式软件工程师秋招知识点梳理 | Kuang's Tech Log</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.umd.js" integrity="sha256-UiSieVaV/DXce2LW7QH+o77w+AIoAvSCPBkezriZ2DQ=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kuang's Tech Log</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">任何资源链接问题或者技术问题欢迎邮件联系讨论</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%9F%BA%E7%A1%80"><span class="nav-number">2.</span> <span class="nav-text">嵌入式软件基础</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#C%E8%AF%AD%E8%A8%80%E5%9F%BA%E7%A1%80%E7%9F%A5%E8%AF%86"><span class="nav-number">2.1.</span> <span class="nav-text">C语言基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%8D%E6%93%8D%E4%BD%9C"><span class="nav-number">2.1.1.</span> <span class="nav-text">位操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#volatile"><span class="nav-number">2.1.2.</span> <span class="nav-text">volatile</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E6%A0%88"><span class="nav-number">2.1.3.</span> <span class="nav-text">堆栈</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C-%E7%B3%BB%E7%BB%9F%E7%BC%96%E7%A8%8B"><span class="nav-number">2.2.</span> <span class="nav-text">C++系统编程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RAII"><span class="nav-number">2.2.1.</span> <span class="nav-text">RAII</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9B%B6%E6%88%90%E6%9C%AC%E6%8A%BD%E8%B1%A1"><span class="nav-number">2.2.2.</span> <span class="nav-text">零成本抽象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#unique-ptr"><span class="nav-number">2.2.3.</span> <span class="nav-text">unique_ptr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shared-ptr"><span class="nav-number">2.2.4.</span> <span class="nav-text">shared_ptr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#weak-ptr"><span class="nav-number">2.2.5.</span> <span class="nav-text">weak_ptr</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A7%BB%E5%8A%A8%E8%AF%AD%E4%B9%89"><span class="nav-number">2.2.6.</span> <span class="nav-text">移动语义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#std-array"><span class="nav-number">2.2.7.</span> <span class="nav-text">std::array</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Guard-%E7%B1%BB"><span class="nav-number">2.2.8.</span> <span class="nav-text">Guard 类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%99%E6%80%81%E5%A4%9A%E6%80%81"><span class="nav-number">2.2.9.</span> <span class="nav-text">静态多态</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C"><span class="nav-number">2.2.10.</span> <span class="nav-text">原子操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9D%A1%E4%BB%B6%E5%8F%98%E9%87%8F"><span class="nav-number">2.2.11.</span> <span class="nav-text">条件变量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#C-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E7%BC%96%E7%A8%8B"><span class="nav-number">2.2.12.</span> <span class="nav-text">C++多线程编程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#lambda"><span class="nav-number">2.2.13.</span> <span class="nav-text">lambda</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#socket"><span class="nav-number">2.2.14.</span> <span class="nav-text">socket</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E7%BD%91%E7%BB%9C%E4%B8%8E%E5%B9%B6%E5%8F%91%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.15.</span> <span class="nav-text">高级网络与并发模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Proactor-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.2.15.1.</span> <span class="nav-text">Proactor 设计模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Reactor-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.2.15.2.</span> <span class="nav-text">Reactor 设计模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Boost-Asio"><span class="nav-number">2.2.15.3.</span> <span class="nav-text">Boost.Asio</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91%E5%B7%A5%E5%85%B7%E9%93%BE"><span class="nav-number">2.3.</span> <span class="nav-text">交叉编译工具链</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Makefile-CMake"><span class="nav-number">2.4.</span> <span class="nav-text">Makefile&#x2F;CMake</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#GDB-%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95"><span class="nav-number">2.5.</span> <span class="nav-text">GDB 远程调试</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Shell-%E8%84%9A%E6%9C%AC"><span class="nav-number">2.6.</span> <span class="nav-text">Shell 脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A3%B8%E6%9C%BA%E5%BC%80%E5%8F%91"><span class="nav-number">2.7.</span> <span class="nav-text">裸机开发</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9B%E7%A8%8B%E9%80%9A%E4%BF%A1IPC"><span class="nav-number">2.8.</span> <span class="nav-text">进程通信IPC</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E4%B8%8E%E6%8E%A5%E5%8F%A3%E7%9F%A5%E8%AF%86"><span class="nav-number">3.</span> <span class="nav-text">硬件与接口知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Zynq-MPSoC-%E6%9E%B6%E6%9E%84"><span class="nav-number">3.1.</span> <span class="nav-text">Zynq MPSoC 架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AXI%E6%80%BB%E7%BA%BF"><span class="nav-number">3.2.</span> <span class="nav-text">AXI总线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ARMv8-A53-%E6%9E%B6%E6%9E%84"><span class="nav-number">3.3.</span> <span class="nav-text">ARMv8 (A53) 架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#M-2-%E6%8E%A5%E5%8F%A3"><span class="nav-number">3.4.</span> <span class="nav-text">M.2 接口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%98%85%E8%AF%BB%E8%8A%AF%E7%89%87%E6%89%8B%E5%86%8C"><span class="nav-number">3.5.</span> <span class="nav-text">阅读芯片手册</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E9%80%9F%E4%BF%A1%E5%8F%B7%E8%AE%BE%E8%AE%A1%E5%9F%BA%E7%A1%80"><span class="nav-number">3.6.</span> <span class="nav-text">高速信号设计基础</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SoC-FPGA-%E5%86%85%E9%83%A8%E5%AD%98%E5%82%A8"><span class="nav-number">3.7.</span> <span class="nav-text">SoC&#x2F;FPGA 内部存储</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#QSPI-Flash"><span class="nav-number">3.8.</span> <span class="nav-text">QSPI Flash</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84-I-O-MMIO"><span class="nav-number">3.9.</span> <span class="nav-text">内存映射 I&#x2F;O (MMIO)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E4%B8%8E%E5%86%85%E6%A0%B8"><span class="nav-number">4.</span> <span class="nav-text">操作系统与内核</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Petalinux-Yocto"><span class="nav-number">4.1.</span> <span class="nav-text">Petalinux&#x2F;Yocto</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Device-Tree-DTS"><span class="nav-number">4.2.</span> <span class="nav-text">Device Tree (DTS)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%83%8C%E6%99%AF"><span class="nav-number">4.2.1.</span> <span class="nav-text">定义与背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%BE%E5%A4%87%E6%A0%91%E7%9A%84%E5%B1%82%E6%AC%A1%E7%BB%93%E6%9E%84"><span class="nav-number">4.2.2.</span> <span class="nav-text">设备树的层次结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux%E5%86%85%E6%A0%B8%E9%85%8D%E7%BD%AE"><span class="nav-number">4.3.</span> <span class="nav-text">Linux内核配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux%E9%A9%B1%E5%8A%A8"><span class="nav-number">4.4.</span> <span class="nav-text">Linux驱动</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A9%B1%E5%8A%A8%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">4.4.1.</span> <span class="nav-text">驱动的分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E8%83%BD%E9%A9%B1%E5%8A%A8%E7%9A%84%E6%B5%81%E7%A8%8B"><span class="nav-number">4.4.2.</span> <span class="nav-text">使能驱动的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E9%A9%B1%E5%8A%A8%E5%BC%80%E5%8F%91%E6%B5%81%E7%A8%8B"><span class="nav-number">4.4.3.</span> <span class="nav-text">内核驱动开发流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%89%8D%E7%BD%AE%E5%87%86%E5%A4%87"><span class="nav-number">4.4.3.1.</span> <span class="nav-text">前置准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%A8%A1%E5%9D%97%E5%8A%A0%E8%BD%BD%E4%B8%8E%E5%8D%B8%E8%BD%BD"><span class="nav-number">4.4.3.2.</span> <span class="nav-text">模块加载与卸载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A9%B1%E5%8A%A8%E4%B8%8E%E8%AE%BE%E5%A4%87%E7%9A%84%E7%BB%91%E5%AE%9A%E4%B8%8E%E8%A7%A3%E7%BB%91"><span class="nav-number">4.4.3.3.</span> <span class="nav-text">驱动与设备的绑定与解绑</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%8E%B7%E5%8F%96%E7%A1%AC%E4%BB%B6%E8%B5%84%E6%BA%90"><span class="nav-number">4.4.3.4.</span> <span class="nav-text">获取硬件资源</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BF%9D%E5%AD%98%E8%AE%BE%E5%A4%87%E4%B8%8A%E4%B8%8B%E6%96%87"><span class="nav-number">4.4.3.5.</span> <span class="nav-text">保存设备上下文</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E8%AE%BE%E5%A4%87%E6%96%87%E4%BB%B6"><span class="nav-number">4.4.3.6.</span> <span class="nav-text">创建设备文件</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-number">4.5.</span> <span class="nav-text">Linux 启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%86%85%E6%A0%B8%E6%A8%A1%E5%9D%97"><span class="nav-number">4.6.</span> <span class="nav-text">内核模块</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6"><span class="nav-number">4.7.</span> <span class="nav-text">中断处理机制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux-%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86"><span class="nav-number">4.8.</span> <span class="nav-text">Linux 内存管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86"><span class="nav-number">4.9.</span> <span class="nav-text">异常处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WDT%E7%9C%8B%E9%97%A8%E7%8B%97"><span class="nav-number">4.10.</span> <span class="nav-text">WDT看门狗</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.</span> <span class="nav-text">存储与文件系统</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#PCIe%E5%8D%8F%E8%AE%AE"><span class="nav-number">5.1.</span> <span class="nav-text">PCIe协议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DMA"><span class="nav-number">5.2.</span> <span class="nav-text">DMA</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#NVMe%E5%8D%8F%E8%AE%AE"><span class="nav-number">5.3.</span> <span class="nav-text">NVMe协议</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E4%BA%A4%E4%B8%8E%E5%AE%8C%E6%88%90%E9%98%9F%E5%88%97"><span class="nav-number">5.3.1.</span> <span class="nav-text">提交与完成队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%91%BD%E4%BB%A4%E6%89%A7%E8%A1%8C%E4%B8%8E%E5%AE%8C%E6%88%90%E6%9C%BA%E5%88%B6"><span class="nav-number">5.3.2.</span> <span class="nav-text">命令执行与完成机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%8C%87%E9%92%88"><span class="nav-number">5.3.3.</span> <span class="nav-text">数据指针</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SSD-%E5%9F%BA%E6%9C%AC%E5%8E%9F%E7%90%86"><span class="nav-number">5.4.</span> <span class="nav-text">SSD 基本原理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Linux-%E5%9D%97%E8%AE%BE%E5%A4%87%E5%B1%82"><span class="nav-number">5.5.</span> <span class="nav-text">Linux 块设备层</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F"><span class="nav-number">5.6.</span> <span class="nav-text">文件系统</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE%E4%B8%8E%E6%95%B0%E6%8D%AE%E5%A4%84%E7%90%86"><span class="nav-number">6.</span> <span class="nav-text">通信协议与数据处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Pcap"><span class="nav-number">6.1.</span> <span class="nav-text">Pcap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AD%97%E8%8A%82%E5%BA%8F"><span class="nav-number">6.2.</span> <span class="nav-text">字节序</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%8C%E6%95%B4%E6%80%A7%E6%A0%A1%E9%AA%8C"><span class="nav-number">6.3.</span> <span class="nav-text">完整性校验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9B%B6%E6%8B%B7%E8%B4%9D"><span class="nav-number">6.4.</span> <span class="nav-text">零拷贝</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RTSP"><span class="nav-number">6.5.</span> <span class="nav-text">RTSP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#TCP-IP-UDP"><span class="nav-number">6.6.</span> <span class="nav-text">TCP&#x2F;IP,UDP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#HTTP"><span class="nav-number">6.7.</span> <span class="nav-text">HTTP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#WebSocket"><span class="nav-number">6.8.</span> <span class="nav-text">WebSocket</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CAN%E6%80%BB%E7%BA%BF"><span class="nav-number">6.9.</span> <span class="nav-text">CAN总线</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zzkuang"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Zzkuang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/zzkuang" title="Gitee → https:&#x2F;&#x2F;gitee.com&#x2F;zzkuang" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>Gitee</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zzkuang0516@163.com" title="E-Mail → mailto:zzkuang0516@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://zhangkuang.asia/2025/08/15/%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%A7%8B%E6%8B%9B%E7%9F%A5%E8%AF%86%E7%82%B9%E6%A2%B3%E7%90%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Zzkuang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="嵌入式软件工程师秋招知识点梳理 | Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          嵌入式软件工程师秋招知识点梳理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-08-15 20:04:31" itemprop="dateCreated datePublished" datetime="2025-08-15T20:04:31+08:00">2025-08-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-09-12 16:04:01" itemprop="dateModified" datetime="2025-09-12T16:04:01+08:00">2025-09-12</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><ul>
+<li><strong>本文目标</strong>:梳理ARM&#x2F;ZYNQ相关方向的嵌入式软件工程师的秋招面试准备</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="嵌入式软件基础"><a href="#嵌入式软件基础" class="headerlink" title="嵌入式软件基础"></a>嵌入式软件基础</h1><h2 id="C语言基础知识"><a href="#C语言基础知识" class="headerlink" title="C语言基础知识"></a>C语言基础知识</h2><h3 id="位操作"><a href="#位操作" class="headerlink" title="位操作"></a>位操作</h3><ol>
+<li><p>常用位操作</p>
+<table>
+<thead>
+<tr>
+<th>运算符</th>
+<th>名称</th>
+<th>功能</th>
+<th>示例 (假设 x&#x3D;5, 0b0101)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&amp;</td>
+<td>AND</td>
+<td>按位与 (常用于清零或提取特定位)</td>
+<td>x &amp; 3 (0b0011) -&gt; 1 (0b0001)</td>
+</tr>
+<tr>
+<td>|</td>
+<td>OR</td>
+<td>按位或 (常用于置位特定位)</td>
+<td>x | 2 (0b0010) -&gt; 7 (0b0111)</td>
+</tr>
+<tr>
+<td>^</td>
+<td>XOR</td>
+<td>按位异或 (常用于翻转特定位)</td>
+<td>x ^ 1 (0b0001) -&gt; 4 (0b0100)</td>
+</tr>
+<tr>
+<td>~</td>
+<td>NOT</td>
+<td>按位取反</td>
+<td>~x -&gt; …11111010</td>
+</tr>
+<tr>
+<td>&lt;&lt;</td>
+<td>左移</td>
+<td>将所有位向左移动,低位补 0 (等效于乘以 2^n)</td>
+<td>x &lt;&lt; 2 -&gt; 20 (0b10100)</td>
+</tr>
+<tr>
+<td>&gt;&gt;</td>
+<td>右移</td>
+<td>将所有位向右移动 (等效于除以 2^n)</td>
+<td>x &gt;&gt; 1 -&gt; 2 (0b0010)</td>
+</tr>
+</tbody></table>
+</li>
+<li><p>位域:位域允许你将一个结构体成员的宽度定义到位级别,而不是字节级别</p>
+<ul>
+<li><strong>不可移植,位域内部位的排布由编译器决定</strong></li>
+<li>位域操作非原子性</li>
+</ul>
+</li>
+</ol>
+<h3 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h3><ol>
+<li>字面意思是 易变的 ,其修饰的变量可能以无法预测的形式改变,<strong>禁止编译器进行优化,每次操作需要到内存读取</strong></li>
+<li><strong>const和volatile可以用在同一个变量</strong>,const仅仅意味着我的程序不能修改这个变量,但是他可能还会被硬件修改(只读的硬件寄存器)</li>
+</ol>
+<h3 id="堆栈"><a href="#堆栈" class="headerlink" title="堆栈"></a>堆栈</h3><ol>
+<li>Linux中<strong>栈向低地址生长,堆向高地址生长</strong></li>
+<li><strong>栈的特性方便进行函数调用和局部变量管理,而堆提供了动态内存分配的功能</strong></li>
+</ol>
+<h2 id="C-系统编程"><a href="#C-系统编程" class="headerlink" title="C++系统编程"></a>C++系统编程</h2><h3 id="RAII"><a href="#RAII" class="headerlink" title="RAII"></a>RAII</h3><ol>
+<li>C++ 最重要的特性之一,也是与 C 语言在资源管理上的根本区别</li>
+<li>机制描述:<strong>将资源的生命周期与一个对象的生命周期绑定</strong></li>
+</ol>
+<ul>
+<li>在对象的构造函数中获取资源(如打开文件、申请内存、锁住一个互斥量)</li>
+<li>在对象的析构函数中释放资源</li>
+<li>当对象离开作用域时(例如函数返回、或者发生异常),它的析构函数会被编译器自动调用,从而保证资源一定会被释放</li>
+</ul>
+<ol start="3">
+<li>C++中析构函数的存在保证了无论函数从哪里返回,资源释放都得到了保证,代码更简洁、更安全</li>
+<li>类的公有私有以及多态等机制是完美的封装硬件的工具</li>
+<li>虽然C语言没有析构函数,但我们可以通过GCC的<code>__attribute__((cleanup(...)))</code>扩展来模拟RAII<ul>
+<li>或者在错误处理路径上使用goto语句跳转到统一的清理代码块,这在Linux内核中是非常常见的模式</li>
+</ul>
+</li>
+</ol>
+<h3 id="零成本抽象"><a href="#零成本抽象" class="headerlink" title="零成本抽象"></a>零成本抽象</h3><ol>
+<li>核心思想:你不为你用不到的东西付出代价,而且你用到的东西,其抽象层次的代价也应该为零或最小</li>
+<li><strong>C++的模板实例化,可以让代码在编译的时候,只选择编译用到的函数</strong>,减小了资源消耗</li>
+<li><strong>内联优化使得</strong>编写C++面向对象代码的效率几乎等同于C语言的效率,<strong>使用</strong>了<strong>面向对象的特性的同时不增加消耗</strong></li>
+<li>经典范例:<ul>
+<li>C++ 的 <code>std::sort</code> 对比 C 的 <code>qsort</code><ul>
+<li>std::sort 使用模板,在编译期就知道要比较的类型,可以直接内联比较操作,生成极快的代码</li>
+<li>qsort 需要一个函数指针,运行时每次比较都有一次间接函数调用开销</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="unique-ptr"><a href="#unique-ptr" class="headerlink" title="unique_ptr"></a>unique_ptr</h3><ol>
+<li>创建指针:<code>auto ptr1 = std::make_unique&lt;MyClass&gt;(arg1, arg2);</code></li>
+<li>核心思想:<strong>独占所有权的指针</strong>,即这块内存,同一时间只能有一个管理者</li>
+<li>工作机制:<ul>
+<li><code>unique_ptr</code>包装了一个裸指针,但<strong>禁止了拷贝构造和拷贝赋值操作</strong></li>
+<li>当<code>unique_ptr</code>对象本身被销毁时(离开作用域),它会在其<strong>析构函数中自动调用</strong><code>delete</code><strong>来释放它所管理的内存</strong></li>
+<li>它虽然不能被拷贝,但可以被:移动  (move).移动操作会将内存的所有权从一个<code>unique_ptr</code>转移给另一个,原来的 <code>unique_ptr</code>会变为空(不再管理任何内存)</li>
+</ul>
+</li>
+<li>性能:几乎是零成本抽象.在大多数编译器实现中,一个 unique_ptr 的大小和一个裸指针完全相同,没有额外的性能开销</li>
+<li>使用场景:<ul>
+<li>工厂函数:工厂函数是一种设计模式,指的是专门用来创建和返回对象的函数,而不是直接使用构造函数或new操作符<ul>
+<li>工厂函数创建对象,调用者获得所有权,使用独占指针明确了所有权的转移,也不用关注资源的释放</li>
+</ul>
+</li>
+<li>作为类的成员:如果一个类 A 包含一个指向类 B 实例的指针,并且 A 完全拥有 B 的生命周期,那么就应该使用<code>unique_ptr</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="shared-ptr"><a href="#shared-ptr" class="headerlink" title="shared_ptr"></a>shared_ptr</h3><ol>
+<li>创建指针:<code>auto ptr2 = std::make_shared&lt;MyClass&gt;(arg1, arg2);</code></li>
+<li>核心思想:<strong>共享所有权的指针</strong>,这块内存,可以被多个管理者共同拥有</li>
+<li>工作机制:<ul>
+<li><code>shared_ptr</code>内部除了包含一个指向托管对象的裸指针外,还包含一个指向:控制块 的指针.<strong>控制块里存储着引用计数</strong></li>
+<li>每当有一个新的 <code>shared_ptr</code> 拷贝或赋值给它时,引用计数加 1</li>
+<li>每当有一个 <code>shared_ptr</code>被销毁时,引用计数减 1</li>
+<li>当<strong>引用计数减到 0 时</strong>,最后一个<code>shared_ptr</code>会负责<strong>释放被管理的对象内存和控制块本身</strong></li>
+</ul>
+</li>
+<li>性能开销<ul>
+<li><strong>内存开销</strong>:shared_ptr 的大小<strong>是裸指针的两倍</strong>(一个指向对象,一个指向控制块)</li>
+<li>运行时开销:引用计数的增减必须是原子操作,以保证线程安全.原子操作会比普通指令慢</li>
+</ul>
+</li>
+<li>应用场景:仅在必要的时候使用:确实需要多个独立的对象共同管理同一个资源的生命周期,且无法确定谁会最后:存活 时<ul>
+<li>异步回调:一个网络请求发出后,需要将某些上下文数据传递给回调函数.这个上下文数据可能在请求发起方和回调处理方都需要访问,使用<code>shared_ptr</code>可以确保在回调执行完毕前,数据不会被销毁</li>
+</ul>
+</li>
+</ol>
+<h3 id="weak-ptr"><a href="#weak-ptr" class="headerlink" title="weak_ptr"></a>weak_ptr</h3><ol>
+<li>指向由<code>shared_ptr</code>管理的对象,但<strong>不增加引用计数</strong>,它本身<strong>不控制对象的生命周期</strong></li>
+<li>核心作用: <strong>打破</strong><code>shared_ptr</code>之间的<strong>循环引用</strong> (Circular Reference).<ul>
+<li>循环引用场景: <ul>
+<li>如果对象A持有一个指向B的<code>shared_ptr</code></li>
+<li>同时对象B也持有一个指向A的<code>shared_ptr</code></li>
+<li>那么A和B的引用计数永远不会变为0</li>
+<li>即使外界已经没有任何指针指向它们,也会导致内存泄漏.</li>
+</ul>
+</li>
+<li>解决方案: 将其中一方(或双方)的<code>shared_ptr</code>改为<code>weak_ptr</code></li>
+</ul>
+</li>
+<li>使用方式: <ul>
+<li><code>weak_ptr</code>不能直接访问对象,必须先通过调用<code>.lock()</code>方法</li>
+<li>如果对象还存在,<code>.lock()</code>会返回一个有效的<code>shared_ptr</code>；</li>
+<li>如果对象已被销毁,则返回一个空的<code>shared_ptr</code></li>
+</ul>
+</li>
+</ol>
+<h3 id="移动语义"><a href="#移动语义" class="headerlink" title="移动语义"></a>移动语义</h3><ol>
+<li><strong>左值</strong> (lvalue):<strong>有持久存储位置的表达</strong>式,有名字,有地址,可以出现在赋值号左边;例子:变量名、数组元素、解引用指针</li>
+<li><strong>右值</strong> (rvalue):<strong>临时的、没有持久存储的表达式</strong>,通常是字面量或临时计算结果,只能出现在赋值号右边;例子:常量、表达式结果</li>
+<li>引用:<strong>引用是对象别名,指针指向地址</strong>,可以将<strong>引用和常量指针划等号</strong>(编译期底层使用常量指针实现的引用)</li>
+<li><code>std::move</code>:什么也不做,只是告诉编译期把这个左值当作右值</li>
+<li>右值的使用场景:<ul>
+<li>函数返回的是右值,赋值的时候会触发移动构造,如果没有才深拷贝;现代C++编译器直接在目标位置构造对象,连移动都省了</li>
+<li>缓冲区内存管理使用右值 </li>
+<li>容器拷贝使用右值 </li>
+<li>字符串的转移也推荐使用右值</li>
+<li>硬件资源权限的转移也推荐使用右值</li>
+</ul>
+</li>
+</ol>
+<h3 id="std-array"><a href="#std-array" class="headerlink" title="std::array"></a>std::array</h3><ol>
+<li>定义:一个封装了<strong>静态大小 C 风格数组的、固定大小的容器</strong>.</li>
+<li>核心特点:<ul>
+<li>大小在编译期确定:std::array&lt;int, 10&gt; arr; 10 必须是编译期常量.</li>
+<li>内存位置:和 C 数组一样,如果作为局部变量,它在栈上分配.没有动态内存分配的开销.</li>
+<li>行为像容器:提供了 .size(), .begin(), .end() 等标准容器接口,可以方便地与 STL 算法(如 std::sort)配合使用,支持范围 for 循环.</li>
+<li>安全性:提供了 .at(i) 成员函数进行带边界检查的访问</li>
+</ul>
+</li>
+<li>优点:<ul>
+<li>C 数组传递给函数时会:退化 为指针,丢失长度信息;std::array 则不会</li>
+<li>vector 的大小是动态的,数据在堆上;array 的大小是静态的,数据通常在栈上</li>
+</ul>
+</li>
+<li>应用场景:任何需要固定大小缓冲区的地方</li>
+</ol>
+<h3 id="Guard-类"><a href="#Guard-类" class="headerlink" title="Guard 类"></a>Guard 类</h3><ol>
+<li>本质:<ul>
+<li>一个遵循 RAII 模式的、专门用于管理非内存资源(如锁、文件句柄、数据库连接、硬件状态)的小类</li>
+</ul>
+</li>
+<li>使用意义:<ul>
+<li><strong>Guard解决了 成对操作必须匹配 的问题</strong></li>
+<li>Guard是针对某种需要状态切换的临时资源 在使用的时候需要从A-&gt;B-&gt;A,如锁 这种类在出现异常时需要恢复状态,但是过多的if内部写回复状态代码比较笨拙易漏,GUARD则会在离开作用域自动将状态切回去</li>
+</ul>
+</li>
+</ol>
+<h3 id="静态多态"><a href="#静态多态" class="headerlink" title="静态多态"></a>静态多态</h3><ol>
+<li><p><strong>动态多态</strong>:</p>
+<ul>
+<li>定义:<strong>父类定义接口,子类各自实现</strong></li>
+<li>使用:用父类指针&#x2F;引用操作不同子类对象</li>
+<li>特点:<strong>运行时根据实际对象类型决定调用哪个方法</strong></li>
+<li>缺点: 有运行时开销(间接调用、vtable 查询),且会阻止编译器内联优化</li>
+</ul>
+</li>
+<li><p><strong>静态多态</strong></p>
+<ul>
+<li><strong>通过模板实现</strong>,一个模板,多种类型,编译时确定调用哪个函数</li>
+</ul>
+</li>
+<li><p><strong>奇异递归模板</strong>模式:<strong>派生类把自己传给基类</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 模板基类接受派生类作为模板参数</span></span><br><span class="line">template&lt;typename Derived&gt;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Base</span> &#123;</span></span><br><span class="line">public:</span><br><span class="line">    <span class="type">void</span> <span class="title function_">interface</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 通过static_cast调用派生类的实现</span></span><br><span class="line">        static_cast&lt;Derived*&gt;(this)-&gt;implementation();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 派生类继承时把自己作为模板参数传给基类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Derived</span> :</span> public Base&lt;Derived&gt; &#123;</span><br><span class="line">public:</span><br><span class="line">    <span class="type">void</span> <span class="title function_">implementation</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt;  Derived的实现  &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>继承父类时,就已经告诉了编译器,我继承的父类他的模板参数是什么</li>
+<li><strong>编译的时候编译器就会知道父类的函数对应的是哪个子类的版本</strong></li>
+</ul>
+</li>
+</ol>
+<h3 id="原子操作"><a href="#原子操作" class="headerlink" title="原子操作"></a>原子操作</h3><ol>
+<li>原子操作指的是一个<strong>不可被中断的操作</strong></li>
+<li><code>std::atomic</code>是一个模板类,用来<strong>将普通变量</strong>(如 int, bool, 指针等)<strong>包装成一个原子对象</strong>,确保对它的所有操作都是原子的</li>
+</ol>
+<h3 id="条件变量"><a href="#条件变量" class="headerlink" title="条件变量"></a>条件变量</h3><ol>
+<li>条件变量允许一个或多个线程等待某个特定条件成立,不是锁,<strong>是通知者,必须与互斥锁配合使用</strong></li>
+<li>它的核心是<strong>解决了忙等待的低效率问题</strong>,提供了一种阻塞-唤醒机制</li>
+<li>使用流程<ul>
+<li><strong>消费者:</strong><ul>
+<li><strong>获取互斥锁</strong>.</li>
+<li><strong>检查条件</strong>(队列是否为空).</li>
+<li>如果条件<strong>不满足</strong>(队列为空),就调用 <strong>cv.wait(lock)</strong>.</li>
+<li>这一步是关键:<strong>线程会原子地释放锁,并让自己进入睡眠状态</strong></li>
+</ul>
+</li>
+<li><strong>生产者</strong>:<ul>
+<li><strong>获取同一个互斥锁</strong>.</li>
+<li>准备数据(向队列中放入元素),<strong>使得条件满足</strong>.</li>
+<li><strong>调用 cv.notify_one()</strong> 来按门铃,<strong>唤醒</strong>一个正在睡眠的<strong>消费者</strong>.</li>
+<li><strong>释放互斥锁</strong></li>
+</ul>
+</li>
+<li>消费者被唤醒后:<ul>
+<li>它会<strong>从 wait() 函数中醒来</strong>,并<strong>自动重新获取之前释放的那个锁</strong>.</li>
+<li>再次<strong>检查条件</strong>(防止虚假唤醒),<strong>确认满足后,开始处理数据</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="C-多线程编程"><a href="#C-多线程编程" class="headerlink" title="C++多线程编程"></a>C++多线程编程</h3><ol>
+<li>线程的创建:使用 <code>&lt;thread&gt;</code> 头文件中的 <code>std::thread</code> 类</li>
+<li>数据通信<ul>
+<li><strong>单生产单消费:无锁环形缓冲区,只有生产者可以修改尾指针,只有消费者可以修改头指针</strong><ul>
+<li>使用原子操作来加载和存储头和尾,可以确保对双方的透明</li>
+<li><code>boost::lockfree::spsc_queue</code></li>
+</ul>
+</li>
+<li>多生产者单消费者<ul>
+<li><strong>对于生产端有加锁的必要,消费端没有</strong></li>
+<li>要么使用队列,条件变量通知消费端,入队时上锁</li>
+<li>要么使用链表,链表使用原子类型,加入数据到链表时使用原子的比较并交换</li>
+</ul>
+</li>
+<li>多生产多消费者<ul>
+<li>使用一个有界(固定大小)的容器,如 std::vector 或 std::array,并将其作为一个环形缓冲区来管理.</li>
+<li>使用一个 std::mutex 来保护整个数据结构</li>
+<li>核心优化点:<strong>使用两个条件变量</strong></li>
+<li><strong><code>cv_not_full_</code>:当队列已满时,生产者在此等待</strong></li>
+<li><strong><code>cv_not_empty_</code>:当队列为空时,消费者在此等待</strong></li>
+<li>这种分离可以避免 惊群效应 和不必要的唤醒</li>
+<li>当生产者添加一个元素后,它<strong>只通知一个可能在等待的消费者</strong> (cv_not_empty_),而不会唤醒其他也在等待的生产者</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>线程管理<ul>
+<li><code>thread.join()</code>: 主线程等待子线程执行完毕.在程序退出前,必须对所有创建的线程调用 <code>join()</code> 或 <code>detach()</code>,否则程序会异常终止.<code>join()</code> 是确保资源被正确清理的常用方式.</li>
+<li><code>thread.detach()</code>: 将子线程与主线程分离,子线程在后台独立运行.这是一种 阅后即焚 的模式,需要开发者自行管理其生命周期,在嵌入式系统中要慎用,容易导致资源泄漏或僵尸线程.</li>
+</ul>
+</li>
+<li><code>std::lock_guard</code>vs<code>std::unique_lock</code><ul>
+<li>二者都是为了<strong>解决上锁忘记解锁的问题</strong></li>
+<li><strong>条件变量必须要与unique_lock一起使用</strong></li>
+<li>当你需要与条件变量(std::condition_variable)配合实现线程等待与唤醒,或者需要在一个锁的生命周期内手动、<strong>灵活</strong>地释放和重新加锁时,就应该使用std::unique_lock</li>
+</ul>
+</li>
+<li>死锁<ul>
+<li>两个或<strong>多个并发线程</strong>(或进程)中的<strong>每一个都在等待另一个线程持有的资源</strong>,而<strong>自己已经持有的资源又不释放</strong></li>
+<li>死锁四个条件<ul>
+<li><strong>互斥,持有等待,非抢占,循环等待链</strong></li>
+</ul>
+</li>
+<li><strong>破坏死锁</strong><ul>
+<li><strong>按序加锁:必须先持有锁1再持有锁2</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="lambda"><a href="#lambda" class="headerlink" title="lambda"></a>lambda</h3><ol>
+<li><p>语法结构</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[ captures ] ( parameters ) -&gt; return_type &#123;</span><br><span class="line">    <span class="comment">// 函数体</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>[]</code>捕获列表<ul>
+<li>什么都不写,不捕获外部变量</li>
+<li><code>[=]</code>表示,以拷贝的方式,捕获所有在 Lambda 中用到的外部变量</li>
+<li><code>[&amp;]</code>表示,以 引用 的方式,捕获所有在 Lambda 中用到的外部变量,警惕lambda生命周期和外部变量的周期长度</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>当一个函数逻辑很短小、只在一个地方使用、并且需要方便地访问当前上下文时建议使用lambda</p>
+</li>
+</ol>
+<h3 id="socket"><a href="#socket" class="headerlink" title="socket"></a>socket</h3><ol>
+<li>用于网络通信的编程接口 (API),用于底层网络协议(如 TCP&#x2F;UDP)进行数据收发</li>
+<li>工作流程:<ul>
+<li>socket() -&gt; bind() -&gt; listen() -&gt; accept() -&gt; read()&#x2F;write() -&gt; close()<ul>
+<li><strong>accept():这是一个阻塞函数</strong></li>
+<li>一旦有连接,accept() 就会返回一个全新的 Socket 描述符 conn_fd</li>
+<li>这个新描述符是和特定客户端通信的专用通道</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>accept() 和 read() 都是阻塞的.如果一个服务器要同时处理成千上万的连接,为<strong>每个连接都开一个线程</strong>会耗尽系统资源<ul>
+<li>可以通过 fcntl() 将一个 Socket 设置为非阻塞模式<ul>
+<li>在这种模式下,如果调用 read() 时没有数据,它不会暂停,而是立即返回一个错误</li>
+<li>缺点:你需要在一个 while(true) 循环里不断地尝试 read(),这会造成 CPU 空转</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>I&#x2F;O 多路复用 (I&#x2F;O Multiplexing)<ul>
+<li><strong>只用一个线程,同时监视大量的 Socket 描述符</strong></li>
+</ul>
+</li>
+</ol>
+<h3 id="高级网络与并发模型"><a href="#高级网络与并发模型" class="headerlink" title="高级网络与并发模型"></a>高级网络与并发模型</h3><h4 id="Proactor-设计模式"><a href="#Proactor-设计模式" class="headerlink" title="Proactor 设计模式"></a>Proactor 设计模式</h4><ol>
+<li>核心思想:将 I&#x2F;O 操作的发起和 I&#x2F;O 操作的完成进行解耦</li>
+<li>工作流程:<ul>
+<li>应用程序(我的服务器)发起一个异步操作(比如 async_read),并提供一个回调函数 (Completion Handler)</li>
+<li>立即返回,继续做其他事情:</li>
+<li>操作系统(由 Boost.Asio 底层的 epoll 代理)在后台完成 I&#x2F;O 操作</li>
+<li>当操作真正完成后,io_context 会在一个指定的线程(来自我们的线程池)中调用之前注册的那个回调函数</li>
+</ul>
+</li>
+<li>Proactor 像点外卖:你(应用)通过手机 App(async_read)下好单,提供了所有信息(回调函数、缓冲区),然后就什么都不用管了:商家(内核)自己做饭、打包,最后外卖小哥(io_context)把现成的饭菜(完成的数据)直接送到你手上:你只关心 结果 ,不关心 过程</li>
+</ol>
+<h4 id="Reactor-设计模式"><a href="#Reactor-设计模式" class="headerlink" title="Reactor 设计模式"></a><strong>Reactor 设计模式</strong></h4><ol>
+<li>核心思想<ul>
+<li>同步 I&#x2F;O 事件的分发:将所有 I&#x2F;O 事件的监听和分发集中到一个单独的组件(Reactor)中,实现对多个并发事件的非阻塞、同步处理:</li>
+<li>核心比喻:一个总机接线员:所有电话都打到总机,总机负责记录哪个电话响了,然后通知对应的人去接听,而不是让每个人都守着自己的电话:</li>
+</ul>
+</li>
+<li>Reactor 像堂食:你(应用)告诉服务员(epoll) 想点菜了就叫我 (注册事件):服务员看到你举手(事件就绪),跑过来说 您好可以点了 (分发事件):你还得亲自翻开菜单,告诉他 我要一个宫保鸡丁 (执行 read()):你关心的是 时机 , 动作 还得自己做:</li>
+</ol>
+<h4 id="Boost-Asio"><a href="#Boost-Asio" class="headerlink" title="Boost.Asio"></a>Boost.Asio</h4><ol>
+<li><p>io_context:双重角色的核心引擎</p>
+<ul>
+<li><p>定义:Boost.Asio 的核心事件中心与任务调度器:</p>
+</li>
+<li><p>双重角色:</p>
+<ul>
+<li>底层是 Reactor:内部封装 epoll,负责高效监听 I&#x2F;O 事件是否就绪:</li>
+<li>上层是 Proactor:向用户提供异步接口:当 epoll 通知事件就绪后,io_context 代替用户完成 I&#x2F;O 操作(如 read),然后将完成结果和回调函数打包成一个任务:</li>
+</ul>
+</li>
+<li><p>一句话总结:<strong>io_context用epoll的 Reactor 机制</strong>,为我们<strong>模拟出了 Proactor</strong> 的编程体验:</p>
+</li>
+</ul>
+</li>
+<li><p>io_context.run() 与线程池</p>
+<ul>
+<li>run() 的作用:<ul>
+<li>任何调用 io_context.run() 的线程,都会变成一个事件处理工作线程</li>
+<li>它的任务就是<strong>不断从 io_context 的完成队列中取出并执行回调任务</strong></li>
+</ul>
+</li>
+<li>优势:I&#x2F;O 监听(epoll)与回调处理(线程池)分离:回调任务可以被并发执行,提升 CPU 密集型任务的处理能力:线程数量固定,避免了 一个连接一个线程 模型的高昂开销:</li>
+</ul>
+</li>
+<li><p>strand:无锁化的顺序保证</p>
+<ul>
+<li>问题:多线程并发执行回调,如何保证对同一个连接的操作不会发生数据竞争？</li>
+<li>解决方案:使用 strand:</li>
+<li>核心比喻:strand 就像一条 逻辑上的单行道 :</li>
+<li>工作原理:将属于同一个连接的所有回调函数都绑定到同一个 strand 上:<strong>strand 会确保,即使在多线程环境中,这些被绑定的回调也永远不会并发执行,而是按顺序、依次执行</strong></li>
+<li>价值:在享受线程池带来的全局高并发的同时,以一种比互斥锁 (mutex) 更轻量、更高效的方式,保证了单个连接内的逻辑串行化</li>
+</ul>
+</li>
+</ol>
+<h2 id="交叉编译工具链"><a href="#交叉编译工具链" class="headerlink" title="交叉编译工具链"></a>交叉编译工具链</h2><ol>
+<li>核心目的:在一台x86 架构的电脑上,开发和编译出能在 ARM 架构上运行的程序</li>
+<li>核心组件<ul>
+<li><strong>编译器</strong>:<strong>gcc, g++</strong>;负责将 C&#x2F;C++ 源代码翻译成目标平台的汇编代码(<strong>预处理<code>.c</code>-&gt;<code>.i</code>,编译<code>.i</code>-&gt;<code>.s</code></strong>)</li>
+<li>二进制工具集:<ul>
+<li><strong>汇编器</strong> (Assembler) as:将<strong>汇编代码转换成机器码(<code>.s</code>-&gt;<code>.o</code>)</strong></li>
+<li><strong>链接器</strong> (Linker) ld:<strong>将汇编器生成的多个机器码文件 (.o) 和库文件链接成可执行文件</strong><ul>
+<li>关键点:它<strong>链接的是目标平台的库</strong>,而不是主机的库</li>
+<li><strong>静态链接</strong>:将你的程序所依赖的库函数或对象的代码副本,直接合并到最终生成的可执行文件中,<strong>可执行文件不依赖外部库</strong>,<strong>启动速度快</strong>,可能浪费空间</li>
+<li><strong>动态链接</strong>:链接阶段,并不将库代码拷贝到可执行文件中,真正的链接工作被推迟到程序运行时 (runtime),<strong>可执行文件依赖外部库</strong>,linux动态链接只会到默认的路径下搜索<code>/usr/lib</code></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>C 标准库</strong> (libc):<strong>交叉工具链必须包含为目标平台编译好的C库</strong><ul>
+<li>glibc (GNU C Library):功能完整,兼容性好,但体积较大.桌面 Linux 系统常用</li>
+<li>musl libc &#x2F; uClibc:轻量级 C 库,专为嵌入式系统设计,体积小,静态链接友好.</li>
+</ul>
+</li>
+<li><strong>内核头文件</strong>:C 库的某些功能(如系统调用)需要与特定版本的内核交互,因此需要包含相应的内核头文件</li>
+<li><strong>调试器</strong>:工具链中包含的 gdb 也是交叉版的,它能在主机上运行,但能理解目标平台的指令集和调试信息,用于远程调试</li>
+</ul>
+</li>
+</ol>
+<h2 id="Makefile-CMake"><a href="#Makefile-CMake" class="headerlink" title="Makefile&#x2F;CMake"></a>Makefile&#x2F;CMake</h2><ol>
+<li><p>Makefile是自动化构建工具,描述项目文件之间依赖关系以及如何生成可执行文件,make可以解析Makefile</p>
+</li>
+<li><p>CMake是跨平台的构建系统生成器,本身不编译代码,而是读取CMakeLists根据系统环境生成本地构建系统(比如linux上会生成Makefile)</p>
+</li>
+<li><p>Makefile核心规则</p>
+<blockquote>
+<p>目标文件:依赖文件1 依赖文件2</p>
+<p>​    生成目标的命令</p>
+</blockquote>
+</li>
+<li><p>CMake工作时解析顶层的CMakeLists,在内存中构建一个项目的内部表示,然后稍后转换为Makefile等文件,随后可以使用make进行构建</p>
+</li>
+<li><p>处理交叉编译</p>
+<ul>
+<li>Makefile:通常约定一个 CROSS_COMPILE 变量作为工具链的前缀,在指定gcc,g++时使用这个前缀来找到对应的工具链</li>
+<li>CMake:一般使用一个专门的<code>.cmake</code>文件来管理,<strong>使用set命令<code>TOOLCHAIN_PATH </code>,<code>CMAKE_SYSROOT </code>来指定交叉编译链以及头文件和库文件的搜索路径</strong>(不再从默认的搜索路径&#x2F;usr下寻找而是从你指定的)</li>
+</ul>
+</li>
+<li><p>处理库依赖</p>
+<ul>
+<li>Makefile: 硬编码写入Makefile</li>
+<li>CMake:使用<code>target_include_directories</code>,<code>target_link_libraries</code>来指定目标库,只会对目标的target生效</li>
+</ul>
+</li>
+</ol>
+<h2 id="GDB-远程调试"><a href="#GDB-远程调试" class="headerlink" title="GDB 远程调试"></a>GDB 远程调试</h2><ol>
+<li>GDB远程分为客户端和服务端,服务端位于开发板客户端,客户端位于宿主机,通过GDB远程串行协议进行连接</li>
+<li>客户端提供高级命令实现查看对战以及变量值,服务端非常轻量级,负责处理客户端的指令<ul>
+<li>Q:客户端为什么也需要一份可执行文件? A:客户端&#x3D;大脑+源码,服务器&#x3D;执行代理</li>
+</ul>
+</li>
+<li>调试流程:<ul>
+<li>在开发板也就是服务端,<code>./gdbserver :1234 ./my_app</code> : 1234​ 告诉 gdbserver 在本地所有 IP 地址的 1234 端口进行监听<ul>
+<li>执行后,gdbserver 会打印监听信息,然后阻塞,等待 GDB 客户端连接.此时 my_app 已被加载到内存但尚未执行</li>
+</ul>
+</li>
+<li>在宿主机也就是客户端,<code>aarch64-linux-gnu-gdb ./my_app</code>:必须使用交叉 GDB (aarch64-linux-gnu-gdb),并且加载本地带符号的 my_app 文件,这样 GDB 才能关联源码</li>
+<li>在客户端的提示下输入IP端口进行连接:<code>(gdb) target remote &lt;target_ip&gt;:1234</code></li>
+<li>随后就可以使用GDB命令进行调试</li>
+</ul>
+</li>
+<li>高频指令<ul>
+<li>b <location> (<strong>break</strong>) - <strong>设置断点</strong></li>
+<li>r (<strong>run</strong>) &#x2F; c (continue) - 运行与继续</li>
+<li>n (<strong>next</strong>) - <strong>单步步过</strong></li>
+<li>s (<strong>step</strong>) - <strong>单步步入</strong></li>
+<li>p <variable> (<strong>print</strong>) - <strong>打印变量</strong></li>
+<li>bt (<strong>backtrace</strong>) - <strong>查看调用栈</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="Shell-脚本"><a href="#Shell-脚本" class="headerlink" title="Shell 脚本"></a>Shell 脚本</h2><ol>
+<li><code>grep</code>:从文本(或文件中)找到指定模式的行<ul>
+<li><code>grep -r  pattern  /path/to/dir</code>:递归的搜索某个路径以及子路径的文件中是否有指定模式的文本</li>
+<li><code>-i</code>:忽略大小写</li>
+<li><code>-v</code>:反向匹配,不包含指定模式的行</li>
+</ul>
+</li>
+<li><code>sed &#39;s/old/new/g&#39;</code>:在管道中对文本进行替换<ul>
+<li><code>s</code>是替换</li>
+<li><code>g</code>代表替换所有匹配项,不加则只替换第一个</li>
+</ul>
+</li>
+<li>管道<code>command1 | command2</code>:将 command1 的标准输出 (stdout) 连接到 command2 的标准输入 (stdin)</li>
+<li>重定向<code>command &gt; file.log 2&gt;&amp;1</code>:把标准输出和标准错误都输出到file.log<ul>
+<li><code>&gt;</code>: 将标准输出重定向到 file.log (会覆盖文件原有内容)</li>
+<li><code>2&gt;</code>: 将标准错误输出 (stderr) 重定向,2是标准错误</li>
+<li><code>&amp;1</code>: &amp; 表示这是一个文件描述符,1 代表标准输出</li>
+</ul>
+</li>
+<li><code>$?</code>:上一个命令的退出状态码</li>
+<li><code>$#, $1, $@</code>:<ul>
+<li><code>$#</code>: 传递给脚本的参数个数</li>
+<li><code>$1</code>, <code>$2</code>…: 第一个、第二个参数</li>
+<li><code>$@</code>: 所有参数的列表</li>
+</ul>
+</li>
+<li><code>[ -f  $FILE  ] / [ -d  $DIR  ] / [ -e  $PATH  ]</code><ul>
+<li><code> -f (is file), -d (is directory), -e (exists)</code>:检查文件&#x2F;目录是否存在</li>
+</ul>
+</li>
+<li><code>[  $VAR1  ==  $VAR2  ] / [ -n  $VAR  ] / [ -z  $VAR  ]</code>:&#x3D;&#x3D; (字符串相等),-n (is not empty),-z (is empty)</li>
+<li><code>[ $NUM1 -eq $NUM2 ]</code>:eq (equal), -ne (not equal), -gt (greater than), -lt (less than).用于整数比较</li>
+</ol>
+<h2 id="裸机开发"><a href="#裸机开发" class="headerlink" title="裸机开发"></a>裸机开发</h2><ol>
+<li>裸机 (Bare-Metal):指的是嵌入式软件直接运行在硬件之上,没有任何操作系统的支持</li>
+<li>RTOS (Real-Time Operating System):是一种<strong>轻量级的操作系统</strong>,其<strong>核心是任务调度器</strong><ul>
+<li>它在裸机之上增加了一个薄薄的抽象层,提供了任务管理、时间管理、任务间通信(如信号量、消息队列)等服务</li>
+<li>将程序的功能拆分成多个独立的 任务 (Task) ,并为每个任务分配一个优先级,<strong>优先级抢占</strong></li>
+</ul>
+</li>
+<li>Linux :追求的是高吞吐量和公平性,而非严格的实时性<ul>
+<li>分时公平</li>
+</ul>
+</li>
+</ol>
+<h2 id="进程通信IPC"><a href="#进程通信IPC" class="headerlink" title="进程通信IPC"></a>进程通信IPC</h2><ol>
+<li><p>进程是独立运行的程序,线程是一个程序内部的子任务</p>
+<ul>
+<li>只有要求强隔离性和强稳定性时,才建议使用进程</li>
+</ul>
+</li>
+<li><p>IPC方式梳理</p>
+<table>
+<thead>
+<tr>
+<th>IPC 方式</th>
+<th>核心原理</th>
+<th>优点</th>
+<th>缺点</th>
+<th>一句话场景</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>管道</strong> (Pipe)</td>
+<td><strong>内核维护</strong>的单向字节流缓冲区.</td>
+<td>简单,符合流式编程思想.</td>
+<td>匿名管道<strong>只能用于父子进程;半双工</strong>.</td>
+<td>重定向命令行工具的输入输出 (ls | grep)</td>
+</tr>
+<tr>
+<td><strong>命名管道</strong> (FIFO)</td>
+<td><strong>文件系统</strong>中的特殊文件,作为管道.</td>
+<td><strong>无亲缘关系的进程可用</strong>.</td>
+<td>依然是<strong>半双工</strong>,速度一般.</td>
+<td>不相关进程间的简单数据流传递.</td>
+</tr>
+<tr>
+<td><strong>消息队列</strong></td>
+<td><strong>内核维护的带类型的消息链表</strong>.</td>
+<td>可选择性接收消息,解耦性好.</td>
+<td>消息大小和队列总容量有限制.</td>
+<td><strong>传递短小的、结构化的控制命令</strong>.</td>
+</tr>
+<tr>
+<td><strong>信号</strong> (Signal)</td>
+<td><strong>异步通知机制</strong>,类似 中断 .</td>
+<td>简单,<strong>内核支持</strong>,<strong>实时性高</strong>.</td>
+<td><strong>传递的信息量极少</strong>(只有一个信号编号).</td>
+<td>通知某个进程发生了特定事件(如 kill -9).</td>
+</tr>
+<tr>
+<td><strong>信号量</strong> (Semaphore)</td>
+<td><strong>一个计数器,用于控制对共享资源的访问</strong>.</td>
+<td>能实现复杂的同步逻辑.</td>
+<td>本身不传递数据,只用于同步.</td>
+<td>控制共享内存的访问,或限制并发数量.</td>
+</tr>
+<tr>
+<td><strong>共享内存</strong></td>
+<td><strong>将同一物理内存映射到多个进程</strong>.</td>
+<td>速度最快,<strong>无内核拷贝开销</strong>.</td>
+<td>必须自己<strong>用信号量等工具做同步</strong>,实现复杂.</td>
+<td>进程间大批量数据(如视频帧)的高速传输.</td>
+</tr>
+<tr>
+<td><strong>套接字</strong> (Socket)</td>
+<td>本地化的网络编程接口 (Unix Domain Socket).</td>
+<td>API 成熟,支持双向通信,模型清晰 (C&#x2F;S).</td>
+<td>性能不如共享内存,有数据拷贝.</td>
+<td>在本地实现 Client&#x2F;Server 模型的复杂交互.</td>
+</tr>
+</tbody></table>
+<ul>
+<li>信号都是系统预置的,几十种有特殊含义的信号</li>
+<li>信号量用于处理复杂生产消费场景的计数器</li>
+</ul>
+</li>
+</ol>
+<h1 id="硬件与接口知识"><a href="#硬件与接口知识" class="headerlink" title="硬件与接口知识"></a>硬件与接口知识</h1><h2 id="Zynq-MPSoC-架构"><a href="#Zynq-MPSoC-架构" class="headerlink" title="Zynq MPSoC 架构"></a>Zynq MPSoC 架构</h2><ol>
+<li>结构划分<ul>
+<li>PS:负责处理复杂的控制流、运行操作系统(如 Linux)、执行网络协议栈、文件系统、用户界面等上层应用</li>
+<li>PL:负责处理高速、并行的计算密集型任务,如数字信号处理 (DSP)、图像算法、自定义高速接口协议等</li>
+</ul>
+</li>
+<li>核心组件<ul>
+<li>APU (Application Processing Unit):MPSoc的PS端拥有四核 ARM Cortex-A53,64 位处理器<ul>
+<li>7000系列则是双核 32 位 ARM Cortex-A9</li>
+</ul>
+</li>
+<li>RPU (Real-Time Processing Unit):<ul>
+<li>双核 ARM Cortex-R5F: 这是一个实时性、可靠性、安全性极高的处理器,通常用于裸机或实时操作系统 (RTOS),负责对延迟和可靠性要求极高的任务,如电机控制、安全监控</li>
+<li>7000 系列没有 RPU</li>
+</ul>
+</li>
+<li>PMU (Platform Management Unit):平台管理单元.一个 MicroBlaze 软核,负责整个芯片的上电顺序、功耗管理和安全</li>
+<li>PL端:查找表LUT,触发器,DSP,BRAM等</li>
+</ul>
+</li>
+<li>PS-PL 交互方式:最主要通过AXI总线,还有通过IRQ_F2P向PS端发送的中断</li>
+</ol>
+<h2 id="AXI总线"><a href="#AXI总线" class="headerlink" title="AXI总线"></a>AXI总线</h2><ol>
+<li>定义:高性能、高带宽、低延迟的片上总线 (On-Chip Bus) 协议</li>
+<li>端口<ul>
+<li>AXI General Purpose (<strong>GP</strong>) Port - <strong>通用目的端口</strong><ul>
+<li>特点: <strong>32位</strong>,低&#x2F;中带宽,主要用于控制和状态信息交互.</li>
+<li>方向: <strong>PS 作为主</strong>设备 (Master),<strong>PL 作为从</strong>设备 (Slave).</li>
+<li>工作流程: PS 上的 CPU 像访问普通内存地址一样,去读写 PL 中自定义模块的寄存器.这些寄存器被映射到 PS 的地址空间</li>
+<li>协议:通常使用AXI-Lite,又是也可以使用Full-AXI</li>
+</ul>
+</li>
+<li>AXI High Performance (<strong>HP</strong>) Port - <strong>高性能端口</strong><ul>
+<li>特点: <strong>64&#x2F;128位</strong>,高带宽,专门为<strong>PL 大规模读写 PS 的 DDR</strong>内存设计</li>
+<li>工作流程: PL 中的一个模块(通常是 DMA 控制器)可以直接、独立地将大量数据从 PL 侧写入 DDR,或者从 DDR 读出数据,整个过程 CPU 不参与</li>
+<li>协议:只使用AXI-Full</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>核心原理<ul>
+<li>一个完整的 AXI 内存映射 (Memory-Mapped) 传输,被分解成了五个并行的、独立的通道<ul>
+<li><strong>AXI</strong>作为交通枢纽,<strong>只做主从之间的转发</strong>,实际的<strong>数据存取都是对应的主或者从设备完成</strong>的</li>
+</ul>
+</li>
+<li><strong>写地址</strong>通道 (Write Address Channel - AW):<ul>
+<li>谁发出: Master (如 CPU, DMA)</li>
+<li>内容: AWADDR (要写入的地址), AWLEN (突发长度) 等控制信号</li>
+<li>作用: Master 在这个通道上喊话:我要往地址 A 写 N 个数据</li>
+</ul>
+</li>
+<li><strong>写数据</strong>通道 (Write Data Channel - W):<ul>
+<li>谁发出: Master.</li>
+<li>内容: WDATA (要写入的数据), WSTRB (字节选通), WLAST (突发的最后一个数据).</li>
+<li>作用: Master 在这个通道上把要写的数据:包裹 发出去</li>
+</ul>
+</li>
+<li><strong>写响应</strong>通道 (Write Response Channel - B):<ul>
+<li>谁发出: Slave (如 BRAM Controller).</li>
+<li>内容: BRESP (写操作是否成功).</li>
+<li>作用: Slave 在这个通道上回话::数据已收到,操作成功&#x2F;失败！</li>
+</ul>
+</li>
+<li><strong>读地址</strong>通道 (Read Address Channel - AR)<ul>
+<li>谁发出: Master</li>
+<li>内容: ARADDR (要读取的地址), ARLEN (突发长度) 等.</li>
+<li>作用: Master 在这个通道上喊话::我需要从地址 B 读取 M 个数据！</li>
+</ul>
+</li>
+<li><strong>读数据</strong>通道 (Read Data Channel - R):<ul>
+<li>谁发出: Slave.</li>
+<li>内容: RDATA (读取到的数据), RRESP (读操作是否成功), RLAST (突发的最后一个数据).</li>
+<li>作用: Slave 在这个通道上把数据:包裹 发给 Master</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>乱序处理 (Out-of-Order Execution)<ul>
+<li><strong>AXI 协议允许</strong> Master 给每个传输请求打上一个 ID 标签</li>
+<li><strong>Slave</strong> 可以不按照收到请求的顺序来完成它们,而是<strong>通过仲裁优先完成快速的请求</strong></li>
+</ul>
+</li>
+<li>AXI协议<ul>
+<li><strong>AXI4</strong> (Full AXI &#x2F; Memory Mapped):<ul>
+<li>特点: 拥有全部 5 个通道,功能最完整.支持<strong>突发传输</strong> (Burst Transaction),即<strong>一次地址请求可以连续读写最多256个数</strong>据.</li>
+<li>接口信号: IP 核上会有 M_AXI_ (主) 或 S_AXI_ (从) 前缀,后面跟着 AWVALID, AWADDR, WVALID, WDATA, BVALID, BREADY 等一大堆信号</li>
+<li>应用场景:<ul>
+<li>高性能内存访问: 连接处理器和 DDR 内存</li>
+<li>DMA 数据传输: 连接 DMA IP 和内存</li>
+<li>连接需要大块数据交换的自定义 IP</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>AXI4-Lite</strong><ul>
+<li>特点: AXI4 的轻量级简化版.它<strong>没有突发传输能力</strong>,<strong>一次地址请求只能读写一个数据单元</strong>(通常是 32 位).因此,它不需要像 AWLEN 这样的长度信号,通道信号也大大减少.</li>
+<li>接口信号: S_AXI_LITE_ 或 M_AXI_LITE_.信号数量远少于 Full AXI</li>
+<li>应用场景:<ul>
+<li><strong>读写控制&#x2F;状态寄存器</strong>: 这是它最主要、最普遍的用途.比如配置一个 IP 的工作模式,启动&#x2F;停止它,读取它的状态.因为这些操作都是单次、低频的,完全不需要高带宽的突发传输.</li>
+<li>AXI DMA 的控制接口: DMA 的控制寄存器接口就是 AXI-Lite 的</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>AXI4-Stream</strong><ul>
+<li>特点: <strong>没有地址概念</strong>,它被设计用来<strong>实现单向、高速、连续的数据流传输</strong></li>
+<li>核心思想: 不关心数据要去哪里(没有地址),只关心数据本身的流动,像一根水管一样</li>
+<li>接口信号: S_AXIS_ (从) 或 M_AXIS_ (主).核心信号只有三个:<ul>
+<li>TDATA: 传输的数据.</li>
+<li>TVALID:水来了 ,表示 TDATA 上的数据是有效的.</li>
+<li>TREADY:我准备好了 ,表示消费者可以接收数据.</li>
+<li><strong>TVALID 和 TREADY同为高电平</strong>时,一次<strong>数据传输</strong>才真正发生(这被<strong>称为握手</strong>)</li>
+<li>还有 TLAST (表示这是数据流的最后一个包)等可选信号</li>
+</ul>
+</li>
+<li>应用场景:<ul>
+<li>流水线式的数据处理: 非常适合连接一系列处理模块.比如:[摄像头数据源 IP] –(AXIS)–&gt; [图像缩放 IP] –(AXIS)–&gt; [颜色空间转换 IP] –(AXIS)–&gt; [DMA IP]</li>
+<li>连接高速 ADC&#x2F;DAC</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="ARMv8-A53-架构"><a href="#ARMv8-A53-架构" class="headerlink" title="ARMv8 (A53) 架构"></a>ARMv8 (A53) 架构</h2><ol>
+<li>该架构引入了64位系统以及异常级别</li>
+<li><strong>异常级别</strong>:定义了一个层次化的特权体系,决定了软件在什么级别上运行,以及它拥有多大的系统控制权限<ul>
+<li><strong>EL0: 用户态</strong><ul>
+<li>运行什么: 普通的应用程序</li>
+<li>权限: 最低权限.代码不能直接访问硬件,不能修改系统关键设置.</li>
+<li>如何获得服务: 必须通过系统调用 (System Call) 的方式,请求 EL1 的操作系统内核来为它服务</li>
+</ul>
+</li>
+<li><strong>EL1: 内核态</strong> (Kernel Mode)<ul>
+<li>运行什么: 操作系统内核,比如 Linux Kernel.</li>
+<li>权限: 拥有对系统大部分硬件和内存的直接控制权.负责管理所有系统资源(内存、进程、设备驱动等),并为 EL0 的应用程序提供服务</li>
+</ul>
+</li>
+<li><strong>EL2: 虚拟化层</strong> (Hypervisor Mode)<ul>
+<li>运行什么: Hypervisor (虚拟机监控器),如 KVM, Xen</li>
+<li>权限: 可以在 EL1 之上,创建和管理多个虚拟机 (VM).每个虚拟机都有自己独立的操作系统内核(运行在 EL1).</li>
+<li>作用: 在一个物理硬件上同时运行多个隔离的操作系统.在嵌入式中可用于隔离安全关键的 OS 和普通 OS</li>
+</ul>
+</li>
+<li><strong>EL3: 安全监控层</strong> (Secure Monitor Mode)<ul>
+<li>运行什么: Secure Monitor 固件,它是 ARM TrustZone 安全技术的基石</li>
+<li>权限: 最高权限.负责在安全世界 (Secure World) 和普通世界 (Normal World) 之间进行切换</li>
+<li>作用: 提供一个硬件隔离的安全执行环境 (TEE - Trusted Execution Environment),用于处理密码、密钥、指纹支付等敏感信息,即使普通世界的 Linux 内核被攻破,也无法访问到安全世界的数据</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>AArch64 与 AArch32 执行状态<ul>
+<li>AArch64: 这是 ARMv8 的原生 64 位执行状态</li>
+<li>AArch32: 为了兼容旧的 32 位 ARM 代码,ARMv8 保留了一个 32 位的执行状态</li>
+<li>在 MPSoC 上,Linux 内核通常运行在 AArch64 状态下,但它有能力运行 32 位的用户程序(如果开启了兼容性支持)</li>
+</ul>
+</li>
+<li><strong>系统启动流程</strong><ul>
+<li><strong>上电后,从EL3开始执行Boot ROM的代码</strong></li>
+<li><strong>加载第一阶段引导程序FSBL,FSBL加载Uboot,U-Boot 通常运行在最高可用特权级(如 EL3 或 EL2)</strong></li>
+<li><strong>Uboot完成硬件初始化切换至EL1,跳转Linux内核入口点</strong></li>
+<li><strong>内核启动用户程序,切换至EL0</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="M-2-接口"><a href="#M-2-接口" class="headerlink" title="M.2 接口"></a>M.2 接口</h2><ol>
+<li><strong><code>m.2</code>是一个接口,不是一种通信协议</strong>,多个协议都可以接该接口,可以承载多种不同的通信协议如 PCIe、SATA、USB<ul>
+<li>SATA是数据传输协议,NVME也是数据传输协议,也有SATA的接口,SATA协议+M2就是M2接口的SATA硬盘</li>
+</ul>
+</li>
+<li>对于NVMe的M2硬件基座,连接到APU遵循如下路径<ul>
+<li><strong>M2插槽</strong>的高速差分信号线<strong>连接PS端的MGT</strong> (Multi-Gigabit Transceiver),也叫 GTR 收发器,负责将高速模拟转化为并行数字<ul>
+<li><strong>MGT</strong>&#x2F;GTR 是<strong>协议无关</strong>的: MGT 的本质是一个非常通用的高速串行物理层接口 (PHY).它本身<strong>只负责处理底层的电信号</strong>(<strong>串并转换、时钟恢复</strong>等),并不认识上层的 PCIe 还是 SATA 协议</li>
+<li>协议由控制器决定: MGT&#x2F;GTR 模块在芯片内部与一个协议控制器硬核 (Controller Hard IP) 相连,接的啥控制器就是啥协议</li>
+<li>如果在PL端的MGT,会根据性能被称为GTH&#x2F;GTY</li>
+</ul>
+</li>
+<li><strong>MGT和上层的硬核PCIE协议控制器相连</strong>,负责处理数据链路和事务层</li>
+<li>芯片内部PCIE控制器通过AXI总线连接到中央互联矩阵 (AXI Interconnect),在AXI的仲裁下可以与DDR等进行交互</li>
+</ul>
+</li>
+<li>Petalinux开发中<ul>
+<li>需要有个设备树节点来使能PCIe控制器,这个使能如果在Vivado配置了,可以被Petalinux识别自动生成设备树</li>
+<li>Linux<strong>内核启动后</strong>,<strong>PCIe 子系统会根据设备树的信息去初始化 PS 端的 PCIe 控制器</strong><ul>
+<li>然后,它会<strong>发起总线枚举</strong> (Bus Enumeration),<strong>扫描 PCIe 总线上的设备</strong></li>
+</ul>
+</li>
+<li><strong>PCIe 子系统扫描到 M.2 SSD 后,会读取其配置信息 (Vendor&#x2F;Device ID),并为其匹配 nvme 核心驱动</strong></li>
+<li><strong>NVMe 驱动初始化成功后</strong>,会<strong>向 Linux 的块设备层注册一个新的磁盘设备</strong><ul>
+<li><strong>块设备层会在 &#x2F;dev 目录下创建我们熟悉的设备节点</strong>,如 &#x2F;dev&#x2F;nvme0n1</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="阅读芯片手册"><a href="#阅读芯片手册" class="headerlink" title="阅读芯片手册"></a>阅读芯片手册</h2><ol>
+<li>我会先用原理图确认物理连接,看‘能不能做’.再用数据手册确认性能规格,看‘能做得多好</li>
+<li>当 BSP 和通用方案解决不了问题时,我会把手册当作最终的排错依据,直接核对关键的控制和状态寄存器</li>
+</ol>
+<h2 id="高速信号设计基础"><a href="#高速信号设计基础" class="headerlink" title="高速信号设计基础"></a>高速信号设计基础</h2><ol>
+<li><strong>低速信号</strong> (如 UART @115200bps): 信号的上升&#x2F;下降时间远小于信号本身的持续时间,可以<strong>近似看作理想的 0 和 1 电平跳变</strong></li>
+<li><strong>高速信号</strong> (如 PCIe Gen3 @8Gbps): 信号的波长已经和 PCB 走线的长度在同一个数量级.这时,PCB 走线不再是一根完美的:导线 ,而变成了一根传输线 (Transmission Line).信号在上面<strong>传播时</strong>,<strong>会出现各种波动效应,如反射、串扰、衰减</strong></li>
+<li><strong>差分信号</strong>:<strong>使用一对信号线 (TX+&#x2F;TX-) 来传输一个信号</strong>.这两条线上的<strong>信号相位相反</strong>(一条为高时,另一条为低),<strong>幅度相同</strong><ul>
+<li>优点:<ul>
+<li><strong>差分线抗背景干扰能力强</strong></li>
+<li>两条线信号相位相反<strong>减少电磁辐射</strong></li>
+<li>可以<strong>在较低的电压摆幅下工作</strong><ul>
+<li>电压摆幅 (Voltage Swing) 指的是信号在逻辑高电平 (V_high) 和逻辑低电平 (V_low) 之间变化的电压范围</li>
+<li>低电压摆幅<strong>速度更快</strong>,因为电压切换的幅值小</li>
+<li><strong>功耗更低</strong>,电压低了功耗就低</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>应用:几乎所有现代高速串行接口都使用差分信号,如 PCIe, SATA, USB 3.0, Ethernet (SGMII&#x2F;RGMII), DisplayPort</li>
+</ul>
+</li>
+<li><strong>特征阻抗:信号在传输线上传播时的瞬时电阻</strong>.<strong>由PCB走线的物理属性</strong>(线宽、与参考地平面的距离、介电常数)<strong>决定</strong>.对于<strong>差分信号,通常控制在 100 欧姆</strong>;对于<strong>单端信号,通常是 50 欧姆</strong></li>
+<li>阻抗匹配 :<strong>阻抗匹配是为了解决信号反射问题.高速信号在传输线上遇到阻抗不连续的点就会发生反射,干扰原始信号</strong><ul>
+<li>PCB 工程师通过精确控制走线的宽度和叠层结构来实现.在源端或末端,也常常会放置终端电阻 (Termination Resistors)来进行匹配</li>
+<li>通过精确控制差分线对的阻抗为 100 欧姆(或单端线 50 欧姆),来保证信号能量的平顺传输</li>
+</ul>
+</li>
+<li><strong>等长绕线</strong>:对于<strong>差分信号对</strong>(P线和N线)<strong>或一组并行总线</strong> (如 DDR 的数据总线 DQ0-DQ7),<strong>要求</strong>它们的 PCB <strong>走线长度几乎完全相等,用于保证信号同时到达</strong><ul>
+<li>差分信号: P 线和 N 线的信号是严格同步、相位相反的<ul>
+<li>如果两根线一长一短,信号到达接收端的时间就会有偏差(称为时序偏斜,Skew)</li>
+<li>这会导致它们的相位关系错乱,差分信号的优势(如共模抑制)就会大打折扣,甚至导致误码</li>
+</ul>
+</li>
+<li>并行总线:时钟信号 (DDR_CLK) 和数据信号 (DDR_DQ) 必须在几乎完全相同的时间到达内存颗粒的引脚<ul>
+<li>数据线之间长度不一,或者数据线与时钟线长度差太多,就会导致在时钟的上升沿采样到的数据是错误</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SoC-FPGA-内部存储"><a href="#SoC-FPGA-内部存储" class="headerlink" title="SoC&#x2F;FPGA 内部存储"></a>SoC&#x2F;FPGA 内部存储</h2><ol>
+<li>BRAM:是FPGA逻辑结构中的一部分,由成百上千个小的 RAM 块构成<ul>
+<li>PL的一部分意味着也在SOC内</li>
+</ul>
+</li>
+<li><strong>OCM (On-Chip Memory):PS内部的一块SRAM</strong><ul>
+<li>CPU 访问它有专用的高速通道,不需要经过复杂的总线仲裁</li>
+<li>与Cache不同,它由程序员精确控制,主要用于存放时间和确定性要求高的代码</li>
+</ul>
+</li>
+<li>DDR:内存</li>
+</ol>
+<h2 id="QSPI-Flash"><a href="#QSPI-Flash" class="headerlink" title="QSPI Flash"></a>QSPI Flash</h2><ol>
+<li>定义:<ul>
+<li><strong>Flash: 掉电后不丢失</strong></li>
+<li>SPI (Serial Peripheral Interface): 串行通信协议<ul>
+<li>使用 4 根线(时钟 SCLK, 主出从入 MOSI, 主入从出 MISO, 片选 CS)</li>
+<li>一次只能传输1bit</li>
+</ul>
+</li>
+<li><strong>QSPI</strong> (<strong>Quad</strong> Serial Peripheral Interface): <strong>SPI的进化版,增加了数据线</strong><ul>
+<li>一次可以传输4bit</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>XIP(Execute-In-Place,就地执行)<ul>
+<li>传统IO:CPU 通过 QSPI 控制器,像操作普通 SPI 设备一样,发送 读 、 写 、 擦除 等命令</li>
+<li><strong>XIP:将QSPI Flash映射到内存地址空间</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="内存映射-I-O-MMIO"><a href="#内存映射-I-O-MMIO" class="headerlink" title="内存映射 I&#x2F;O (MMIO)"></a>内存映射 I&#x2F;O (MMIO)</h2><ol>
+<li>定义:MMIO是一种 CPU 与外设 (Peripherals) 进行通信的架构设计<ul>
+<li><strong>外设的控制寄存器、状态寄存器以及数据缓冲区</strong>被分配到 CPU 的<strong>物理地址空间</strong>中</li>
+<li>是现代嵌入式系统(特别是 ARM 架构)中与外设交互的唯一方式</li>
+</ul>
+</li>
+<li>系统内部有地址解码器,负责监听地址总线,将地址与实际的设备映射起来</li>
+<li>软件访问MMIO<ul>
+<li>Linux用户态访问<code>/dev/mem</code></li>
+<li>使用UIO,调用mmap</li>
+</ul>
+</li>
+<li><strong>在使用指针访问 MMIO 区域时,必须将指针声明为 volatile</strong></li>
+</ol>
+<h1 id="操作系统与内核"><a href="#操作系统与内核" class="headerlink" title="操作系统与内核"></a>操作系统与内核</h1><h2 id="Petalinux-Yocto"><a href="#Petalinux-Yocto" class="headerlink" title="Petalinux&#x2F;Yocto"></a>Petalinux&#x2F;Yocto</h2><ol>
+<li>定义与背景<ul>
+<li><strong>Yocto Project: 构建嵌入式linux 的开源工具</strong></li>
+<li>Petalinux: 这是 Xilinx&#x2F;AMD 基于 Yocto Project 为其自家芯片(Zynq, Versal 等)定制的一套上层封装和工具集</li>
+<li>Petalinux ≈ Yocto Project + Xilinx BSP + Xilinx 定制工具 (petalinux-create, petalinux-config 等)</li>
+</ul>
+</li>
+<li>工作流程<ul>
+<li>硬件描述输入:<code>petalinux-config --get-hw-description</code>导入xsa,会自动生成匹配的Uboot和设备树</li>
+<li>系统基础配置:<ul>
+<li><code>petalinux-config -c kernel</code>:裁剪内核,开启我需要的驱动(比如 PCIe&#x2F;NVMe)</li>
+<li><code>petalinux-config -c rootfs</code> 来选择需要集成到系统里的预置软件包</li>
+</ul>
+</li>
+<li>构建与部署:<ul>
+<li><code>petalinux-build</code>,编译系统生成镜像文件(如 image.ub, rootfs.tar.gz)</li>
+<li><code>petalinux-package --boot --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot --force</code>生成BOOT.BIN</li>
+</ul>
+</li>
+<li>集成自定义应用:在编译完毕的系统开发程序,开发完毕后添加到<code>project-spec/meta-user</code>下,配置后重新生成镜像, 默认包含用户App</li>
+</ul>
+</li>
+</ol>
+<h2 id="Device-Tree-DTS"><a href="#Device-Tree-DTS" class="headerlink" title="Device Tree (DTS)"></a>Device Tree (DTS)</h2><h3 id="定义与背景"><a href="#定义与背景" class="headerlink" title="定义与背景"></a>定义与背景</h3><ol>
+<li><strong>设备树 (Device Tree) 用来描述硬件信息,以与操作系统无关的方式,将硬件的详细信息传递给操作系统内核</strong><ul>
+<li>DTS (Device Tree Source): .dts 或 .dtsi 文件,是人类可读的、描述硬件的源代码</li>
+<li>DTB (Device Tree Blob): .dtb 文件,是 DTS 经过编译后生成的、内核可以直接解析的二进制文件</li>
+</ul>
+</li>
+<li>为什么需要设备树<ul>
+<li>内核本身是通用的,为了避免不同的开发板的硬件配置使内核大小膨胀,使用设备树选择性的添加硬件文件</li>
+<li>设备树可以独立于内核,修改设备树不需要编译内核</li>
+</ul>
+</li>
+</ol>
+<h3 id="设备树的层次结构"><a href="#设备树的层次结构" class="headerlink" title="设备树的层次结构"></a>设备树的层次结构</h3><ol>
+<li><p>层次拆分</p>
+<ul>
+<li><strong>顶层结构</strong>:<code>system-top.dts</code>:Petalinux <strong>构建时使用的最顶层文件</strong>,通常由工具管理</li>
+</ul>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// system-top.dts (通常由工具管理)</span></span><br><span class="line">/include/  system-conf.dtsi  <span class="comment">// 包含板级配置文件</span></span><br><span class="line"></span><br><span class="line">/ &#123;</span><br><span class="line">    <span class="comment">// 这里可能会有一些顶层属性</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><strong>板级配置层</strong>:<code>system-conf.dtsi</code>:这个文件<strong>负责整合芯片级和用户级的配置</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// system-conf.dtsi (工具生成)</span></span><br><span class="line">/include/  zynqmp.dtsi  <span class="comment">// 1. 包含芯片原厂定义的 dtsi</span></span><br><span class="line">/include/  pl.dtsi       <span class="comment">// 2. 包含从 XSA 生成的 PL 部分 dtsi</span></span><br><span class="line">/include/  system-user.dtsi  <span class="comment">// 3. 包含用户自定义的 dtsi</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>核心定义层:通常不需要修改</p>
+<ul>
+<li><code>zynqmp.dtsi</code>:定义了 Zynq MPSoC PS 端所有的硬件IP核(CPU, I2C, SPI, PCIe控制器等);所有节点在这里都带有标签 (label),并且 status 通常是  disabled </li>
+<li><code>pl.dtsi</code>: Petalinux 根据你的 .xsa 文件自动生成.定义了你在 Vivado 中设计的 PL 端所有 AXI IP 核.同样,节点也都带有标签</li>
+</ul>
+</li>
+<li><p><strong>用户自定义层</strong>:<strong><code>system-user.dtsi</code>,用于修改和追加配置的地方</strong></p>
+<ul>
+<li><code>/&#123;...&#125;</code>: 定义了硬件的物理层级结构.根下面有 soc,soc 下面有 i2c-controller,i2c-controller 下面有 i2c-device.这描述了谁挂在谁身上</li>
+<li>根节点外<code>&amp;label&#123;...&#125;</code>:引用一个别处已经定义的节点进行覆盖(zynqmp.dtsi或pl.dtsi)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>用户设备树修改规则</p>
+<ul>
+<li><strong>当你的外设寄存器的设置需求与Vivado标准配置不同时</strong>(比如网卡芯片不同):<ul>
+<li><strong>在核心定义层查找对应节点,获取label</strong></li>
+<li><strong>在用户自定义层使用根节点外的label来覆盖设备的信息</strong></li>
+</ul>
+</li>
+<li><strong>对于非标准器件,比如通过GPIO,或者I2C总线连接的传感器模块</strong><ul>
+<li>如果是一个 I2C 设备,就应该在 system-user.dtsi 中,<strong>引用对应总线的label,并在其中追加一个子节点来描述它</strong></li>
+<li>如果<strong>不属于标准总线,直接被GPIO控制,可以在根节点下创建一个描述节点</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>语法规则</p>
+<ul>
+<li>节点:代表系统中的一个设备或总线<ul>
+<li><code>label-name:node-name@unit-address &#123; ... &#125;;</code>,其中label-name是可选的</li>
+</ul>
+</li>
+<li>属性:描述节点的内部配置<ul>
+<li><code>property-name = &lt;value&gt;;</code></li>
+</ul>
+</li>
+<li>核心属性<ul>
+<li><strong>compatible</strong>:它是一个字符串列表,格式为  manufacturer,model .<strong>用于内核匹配驱动</strong></li>
+<li><strong>reg</strong>:reg 属性的值是由一个或多个 &lt;地址 大小&gt; 对组成的.每一对所占用的 cell (32位单元) 数量,由父节点的<code> #address-cells</code> 和 <code>#size-cells</code> 决定,用于表述硬件的寄存器信息<ul>
+<li>在 64 位系统的标准配置:<code>#address-cells = &lt;2&gt;;</code>,<code>#size-cells = &lt;2&gt;;</code></li>
+<li><code>reg = &lt;0x0 0xff000000 0x0 0x1000&gt;;</code>表示地址位占用两个cell,大小位占用两个cell</li>
+</ul>
+</li>
+<li><strong>interrupts</strong>:<strong>描述设备使用的中断及其属性</strong><ul>
+<li><code> interrupts = &lt;0 66 4&gt;</code>:0是共享外设中断,66是终端号,4是高电平触发</li>
+</ul>
+</li>
+<li><strong>interrupt-controller 属性</strong>: 一个空的布尔属性,<strong>用于将一个设备节点标记为中断控制器</strong></li>
+<li><strong>#interrupt-cells 属性</strong>: 这是中断控制器节点的一个重要属性,它决定了中断描述符需要用多少个32位的单元(cell)来表示<code>#interrupt-cells = &lt;1&gt;</code></li>
+<li><strong>interrupt-parent 属性</strong>: 设备节点通过此属性指定其<strong>中断信号所连接到的中断控制器</strong><code>interrupt-parent = &lt;&amp;intc1&gt;</code><ul>
+<li>如果一个节点没有 interrupt-parent 属性,它将从其父节点继承</li>
+</ul>
+</li>
+<li><strong>interrupts-extended 属性</strong>: 当一个设备<strong>需要连接到多个中断控制器</strong>时,应使用此属性</li>
+<li><strong>status</strong>: okay或ok表示设备已使能;disabled表示设备被禁用</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>内核解析规则</p>
+<ul>
+<li>加载 DTB: <strong>U-Boot 把编译好的 .dtb 二进制文件加载到内存</strong>,并<strong>把地址告诉 Linux 内核</strong></li>
+<li>构建 device_node 树: <strong>内核</strong>启动早期,会<strong>解析 DTB存储在内存</strong></li>
+<li>扫描与注册:<strong>内核扫描内存设备信息</strong>,<strong>扫描节点的compatible属性</strong>,如果<strong>扫描到了</strong>就把信息打包为<code>platform_device</code>结构体,并<strong>挂载到平台总线等待驱动匹配</strong></li>
+<li>驱动加载:<strong>驱动向驱动模型核心(Driver Core)提交内置的compatible属性</strong></li>
+<li>驱动匹配:<strong>驱动模型核心</strong>(Driver Core)<strong>匹配二者,匹配成功调用该驱动的probe函数</strong><ul>
+<li>驱动的probe函数可以使用内核的API获取寄存器及中断等硬件信息</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>注意事项:</p>
+<ul>
+<li><strong>自定义的模块和自定义的驱动,都要写上相对应的compatible属性</strong></li>
+<li><strong>设备树只声明硬件的寄存器地址,设置寄存器值是驱动在完成</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="Linux内核配置"><a href="#Linux内核配置" class="headerlink" title="Linux内核配置"></a>Linux内核配置</h2><ol>
+<li>为什么要配置内核?<ul>
+<li>使能硬件驱动</li>
+<li>开启&#x2F;关闭内核特性:比如,开启内核的调试功能 (如 kgdb),或者为了安全关闭一些不必要的网络协议支持</li>
+<li>系统优化: 裁剪掉所有不需要的驱动和功能,可以极大地减小内核镜像体积,并加快系统启动速度</li>
+</ul>
+</li>
+<li>petalinux配置内核的页面与Linux内核源码树的标准menuconfig一样,petalinux只是提供了一个入口</li>
+<li>内核配置页解析<ul>
+<li><strong>General setup</strong>:<strong>内核最核心、最通用的配置.比如系统主机名、内核消息队列支持等</strong></li>
+<li><strong>Device Drivers</strong>:对应<code>drivers/</code>目录,<strong>几乎所有的硬件驱动配置</strong>都在这里</li>
+<li><strong>File systems</strong>:对应<code>fs/</code>目录.这里<strong>包含了所有文件系统的支持</strong>,比如 EXT4, NFS, VFAT</li>
+<li><strong>Networking support</strong>:对应<code>net/</code>目录.这里是<strong>网络协议栈的配置</strong>,比如 TCP&#x2F;IP, IPv6, Sockets 等<ul>
+<li>和<code>Device Drivers -&gt; Network device support</code>的区别:这里是协议层,那边是硬件驱动层</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Linux驱动"><a href="#Linux驱动" class="headerlink" title="Linux驱动"></a>Linux驱动</h2><h3 id="驱动的分类"><a href="#驱动的分类" class="headerlink" title="驱动的分类"></a>驱动的分类</h3><table>
+<thead>
+<tr>
+<th align="left">特性维度</th>
+<th align="left">内核驱动 (Kernel Driver)</th>
+<th align="left">用户空间驱动 (Userspace Driver, e.g., UIO)</th>
+<th align="left">混合驱动 (Hybrid Driver, e.g., DPDK)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">运行空间</td>
+<td align="left">内核空间 (EL1)</td>
+<td align="left">用户空间 (EL0)</td>
+<td align="left">控制路径: 用户空间<br>数据路径: 内核(Bypass)+用户空间</td>
+</tr>
+<tr>
+<td align="left">核心思想</td>
+<td align="left">内核全面管理硬件,向用户提供抽象接口</td>
+<td align="left">内核只做:管道工 ,将硬件资源直接暴露给用户态</td>
+<td align="left">内核让出数据路径,用户态直接、高效地操作硬件</td>
+</tr>
+<tr>
+<td align="left">性能</td>
+<td align="left">高 (中断延迟低, 无需上下文切换)</td>
+<td align="left">中&#x2F;低 (中断延迟高, 存在上下文切换开销)</td>
+<td align="left">极致 (绕过内核协议栈和中断, 零拷贝)</td>
+</tr>
+<tr>
+<td align="left">开发调试</td>
+<td align="left">困难 (需遵循内核规范, 崩溃导致系统宕机)</td>
+<td align="left">简单 (使用标准用户态工具, 崩溃仅影响自身进程)</td>
+<td align="left">复杂 (需要理解底层硬件和特定框架)</td>
+</tr>
+<tr>
+<td align="left">安全性</td>
+<td align="left">较低 (驱动 Bug 可能危及整个内核)</td>
+<td align="left">高 (受操作系统内存保护, 无法破坏内核)</td>
+<td align="left">中 (给予用户态进程极大权限, 可能误操作硬件)</td>
+</tr>
+<tr>
+<td align="left">典型实现</td>
+<td align="left">字符&#x2F;块&#x2F;网络设备驱动 (<code>.c</code>&#x2F;<code>.ko</code>)</td>
+<td align="left">UIO, VFIO</td>
+<td align="left">DPDK (网络), SPDK (存储)</td>
+</tr>
+<tr>
+<td align="left">数据通路</td>
+<td align="left">应用 &lt;—-&gt; 系统调用 &lt;—-&gt; 内核驱动 &lt;—-&gt; 硬件</td>
+<td align="left">应用 &lt;—-&gt; mmap&#x2F;read &lt;—-&gt; (轻量级内核通道) &lt;—-&gt; 硬件</td>
+<td align="left">应用 &lt;—-&gt; (绕过内核) &lt;—-&gt; 硬件</td>
+</tr>
+<tr>
+<td align="left">适用场景</td>
+<td align="left">通用、高性能硬件<br>(如: <code>NVMe</code>, <code>Ethernet</code>, <code>SATA</code>)</td>
+<td align="left">简单、低速的自定义硬件<br>(如: PL 端的 <code>AXI GPIO</code>, <code>BRAM Controller</code>)</td>
+<td align="left">极限性能的网络&#x2F;存储应用<br>(如: 高性能路由器, 分布式存储)</td>
+</tr>
+<tr>
+<td align="left">DMA 模式</td>
+<td align="left">所有 DMA 模式 (中断驱动, 流式 DMA)</td>
+<td align="left">适合控制:智能 DMA 硬件  (如: AXI DMA) <br>不适合需要软件深度参与的流式 DMA</td>
+<td align="left">专为高性能 DMA 设计 (轮询, 零拷贝)</td>
+</tr>
+</tbody></table>
+<h3 id="使能驱动的流程"><a href="#使能驱动的流程" class="headerlink" title="使能驱动的流程"></a>使能驱动的流程</h3><ol>
+<li>硬件层:定义物理存在与连接</li>
+</ol>
+<ul>
+<li>对于 SoC 内部&#x2F;PL 侧 IP:<ul>
+<li>在 Vivado 中,使能 PS 端外设 (如 I2C0, SPI1),或在 Block Design 中添加 PL 侧的 AXI IP (如 AXI DMA),并完成引脚&#x2F;接口的连接.</li>
+<li>导出硬件描述 (.xsa),这份文件就是硬件的:数字身份证 .</li>
+<li>将 .xsa 导入 Petalinux,系统会自动在 zynqmp.dtsi 和 pl.dtsi 中生成或更新对应的设备树节点</li>
+</ul>
+</li>
+<li>对于板级外部设备 (非 .xsa 可见):<ul>
+<li>这类设备(如通过 I2C 连接的传感器、通过 GPIO 控制的芯片)在Vivado开启对应IO即可</li>
+<li>它们的物理存在需要我们在第二步中手动在设备树里进行描述.</li>
+</ul>
+</li>
+</ul>
+<ol start="2">
+<li><p>配置层:使能设备并绑定驱动</p>
+<ul>
+<li>在用户设备树 (system-user.dtsi) 中操作:<ul>
+<li>对于 SoC 内部&#x2F;PL 侧 IP: 通过 &amp;label 引用并设置 status &#x3D;  okay ;.</li>
+<li>对于板级外部设备: 在其所连接的总线节点下新建子节点,并确保引脚已在 .xsa 中正确配置.</li>
+</ul>
+</li>
+<li>绑定驱动 (所有设备类型通用):<ul>
+<li>在目标节点中,设置 compatible 属性,指向内核自带驱动、UIO 或自定义驱动.</li>
+</ul>
+</li>
+<li>准备驱动代码:<ul>
+<li>方式 A - 集成到系统构建 (树内模块):<ul>
+<li>动作: 将驱动源码通过 Petalinux Recipe 的方式添加到内核源码树中,并修改 Kconfig&#x2F;Makefile.</li>
+<li>配置: 在 petalinux-config -c kernel 中,将该驱动选项编译进内核 (&lt;*&gt;) 或作为标准模块 (<M>).</li>
+<li>优点: 最终产物高度集成,自动化部署.</li>
+</ul>
+</li>
+<li>方式 B - 独立编译开发 (树外模块):<ul>
+<li>动作: 驱动源码独立存放,为其编写一个专用的 Makefile.</li>
+<li>准备: 使用<code>petalinux-build --sdk</code>生成并安装包含内核头文件的 SDK.</li>
+<li>编译: 在 SDK 环境下,于驱动目录中直接 make,独立生成 .ko 文件.</li>
+<li>优点: 开发调试效率极高,无需重构整个系统.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>验证层:构建、部署与验证</p>
+<ul>
+<li><p>构建系统 (petalinux-build): (主要针对方式 A)编译所有变更.</p>
+</li>
+<li><p>部署并启动: 将新镜像部署到开发板.</p>
+<ul>
+<li>加载驱动:<ul>
+<li>对于方式 A: 驱动通常会被内核根据设备树自动加载.</li>
+<li>对于方式 B: 需要手动将 .ko 文件拷贝到板子上,并使用<code>insmod ./my_driver.ko</code>手动加载.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>验证:</p>
+<ul>
+<li>dmesg, lsmod: 查看驱动加载信息和 probe 函数打印.</li>
+<li>&#x2F;proc&#x2F;device-tree, &#x2F;dev, &#x2F;sys: 确认设备节点和接口是否正确创建</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="内核驱动开发流程"><a href="#内核驱动开发流程" class="headerlink" title="内核驱动开发流程"></a>内核驱动开发流程</h3><h4 id="前置准备"><a href="#前置准备" class="headerlink" title="前置准备"></a>前置准备</h4><ol>
+<li><p>获取内核头文件:准备一个正确配置、<strong>已编译过的内核源码树</strong>(或至少是内核头文件),以<strong>提供编译所需的头文件和配置信息</strong></p>
+</li>
+<li><p>编写Makefile:需要一个 Makefile 来调用内核的构建系统</p>
+<ul>
+<li><p>树内模块</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># drivers/char/my_driver/Makefile (示例)</span></span><br><span class="line">obj-<span class="variable">$(CONFIG_MY_DRIVER)</span> += my_driver.o</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>CONFIG_MY_DRIVER 是你在 Kconfig 文件里定义的配置选项.</li>
+<li>这行代码的意思是::如果用户在 menuconfig 里选中了 CONFIG_MY_DRIVER,那么就把 my_driver.o 编译并链接到最终目标里</li>
+</ul>
+</li>
+<li><p>树外模块</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. 定义要编译的模块</span></span><br><span class="line"><span class="comment">#  obj-m  是内核构建系统的一个特殊变量,表示要编译成  module  (.ko 文件)</span></span><br><span class="line"><span class="comment"># 这里表示,我们最终的目标是 my_driver.ko,它由 my_driver.o 链接而成.</span></span><br><span class="line">obj-m := my_driver.o</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. (可选) 定义模块的源文件</span></span><br><span class="line"><span class="comment"># 如果 my_driver.ko 是由多个 .c 文件组成的,就这样写:</span></span><br><span class="line"><span class="comment"># my_driver-objs := file1.o file2.o file3.o</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 指定内核构建系统的位置</span></span><br><span class="line"><span class="comment">#  -C $(KDIR)  告诉 make 命令, 请先切换到 KDIR 目录,</span></span><br><span class="line"><span class="comment"># 然后使用那里的顶层 Makefile 来指导编译 .</span></span><br><span class="line"><span class="comment"># KDIR 的值由 SDK 的环境变量自动提供,指向内核头文件目录.</span></span><br><span class="line">KDIR := <span class="variable">$(SDKTARGETSYSROOT)</span>/usr/src/kernel</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 告诉内核构建系统,我们的源码在哪里</span></span><br><span class="line"><span class="comment">#  M=$(PWD)  告诉内核的顶层 Makefile, 你要编译的模块源码,</span></span><br><span class="line"><span class="comment"># 在我当前所在的这个目录 (PWD) 里 .</span></span><br><span class="line">PWD := <span class="variable">$(<span class="built_in">shell</span> pwd)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 5. 定义 make 命令的规则</span></span><br><span class="line"><span class="section">default:</span></span><br><span class="line">	<span class="variable">$(MAKE)</span> -C <span class="variable">$(KDIR)</span> M=<span class="variable">$(PWD)</span> modules</span><br><span class="line"></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	<span class="variable">$(MAKE)</span> -C <span class="variable">$(KDIR)</span> M=<span class="variable">$(PWD)</span> clean</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>输入 make 时,实际上是执行了 make -C &#x2F;path&#x2F;to&#x2F;kernel&#x2F;headers M&#x3D;&#x2F;path&#x2F;to&#x2F;my&#x2F;driver modules</li>
+<li>含义是:借用内核的构建系统,来编译我放在自己目录下的这个模块</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h4 id="模块加载与卸载"><a href="#模块加载与卸载" class="headerlink" title="模块加载与卸载"></a>模块加载与卸载</h4><ul>
+<li><p>目标: 让内核能够加载 (insmod) 和卸载 (rmmod) 你的驱动</p>
+</li>
+<li><p>实现:</p>
+<ul>
+<li><p>包含头文件 #include &lt;linux&#x2F;module.h&gt;.</p>
+</li>
+<li><p><strong>编写一个初始化函</strong>数,用module_init()宏来注册.这个函数在模块被加载时执行,<strong>只做一件事, 调用</strong><code>platform_driver_register(&amp;my_pdrv);</code>,<strong>用于向内核报道</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">my_driver_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    platform_driver_register(&amp;my_pdrv);</span><br><span class="line">&#125;</span><br><span class="line">module_init(my_driver_init);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>__init</code>: 用来修饰初始化函数 (module_init 注册的那个),对于静态编译进内核的驱动,当内核启动完成、所有__init 函数都执行完毕后,内核会释放该函数相关内存</li>
+</ul>
+</li>
+<li><p><strong>编写一个退出函数</strong>,用module_exit()宏来注册.这个函数在模块被卸载时执行,<strong>只做一件事,调用</strong><code>platform_driver_unregister(&amp;my_pdrv);</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">my_driver_exit</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    platform_driver_unregister(&amp;my_pdrv);</span><br><span class="line">&#125;</span><br><span class="line">module_exit(my_driver_exit)</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>用来修饰退出函数 (module_exit 注册的那个),如果你的内核被配置为不允许卸载模块,那么内核在链接时会直接丢弃所有被 __exit 修饰的函数</li>
+</ul>
+</li>
+<li><p>使用 MODULE_LICENSE( GPL ), MODULE_AUTHOR(…), MODULE_DESCRIPTION(…) 声明模块的基本信息</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="驱动与设备的绑定与解绑"><a href="#驱动与设备的绑定与解绑" class="headerlink" title="驱动与设备的绑定与解绑"></a>驱动与设备的绑定与解绑</h4><ul>
+<li><p>目标: 将你的驱动逻辑与设备树中描述的物理设备绑定起来.</p>
+</li>
+<li><p>实现:</p>
+<ul>
+<li><p>使用平台驱动模型 (Platform Driver).包含 #include &lt;linux&#x2F;platform_device.h&gt;.</p>
+</li>
+<li><p><strong>定义一个 of_device_id 数组,列出你的驱动支持的 compatible 字符串</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">of_device_id</span> <span class="title">my_driver_of_match</span>[] =</span> &#123;</span><br><span class="line">    &#123; .compatible =  my-company1,my-device1  &#125;,</span><br><span class="line">    &#123; .compatible =  my-company2,my-device2  &#125;,</span><br><span class="line">    &#123; <span class="comment">/* 末尾空元素是必须的 */</span> &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>定义一个 platform_driver 结构体,将你的 probe 和 remove 函数,以及 of_device_id 数组赋值给它</strong>.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_driver</span> <span class="title">my_pdrv</span> =</span> &#123;    </span><br><span class="line">	.driver = &#123;</span><br><span class="line">        .name =  my_driver ,</span><br><span class="line">        .of_match_table = my_driver_of_match,</span><br><span class="line">    &#125;,</span><br><span class="line">    .probe = my_driver_probe,</span><br><span class="line">    .remove = my_driver_remove,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>在初始化函数 (my_driver_init) 中,调用 platform_driver_register(&amp;my_pdrv) 来向内核注册你的平台驱动.</p>
+</li>
+<li><p>在退出函数 (my_driver_exit) 中,调用 platform_driver_unregister(&amp;my_pdrv) 来注销</p>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="获取硬件资源"><a href="#获取硬件资源" class="headerlink" title="获取硬件资源"></a>获取硬件资源</h4><ul>
+<li><p>目标: <strong>在 <code>probe(struct platform_device *pdev)</code> 函数中,从设备树获取硬件信息并建立连接</strong></p>
+<ul>
+<li><strong>probe 函数: 当内核发现一个设备的 compatible 与你的驱动匹配时,自动调用此函数,负责设备初始化</strong></li>
+<li><strong>remove 函数: 当设备被移除或驱动被卸载时调用,用于释放资源</strong></li>
+</ul>
+</li>
+<li><p>相关API</p>
+<ul>
+<li><p>获取和映射寄存器地址:</p>
+<ul>
+<li><p><code>platform_get_resource(pdev, IORESOURCE_MEM, 0)</code>: 从设备树的 reg 属性中获取物理地址资源</p>
+<ul>
+<li>pdev: 内核传给 probe 函数的设备结构体指针,包含了设备的所有信息.</li>
+<li>type: 你想获取的资源类型.最常用的是 IORESOURCE_MEM (内存映射的寄存器) 和 IORESOURCE_IRQ (中断).</li>
+<li>num: 资源的索引.如果设备树的 reg 或 interrupts 属性里有多项,0 代表第一项,1 代表第二项,以此类推</li>
+</ul>
+</li>
+<li><p><code>devm_ioremap_resource(&amp;pdev-&gt;dev, res)</code>: 将物理地址映射到内核的虚拟地址空间,返回一个可以直接读写的指针.(devm_ 开头的函数会自动管理内存,推荐使用).</p>
+<ul>
+<li>dev: &amp;pdev-&gt;dev,从 platform_device 中获取的通用设备结构体指针.</li>
+<li>res: platform_get_resource() 返回的资源结构体指针</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>读写寄存器:</p>
+<ul>
+<li><code>readl(addr)</code>, <code>writel(value, addr)</code>: 读写 32 位寄存器.</li>
+</ul>
+</li>
+<li><p>获取和申请中断:</p>
+<ul>
+<li><code>platform_get_irq(pdev, 0)</code>: 从设备树的 interrupts 属性中获取中断号 (0是索引)<ul>
+<li>num: 中断资源的索引,0 代表 interrupts 属性里的第一组中断</li>
+</ul>
+</li>
+<li><code>devm_request_irq(&amp;pdev-&gt;dev, irq_num, my_irq_handler, IRQF_TRIGGER_RISING,  my_device_irq , my_device_data)</code>: 注册一个中断处理函数<ul>
+<li>dev: &amp;pdev-&gt;dev.</li>
+<li>irq: platform_get_irq() 返回的中断号.</li>
+<li>handler: 中断处理函数的函数指针,比如 my_irq_handler.</li>
+<li>flags: 中断触发标志.最常用的是 IRQF_TRIGGER_RISING (上升沿), IRQF_TRIGGER_FALLING (下降沿).</li>
+<li>name: 这个中断的名字,会显示在 &#x2F;proc&#x2F;interrupts 文件中,用于调试.</li>
+<li>dev_id: 一个私有数据指针.当中断发生时,这个指针会原封不动地传给你的中断处理函数.通常我们会把设备的私有数据结构体指针传进去,这样在 ISR 里就能知道是哪个设备触发了中断</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>中断处理函数 (Interrupt Service Routine, ISR)</strong>:</p>
+<ul>
+<li>这是一个特殊的函数,当硬件中断发生时,CPU 会立即跳转到这里执行.</li>
+<li>函数原型: <code>static irqreturn_t my_irq_handler(int irq, void *dev_id)</code></li>
+<li>注意: ISR 必须执行得非常快不能进行任何可能导致睡眠的操作.通常它只做一些紧急的操作(如清除中断标志位),然后通过工作队列 (workqueue) 或tasklet 等机制,将耗时的:下半部 (bottom half) 处理推迟到正常上下文中执行<ul>
+<li>在驱动的 probe 函数里,你可以创建一个工作项 (work item),并指定一个处理函数<code>INIT_WORK(&amp;my_work, my_work_handler_func);</code></li>
+<li>在中断处理函数 (ISR) 的最后,你只需要调用 <code>schedule_work(&amp;my_work);</code>这个调用会立即返回,ISR 结束</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="保存设备上下文"><a href="#保存设备上下文" class="headerlink" title="保存设备上下文"></a>保存设备上下文</h4><ul>
+<li><p>目标: </p>
+<ul>
+<li>在probe 函数中,我们<strong>将所有获取到的、与特定设备相关的资源</strong>(如映射后的寄存器地址、中断号、自旋锁、私有数据缓冲区等)打包到一个自定义的结构体中</li>
+<li>将这个结构体的指针:<strong>附着到内核的设备模型上</strong>.</li>
+<li>在驱动的其他函数(如 read, write, remove, irq_handler)中,就能方便地取回这些信息,从而操作正确的设备</li>
+</ul>
+</li>
+<li><p>实现方法</p>
+<ul>
+<li><code>void platform_set_drvdata(struct platform_device *pdev, void *data)</code><ul>
+<li>作用: 将你的私有数据指针 data 设置 (关联) 到 platform_device 结构体中.这是一个通用的 void * 指针,可以存放任何类型的数据.</li>
+<li>pdev: 你的平台设备.</li>
+<li>data: 你要存放的私有数据结构体指针(比如 priv).</li>
+</ul>
+</li>
+<li><code>void *platform_get_drvdata(const struct platform_device *pdev)</code><ul>
+<li>作用: 从 platform_device 结构体中获取 (取回) 之前用 platform_set_drvdata 设置的私有数据指针.</li>
+<li>pdev: 你的平台设备.</li>
+<li>返回值: 返回之前设置的那个 void * 指针,你需要将它强制类型转换回你自己的结构体类型</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h4 id="创建设备文件"><a href="#创建设备文件" class="headerlink" title="创建设备文件"></a>创建设备文件</h4><ul>
+<li><p>目标:<strong>创建自定义的file_operations函数,在probe函数末尾绑定,便于用户操</strong>作</p>
+</li>
+<li><p>file_operations 结构体:这是一个包含函数指针的结构体,将标准的文件操作映射到你自己的驱动函数上</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">my_fops</span> =</span> &#123;</span><br><span class="line">    .owner   = THIS_MODULE,</span><br><span class="line">    .open    = my_driver_open,</span><br><span class="line">    .release = my_driver_release,</span><br><span class="line">    .read    = my_driver_read,</span><br><span class="line">    .write   = my_driver_write,</span><br><span class="line">    .unlocked_ioctl = my_driver_ioctl,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>file_operations 函数</p>
+<ul>
+<li><code>static int my_driver_open(struct inode *inode, struct file *filp)</code><ul>
+<li>何时调用: <strong>当用户空间的程序执行 open( &#x2F;dev&#x2F;my_device , …) 时</strong>.</li>
+<li>做什么:<ul>
+<li><strong>做一些设备打开时的初始化工作(比如给硬件上电、检查设备状态)</strong>.</li>
+<li>(重要) 可以将设备的私有数据结构体指针,存放到 filp-&gt;private_data 中.这样,在后续的 read&#x2F;write 调用中,就可以通过 filp-&gt;private_data 方便地取回这个设备的上下文信息.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>static int my_driver_release(struct inode *inode, struct file *filp)</code><ul>
+<li>何时调用: <strong>当用户空间的程序执行close(fd)时</strong>(并且这是最后一个关闭该文件的进程).</li>
+<li>做什么: 执行与 open 相反的操作,比如给硬件断电,释放 open 时申请的资源.</li>
+</ul>
+</li>
+<li><code>static ssize_t my_driver_read(struct file *filp, char __user *buf, size_t count, loff_t *f_pos)</code><ul>
+<li>何时调用: <strong>用户程序执行 read(fd, …)</strong></li>
+<li>做什么:<ul>
+<li><strong>从硬件读取数据.</strong></li>
+<li><strong>使用<code>copy_to_user(buf, kernel_data, data_size)</code>,将从硬件读到的数据</strong>,安全地<strong>拷贝到用户空间</strong>提供的 buf 缓冲区中.</li>
+<li>返回成功拷贝的字节数.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>static ssize_t my_driver_write(struct file *filp, const char __user *buf, size_t count, loff_t *f_pos)</code><ul>
+<li>何时调用: <strong>用户程序执行 write(fd, …)</strong>.</li>
+<li>做什么:<ul>
+<li><strong>使用<code>copy_from_user(kernel_data, buf, data_size)</code></strong>,<strong>将用户空间</strong> buf 里<strong>的数据</strong>,安全地<strong>拷贝到内核的临时缓冲区</strong>.</li>
+<li>将拷贝来的数据写入到硬件.</li>
+<li>返回成功写入的字节数.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><code>static long my_driver_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)</code><ul>
+<li>何时调用: <strong>用户程序执行 ioctl(fd, …).</strong></li>
+<li>做什么: <strong>处理一些无法通过简单 read&#x2F;write 完成的、设备特定的控制命令</strong>.比如,用一个 ioctl 命令来复位设备,或者设置设备的工作模式.cmd 是命令编号,arg 是传递的参数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>相关API</p>
+<ul>
+<li><p><code>int alloc_chrdev_region(dev_t *dev, unsigned int firstminor, unsigned int count, const char *name)</code></p>
+<ul>
+<li>作用: 动态地向内核申请一个或多个未被使用的设备号.这是推荐的方式,可以避免与系统中已有的设备号冲突.</li>
+<li><code>dev_t *dev</code>: [输出参数] 一个指向 <code>dev_t</code> 类型变量的指针.如果函数执行成功,内核会把分配到的设备号写入这个变量.</li>
+<li><code>unsigned int firstminor</code>: 请求的起始次设备号.通常设置为 <code>0</code>.</li>
+<li><code>unsigned int count</code>: 你想申请的连续设备号的数量.对于一个只提供单个设备节点的驱动,这里写 <code>1</code>.</li>
+<li><code>const char *name</code>: 你的设备名.这个名字会显示在 <code>/proc/devices</code> 文件中,用于标识这个主设备号被谁占用了.</li>
+<li>返回值: 成功返回 <code>0</code>,失败返回一个负的错误码.</li>
+</ul>
+</li>
+<li><p><code>void cdev_init(struct cdev *cdev, const struct file_operations *fops)</code></p>
+<ul>
+<li>作用: 初始化一个 <code>cdev</code> 结构体,并将它与你的 <code>file_operations</code> 结构体关联起来.<code>cdev</code> (character device) 结构体是字符设备在内核中的抽象表示.</li>
+<li><code>struct cdev *cdev</code>: [输入&#x2F;输出参数] 指向你在驱动中定义的 <code>cdev</code> 结构体变量的指针.</li>
+<li><code>const struct file_operations *fops</code>: 指向你已经定义好的 <code>file_operations</code> 结构体变量的指针.</li>
+</ul>
+</li>
+<li><p><code>int cdev_add(struct cdev *cdev, dev_t dev, unsigned int count)</code></p>
+<ul>
+<li>作用: 向内核正式注册这个字符设备,让它:活 起来.从此,对这个设备号的访问就会被导向你的 <code>file_operations</code>.</li>
+<li><code>struct cdev *cdev</code>: 指向你已经 <code>cdev_init</code> 过的 <code>cdev</code> 结构体.</li>
+<li><code>dev_t dev</code>: <code>alloc_chrdev_region()</code> 分配到的那个设备号.</li>
+<li><code>unsigned int count</code>: 你要注册的连续设备数量,必须与 <code>alloc_chrdev_region</code> 中申请的数量一致,通常是 <code>1</code>.</li>
+<li>返回值: 成功返回 <code>0</code>,失败返回负的错误码.</li>
+</ul>
+</li>
+<li><p><code>struct class *class_create(struct module *owner, const char *name)</code></p>
+<ul>
+<li>作用: 创建一个设备类 (<code>class</code>),它相当于 <code>/sys/class/</code> 目录下的一个新文件夹.同一类设备可以放在这里,便于管理.</li>
+<li><code>struct module *owner</code>: 通常就是 <code>THIS_MODULE</code> 宏.</li>
+<li><code>const char *name</code>: 你的设备类的名字,比如 <code>my_device_class</code>.</li>
+<li>返回值: 成功返回一个指向 <code>class</code> 结构体的指针,失败返回 <code>ERR_PTR</code>.</li>
+</ul>
+</li>
+<li><p><code>struct device *device_create(struct class *cls, struct device *parent, dev_t dev, void *drvdata, const char *fmt, ...)</code></p>
+<ul>
+<li>作用: 在你创建的 <code>class</code> 下,创建一个具体的设备 (<code>device</code>),并触发 udev 生成 <code>/dev</code> 节点.</li>
+<li><code>struct class *cls</code>: <code>class_create()</code> 返回的那个类指针.</li>
+<li><code>struct device *parent</code>: 父设备指针.对于平台设备,通常是 <code>&amp;pdev-&gt;dev</code>.对于独立设备,可以是 <code>NULL</code>.</li>
+<li><code>dev_t dev</code>: 我们分配到的设备号.</li>
+<li><code>void *drvdata</code>: 私有数据指针,可以传 <code>NULL</code>.</li>
+<li><code>const char *fmt, ...</code>: 设备节点的名字,可以使用 <code>printf</code> 格式,例如 <code>my_device%d</code>.udev 会用它来创建 <code>/dev/my_device0</code>.</li>
+<li>返回值: 成功返回一个指向 <code>device</code> 结构体的指针.</li>
+</ul>
+</li>
+<li><p><code>unsigned long copy_to_user(void __user *to, const void *from, unsigned long n)</code></p>
+<ul>
+<li>作用: 从内核空间安全地拷贝数据到用户空间.</li>
+<li><code>void __user *to</code>: 用户程序传进来的目标缓冲区指针(比如 <code>read</code> 系统调用的 <code>buf</code> 参数).<code>__user</code> 是一个特殊的宏,提醒编译器和检查工具,这是一个不可信的用户空间地址.</li>
+<li><code>const void *from</code>: 你在内核空间准备好的源数据缓冲区.</li>
+<li><code>unsigned long n</code>: 要拷贝的字节数.</li>
+<li>返回值: 返回未能成功拷贝的字节数.如果返回 <code>0</code>,表示全部拷贝成功.</li>
+</ul>
+</li>
+<li><p><code>unsigned long copy_from_user(void *to, const void __user *from, unsigned long n)</code></p>
+<ul>
+<li>作用: 从用户空间安全地拷贝数据到内核空间.</li>
+<li><code>void *to</code>: 你在内核空间准备的目标缓冲区.</li>
+<li><code>const void __user *from</code>: 用户程序传进来的源缓冲区指针(比如 <code>write</code> 系统调用的 <code>buf</code> 参数).</li>
+<li><code>unsigned long n</code>: 要拷贝的字节数.</li>
+<li>返回值: 同样,返回未能成功拷贝的字节数.如果返回 <code>0</code>,表示全部拷贝成功.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="Linux-启动流程"><a href="#Linux-启动流程" class="headerlink" title="Linux 启动流程"></a>Linux 启动流程</h2><blockquote>
+<p>[上电] -&gt; [BootROM] -&gt; [FSBL] -&gt; [U-Boot] -&gt; [Linux Kernel] -&gt; [Init Process] -&gt; [用户应用]</p>
+</blockquote>
+<ol>
+<li>BootROM (芯片内固化的代码):<strong>唯一使命就是找到并唤醒 FSBL</strong><ul>
+<li><strong>触发:SoC 芯片上电或复位</strong></li>
+<li>执行者:芯片内部一块只读存储器(ROM)中的固化代码,由芯片制造商写入,无法修改</li>
+<li>核心任务:<ul>
+<li><strong>进行最最基础的硬件初始化</strong>(例如,部分时钟).</li>
+<li>根据 启动模式 配置(通过外部引脚电平决定)<strong>去指定的启动设备</strong>(如 QSPI Flash、SD 卡、NAND Flash)<strong>的特定位置加载</strong>第一阶段引导加载程序 (<strong>FSBL</strong>).</li>
+<li>验证 FSBL 的签名(如果开启了安全启动),然后将控制权交给 FSBL</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>第二阶段:<strong>FSBL (First Stage Boot Loader)</strong>:唤醒硬件,为U-Boot 准备好运行环境<ul>
+<li>执行者:由硬件开发工具(如 Xilinx Vitis&#x2F;Vivado)根据硬件设计自动生成的程序.</li>
+<li>核心任务:<ul>
+<li>初始化关键硬件:主要是<strong>初始化PS</strong> (处理器系统) 部分,比<strong>如 DDR 内存控制器、时钟</strong>(PLL)、以及一些必要的片上外设.没有它,DDR 无法使用.</li>
+<li>(可选)<strong>加载 PL Bitstream</strong>:在 Zynq 中,FSBL 还可以负责加载 FPGA 的比特流文件,配置 PL (可编程逻辑) 部分.</li>
+<li><strong>加载</strong>下一阶段程序:将 <strong>U-Boot</strong>(或其它第二阶段引导程序)从启动设备加载到 DDR 内存中.</li>
+<li>移交控制权:跳转到 U-Boot 在 DDR 中的入口地址,把:接力棒 传给 U-Boot.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>第三阶段:<strong>U-Boot (Universal Boot Loader)</strong><ul>
+<li>执行者:一个功能强大的开源 Bootloader,是嵌入式 Linux 世界的事实标准.</li>
+<li>核心任务:<ul>
+<li><strong>全面的硬件初始化</strong>:<strong>初始化更多、更复杂的外设</strong>,如网络接口(PHY)、USB 控制器、存储控制器(eMMC&#x2F;SATA)等.</li>
+<li><strong>提供交互接口</strong>:<strong>通过串口提供一个命令行界面</strong>,<strong>允许</strong>工程师<strong>中断启动过程,进行调试、烧写固件、修改启动参数</strong>等.</li>
+<li><strong>加载操作系统</strong>:<strong>从启动设备中读取 Linux 内核</strong>(uImage&#x2F;zImage)、<strong>设备树</strong>(.dtb)和可选的 RAM disk 文件,并将它们加载到 DDR 的指定地址.</li>
+<li><strong>传递启动参数</strong><strong>:通过设备树 (<strong>Device Tree</strong>)和</strong>bootargs<strong>环境变量</strong>,<strong>告诉内核硬件相关信息以及启动方法</strong>(如根文件系统在哪里、串口终端是哪个)</li>
+<li>移交控制权:以特定的方式(ARM 架构下,通常是将设备树的地址放入特定寄存器)<strong>跳转到 Linux 内核的入口点</strong>,<strong>正式启动操作系统</strong>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>第四阶段:Linux Kernel<ul>
+<li>执行者:Linux 内核自身.</li>
+<li>核心任务:<ul>
+<li>自解压:<strong>内核镜像通常是压缩的</strong>,所以第一步是<strong>先在内存中把自己解压开</strong>.</li>
+<li>内核初始化:<strong>初始化各个核心子系统</strong>,如内存管理(MMU)、进程调度、中断管理、定时器等.</li>
+<li><strong>解析设备树</strong>:读取 U-Boot 传过来的设备树信息,<strong>根据设备树信息来探测和初始化对应的设备驱动程序</strong>.例如,它在设备树里看到一个网络芯片的描述,就会去加载对应的驱动.</li>
+<li><strong>挂载根文件系统</strong> (RootFS):根据 U-Boot 传递的 bootargs 中的 root&#x3D; 参数,找到指定的存储设备分区,并将其挂载为根目录 &#x2F;.</li>
+<li>启动第一个用户进程:<strong>在根文件系统挂载成功后,内核在用户空间创建并执行第一个进程–init 进程</strong>(通常是 &#x2F;sbin&#x2F;init).</li>
+</ul>
+</li>
+<li>一句话总结:系统的:灵魂 ,接管硬件控制,并建立起软件运行的框架.</li>
+</ul>
+</li>
+<li>第五阶段:Init 进程与用户空间<ul>
+<li>执行者:init 进程(PID&#x3D;1),它是所有用户进程的:祖先 .</li>
+<li>核心任务:<ul>
+<li><strong>读取自己的配置文件</strong>(<strong>如 &#x2F;etc&#x2F;inittab 或 systemd</strong> 的配置单元).</li>
+<li><strong>依次启动各种系统服务</strong>(<strong>如网络服务</strong>、SSH 服务、日志服务等).</li>
+<li>最终,启动你的目标应用程序(例如 RTSP 服务器)或<strong>显示一个登录 Shell</strong>.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>其他细节:<ul>
+<li><strong>BOOT.BIN通常包含:FSBL, Bitstream, U-Boot</strong></li>
+<li><strong>image.ub</strong> 是一个符合 U-Boot FIT (Flattened Image Tree) 格式的<strong>镜像文件,包含内核本身,设备树</strong>等</li>
+<li><strong>boot.scr包含了Uboot启动自动化脚本</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="内核模块"><a href="#内核模块" class="headerlink" title="内核模块"></a>内核模块</h2><ol>
+<li>定义:<ul>
+<li>Linux 内核模块(LKM, Loadable Kernel Module)是一段特殊的目标代码,可以在系统正在运行时被动态地加载到内核空间</li>
+<li>也可以在不需要时从内核中卸载,释放其占用的资源</li>
+<li>内核模块的最终产物是一个后缀为 .ko (Kernel Object) 的文件<ul>
+<li>它是一种标准的 ELF (Executable and Linkable Format) 对象文件</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>加载过程<ul>
+<li>用户空间发起:<strong>通过 insmod 或 modprobe 命令发起加载请求</strong>.</li>
+<li>系统调用:这些命令会<strong>触发系统调用</strong>(如 init_module),<strong>请求陷入内核态</strong>.</li>
+<li>内核操作:<ul>
+<li>分配内核内存:<strong>内核为</strong>即将加载的<strong>模块分配</strong>一块专属的、连续的<strong>内核空间内存</strong></li>
+<li>加载代码和数据:<strong>将<code>.ko</code>文件从用户空间拷贝到内核空间内存</strong></li>
+<li>符号解析 (Symbol Resolution):<strong>将模块中未定义的外部符号(如</strong> <strong>printk</strong>),链接到内核主程序已定义的符号地址上</li>
+<li><strong>执行初始化函数</strong>:每个模块都必须定义一个初始化函数(使用 module_init() 宏注册).在符号解析成功后,内核会调用这个函数</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>卸载过程 (Unloading):<ul>
+<li>用户空间发起:<strong>通过rmmod命令发起卸载请求</strong></li>
+<li>系统调用:<strong>触发delete_module系统调用</strong>.</li>
+<li>内核操作:<ul>
+<li>检查引用计数:<strong>内核会检查该模块是否仍在使用中</strong>(比如设备文件是否被打开).如果引用计数不为零,卸载会失败,防止系统崩溃</li>
+<li><strong>执行清理函数</strong>:每个模块都必须定义一个清理函数(使用 module_exit() 宏注册).内核会调用它来注销驱动、释放设备节点、归还硬件资源等.</li>
+<li>释放内存:<strong>将模块占用的内核内存释放,彻底从系统中移除</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="中断处理机制"><a href="#中断处理机制" class="headerlink" title="中断处理机制"></a>中断处理机制</h2><blockquote>
+<p>[设备] -&gt; [GIC 中断控制器] -&gt; [CPU 核] -&gt; [异常向量表] -&gt; [内核通用分发器] -&gt; [驱动的 ISR (顶半部)] -&gt; [内核的软中断 (底半部)]</p>
+</blockquote>
+<ol>
+<li>硬件阶段:信号的产生与路由<ul>
+<li>设备触发:<strong>外部设备</strong>(如一个 GPIO 控制器)的某个引脚电平发生变化,<strong>触发中断信号</strong>.</li>
+<li><strong>送达 GIC</strong>:<strong>物理信号线连接到 Zynq 内部的 GIC</strong> (中断控制器).<strong>GIC负责管理系统中所有的中断源</strong></li>
+<li><strong>GIC 的工作</strong>:<ul>
+<li><strong>仲裁与优先级</strong>:如果多个中断同时到达,GIC 会根据预设的优先级,决定先处理哪一个.</li>
+<li><strong>屏蔽</strong> (Masking):GIC 可以屏蔽掉某些不想处理的中断.</li>
+<li><strong>路由</strong>:在多核系统中(如 Zynq MPSoC 的 A53),GIC 负责将中断信号路由给一个或多个特定的 CPU 核.</li>
+<li><strong>通知 CPU</strong>:GIC 最终通过一根专用的物理线(IRQ 或 FIQ)向目标 CPU 核发出中断请求.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>处理器阶段:打断与跳转<ul>
+<li>CPU 响应:<strong>CPU 在执行完当前指令后,会检查 GIC 发来的中断请求线</strong>.</li>
+<li><strong>上下文保存 (硬件自动)</strong>:一旦确认中断,CPU 会自动地做几件关键事情:<ul>
+<li>将当前程序计数器(PC)的值保存到 ELR_EL1 (异常链接寄存器).</li>
+<li>将当前的处理器状态(CPSR)保存到 SPSR_EL1 (保存的程序状态寄存器).</li>
+<li>进入特权模式(EL1,即内核态),并屏蔽后续的同级或低级中断.</li>
+</ul>
+</li>
+<li><strong>跳转到向量表</strong>:CPU根据中断类型,跳转到异常向量表 (Exception Vector Table),由异常向量表跳转到通用分发器</li>
+</ul>
+</li>
+<li>内核软件阶段:分发与处理<ul>
+<li>通用分发器:<ul>
+<li><strong>保存完整上下文</strong>:将所有通用寄存器(x0-x30)压入内核栈.</li>
+<li><strong>查询中断源</strong>:向 GIC 查询, 刚才到底是哪个中断号 (IRQ Number) 触发了我？ .GIC 会返回具体的数字,比如 61 代表 GPIO 中断.</li>
+<li>调用 ISR:<strong>内核根据中断源,在一个全局的中断处理函数指针数组中,找到驱动注册的中断处理函数并调用</strong></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>驱动处理阶段:两阶段处理 (Top Half &#x2F; Bottom Half),这是 Linux 中断处理的精髓,为了保证系统整体的响应性,一<strong>个中断处理被刻意拆分为两部分</strong>:<ul>
+<li><strong>顶半部</strong> (Top Half &#x2F; Hard IRQ):<ul>
+<li>身份:<strong>就是驱动里通过 request_irq() 注册的处理函数</strong>.</li>
+<li>特点:<strong>在中断上下文中执行,此时中断是被屏蔽的</strong>,<strong>因此,它必须极快地执行完毕</strong>,否则会严重影响系统的其他部分.</li>
+<li>任务:<strong>只做最紧急的事</strong>,比如:<strong>读取设备寄存器以清除中断标志位</strong>、从硬件 FIFO 中拷贝少量数据到内存、然后调度一个底半部任务,并立即返回.</li>
+</ul>
+</li>
+<li><strong>底半部</strong> (Bottom Half &#x2F; Soft IRQ):<ul>
+<li>身份:<strong>由顶半部:预约 的一个延迟执行的任务</strong>,形式有 Softirq、Tasklet、Workqueue.</li>
+<li>特点:它<strong>在普通内核上下文中执行</strong>,此时中断是打开的.它<strong>允许被更高优先级的中断打断</strong>.</li>
+<li>任务:<strong>处理那些耗时、复杂的任务</strong>,比如:详细解析收到的数据包、将数据传递给上层应用、进行大量的计算等.</li>
+<li>比喻:关上门后,你回到客厅,从容地拆开包裹,检查商品,然后把它放到储物柜里</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>其他细节<ul>
+<li><strong>传统中断 (Legacy INTx)</strong>:通过物理线触发中断,多设备共享,效率低</li>
+<li><strong>MSI (Message Signaled Interrupts)</strong>:设备<strong>不再用物理线</strong>,而是通过向一个特定的内存地址<strong>写入一个特定的数据</strong>来触发中断</li>
+<li><strong>MSI-X</strong>:<strong>MSI 的增强版</strong>,允许一个物理设备虚拟出<strong>多个独立的中断源</strong><ul>
+<li>对于 NVMe SSD 或多队列网卡至关重要,每个队列都可以有自己的中断,可以分发到不同的 CPU 核上处理,实现极高的并行性能</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="Linux-内存管理"><a href="#Linux-内存管理" class="headerlink" title="Linux 内存管理"></a>Linux 内存管理</h2><ol>
+<li>定义<ul>
+<li>物理内存:真实存在的硬件资源,地址是物理地址,从 0 开始,是有限的</li>
+<li><strong>虚拟内存</strong>:内核为每个进程制造出来的<strong>一种假象</strong>.内核让每个进程都以为自己独占了整个系统的内存</li>
+</ul>
+</li>
+<li>作用<ul>
+<li><strong>进程隔离与系统保护</strong>:<ul>
+<li><strong>隔离</strong>:<strong>每个进程都有自己独立的虚拟地址空间,互不干扰</strong></li>
+<li><strong>保护</strong>:一个进程发生<strong>内存访问错误</strong>,<strong>只导致自己崩溃</strong>,而不会影响到内核或其他进程</li>
+</ul>
+</li>
+<li><strong>简化程序开发</strong><ul>
+<li><strong>不需要关心真实的物理内存还剩多少、哪块是空闲的</strong></li>
+<li>它们只需要在一个标准、统一的虚拟地址空间里布局代码段、数据段、堆栈即可</li>
+<li>链接器可以总是假设程序从一个固定的虚拟地址开始</li>
+</ul>
+</li>
+<li><strong>高效利用物理内存</strong><ul>
+<li>虚拟内存允许将不常用的内存页(Page)换出到磁盘(Swap),在需要时再加载回来</li>
+<li><strong>不同的进程可以共享同一份物理内存</strong>;例如,所有 C 程序都会用到 libc.so 库,内核<strong>只需在物理内存中加载一份</strong>,然后把<strong>映射到</strong>所有需要它的<strong>进程的虚拟地址空间</strong>里即可</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>为了实现系统保护,<strong>Linux 将每个进程的虚拟地址分为内核空间和用户空间</strong><ul>
+<li>用户空间:地址范围较低的部分.<ul>
+<li>特点:<strong>每个进程都有一套自己独立的页表来映射这部分空间</strong>.进程 A 和进程 B 的用户空间页表是完全不同的.</li>
+<li>内容:<strong>存放进程的代码、全局变量、堆栈等</strong>.</li>
+<li>访问:CPU 处于非特权模式(EL0)时只能访问这部分地址.</li>
+</ul>
+</li>
+<li><strong>内核空间</strong>:地址范围较高的部分.<ul>
+<li>特点:这部分<strong>虚拟地址空间的映射关系是全局唯一的,被所有进程共享</strong>.无论哪个进程进入内核态,看到的内核空间都是同一个</li>
+<li>内容:<strong>存放内核的代码、数据、以及用于管理所有进程和硬件的数据结构</strong>.</li>
+<li>访问:只有当 CPU 通过系统调用 (System Call) 或中断进入特权模式(EL1)后,才能访问这部分地址</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>CPU访问内存流程<ul>
+<li><strong>CPU把虚拟地址放到地址总线</strong></li>
+<li><strong>MMU(内存管理单元)获取虚拟地址,查询TLB</strong>(Translation Lookaside Buffer).TLB 是一个高速缓存,存放着最近用过的:虚拟地址 -&gt; 物理地址 的映射关系<ul>
+<li>如果 TLB 里正好有这个虚拟地址的映射记录,MMU 立刻就能得到对应的物理地址</li>
+<li>如果在 TLB 里<strong>没找到,就启动查询页表</strong> (Page Table)</li>
+</ul>
+</li>
+<li>MMU开始在内存中遍历页表,<strong>页表记录了所有虚拟页到物理页框的映射关系</strong><ul>
+<li>查询是分级的,在 ARMv8 中通常是 4 级</li>
+</ul>
+</li>
+<li><strong>如果最终找到了有效的映射,MMU 就得到了虚拟地址对应的物理地址,并存入TLB</strong></li>
+<li>如果在遍历页表过程中,<strong>发现某个页表项是无效的</strong>,MMU 会触发一个<strong>缺页异常</strong>,这是一个硬件中断<ul>
+<li>如果<strong>合法则从Swap空间交换回来,更新页表,重新执行刚刚失败的指令</strong></li>
+<li>如果非法内核就会给进程发送一个 SIGSEGV 信号,导致程序崩溃(Segmentation fault)</li>
+</ul>
+</li>
+<li><strong>MMU获得物理地址,发送给内存总线和内存控制器,内存控制器从DDR读取数据</strong></li>
+<li>数据从数据总线返回CPU</li>
+</ul>
+</li>
+<li>Linux进程切换<ul>
+<li>内核通过切换 CPU 的<strong>用户空间页表基地址寄存器</strong>(TTBR0_EL1),<strong>来更换当前进程的虚拟地址空间映射</strong></li>
+<li>同时<strong>保持内核空间的页表基地址寄存器</strong>(TTBR1_EL1)不变,从而<strong>实现了用户空间的隔离和内核空间的共享</strong></li>
+<li>这个切换动作会<strong>导致 TLB 中旧进程的缓存失效</strong></li>
+</ul>
+</li>
+<li>注意事项<ul>
+<li>Page Fault :写时才分配</li>
+<li>C&#x2F;C++ 中使用 malloc() 或 new,库函数会通过 brk() 或 mmap() 系统调用向内核申请内存</li>
+<li>内核收到请求后,会修改该进程的页表,建立新的虚拟到物理的映射,但<strong>并不会立即分配物理内存</strong></li>
+<li>内核空间地址申请<ul>
+<li>kmalloc():内核中最常用的方式.它申请的是<strong>物理地址连续</strong>的内存块</li>
+<li>vmalloc():申请的是<strong>虚拟地址连续</strong>,但<strong>物理地址不一定连续</strong>的内存块</li>
+</ul>
+</li>
+<li><strong>设备寄存器映射</strong><ul>
+<li>PL 侧的 IP 核或片上外设(如 UART)的寄存器都位于<strong>固定的物理地址</strong>.内核驱动不能直接通过指针访问这些物理地址</li>
+<li><code>ioremap()</code>函数,为这些物理地址在<strong>内核的虚拟地址空间</strong>中创建一个映射后才可以访问</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="异常处理"><a href="#异常处理" class="headerlink" title="异常处理"></a>异常处理</h2><ol>
+<li>定义:<strong>任何导致处理器偏离正常指令顺序执行流程的事件</strong><ul>
+<li>在 ARM 架构的官方定义中,<strong>中断只是异常的一种</strong></li>
+<li><strong>中断:由外设异步产生的异常</strong></li>
+</ul>
+</li>
+<li><strong>Linux 用异常处理机制来隔离错误、杀死进程</strong></li>
+<li><strong>裸机用异常处理机制来捕获错误、停机待查</strong></li>
+</ol>
+<h2 id="WDT看门狗"><a href="#WDT看门狗" class="headerlink" title="WDT看门狗"></a>WDT看门狗</h2><ol>
+<li>定义:是一个独立的硬件定时器,核心使命是监控主处理器的程序是否正常运行<ul>
+<li>这个定时器需要周期性的喂狗,如果程序跑飞没喂,会产生不可屏蔽的硬件复位信号,重启系统</li>
+</ul>
+</li>
+<li>应用场景:<ul>
+<li>裸机循环卡死</li>
+<li>RTOS任务死锁</li>
+<li>Linux内核异常</li>
+<li>硬件异常导致程序跑飞</li>
+</ul>
+</li>
+<li>工作流程<ul>
+<li>在程序初始化阶段(main函数开始),初始化WDT<ul>
+<li>设置超时周期,使能WDT</li>
+</ul>
+</li>
+<li>在主程序中,保留一个可靠的能够代表系统监控的地方周期性的喂狗</li>
+<li>超时没喂就会强制重启</li>
+</ul>
+</li>
+</ol>
+<h1 id="存储与文件系统"><a href="#存储与文件系统" class="headerlink" title="存储与文件系统"></a>存储与文件系统</h1><h2 id="PCIe协议"><a href="#PCIe协议" class="headerlink" title="PCIe协议"></a>PCIe协议</h2><ol>
+<li>定义:<strong>是一种高速、串行、点对点的计算机扩展总线标准</strong>.与老式的并行总线(如 PCI)不同,它使用一对或多对差分信号来传输数据<ul>
+<li><strong>PCIe 是目前连接 CPU 与高性能外设的事实标准</strong>.在嵌入式系统中,任何需要高带宽、低延迟的场景都离不开它</li>
+</ul>
+</li>
+<li><strong>总线枚举</strong>:<strong>识别所有的PCIe总线上的设备</strong>,<strong>为设备分配唯一的</strong>、由总线号 (Bus)、设备号 (Device) 和功能号 (Function) 组成的<strong>BDF地址</strong>,<strong>该步骤是由Uboot进行执行</strong><ul>
+<li>起始点:<strong>从PCIe Root Complex 直连的Bus 0开始</strong>.<ul>
+<li>PCIe Root Complex集成在CPU内部,是PCIe控制器,延伸出来直连PCIe线就是Bus0</li>
+</ul>
+</li>
+<li>深度优先遍历:软件<strong>通过发送配置读写</strong>(Configuration Read&#x2F;Write)<strong>TLP 包</strong>,<strong>以深度优先的算法遍历整个 PCIe 拓扑树</strong>,读取设备的配置空间<ul>
+<li>从Bus 0, Device 0, Function 0开始,<strong>主动发送Configuration Read TLP到每个可能的BDF地址</strong></li>
+</ul>
+</li>
+<li>设备发现:如果<strong>设备存在</strong>,<strong>会收到包含有效Vendor ID的响应TLP</strong>,不存在则收到超时信息</li>
+<li>桥(Bridge)处理:当发现一个设备的 Header Type 表明它是一个 PCIe 桥时,软件会为桥下联的次级总线(Secondary Bus)分配一个新的总线号,并递归地对该新总线继续进行枚举.</li>
+<li>资源分配:在枚举过程中,软件会读取各设备的资源需求(如 BAR 空间大小、中断请求),并为其分配系统资源</li>
+</ul>
+</li>
+<li><strong>配置空间</strong>:配置空间是<strong>每个PCIe设备内部的一个标准化的 4KB 寄存器区域</strong>,是设备被分配的地址BDF指向的空间,以完成设备的识别、资源分配和功能启用<ul>
+<li>设备识别:操作系统利用Vendor ID(厂商ID), Device ID(设备ID)匹配并加载相应的设备驱动程序.</li>
+<li>设备分类:Class Code(设备分类码)定义了设备的基本类型(如存储控制器、网络控制器),便于通用驱动或操作系统的识别.</li>
+<li>拓扑结构:Header Type区分该功能是属于一个普通端点设备(Endpoint, Type 0 Header)还是一个 PCIe 桥(Bridge, Type 1 Header)</li>
+<li>资源请求:<strong>Base Address Registers</strong> (BARs)<strong>用于声明设备需要映射的内存或 I&#x2F;O 空间的大小和类型</strong>.</li>
+<li>控制与状态:Command 和 Status 寄存器用于启用&#x2F;禁用设备功能(如 Bus Master Enable、Memory Space Enable)和回报设备状态</li>
+</ul>
+</li>
+<li><strong>设备基地址寄存器</strong>:Base Address Register(BAR)是位于配置空间头部的一组寄存器,<strong>用于将设备内部的本地内存、I&#x2F;O 端口或控制寄存器映射到主机的物理地址空间中</strong>,是实现 MMIO (Memory Mapped I&#x2F;O) 的核心机制<ul>
+<li>空间探测:软件首先<strong>向BAR 寄存器写入全 1</strong></li>
+<li>设备响应:设备硬件根据其所需的空间大小,<strong>将地址掩码(Size Mask)返回</strong>.例如,需要 1MB 空间,则返回 0xFFF00000.</li>
+<li>大小计算:<strong>软件通过对读回的值进行位反转并加一</strong> (~value + 1),即可计算出设备请求的地址空间大小.</li>
+<li>地址分配:软件<strong>在系统物理地址空间中找</strong>到一块满足大小和对齐要求的<strong>空闲区域</strong>,<strong>将其物理基地址写回 BAR 寄存器</strong>.</li>
+<li>映射建立:<strong>写入完成后,硬件映射建立</strong>.任何对<strong>这段被分配的主机物理地址范围</strong>的访问都会被Root Complex转化为对特定PCIe设备的访问</li>
+</ul>
+</li>
+<li><strong>TLP</strong> (Transaction Layer Packet):<strong>是 PCIe 总线上进行信息交换的基本数据单元</strong>.所有通信,包括内存访问、I&#x2F;O 访问、配置和消息,都必须封装成 TLP 进行传输</li>
+</ol>
+<ul>
+<li><strong>Header (包头)</strong>:<strong>定义了 TLP 的类型和属性</strong>,<strong>是路由和处理 TLP 的依据</strong><ul>
+<li><strong>Fmt 和 Type</strong>:<strong>定义 TLP 的格式和具体类型</strong>(如 MRd - 内存读, MWr - 内存写, CfgRd - 配置读, Cpl - 完成包, CplD - 带数据的完成包).</li>
+<li><strong>Requester ID</strong>:<strong>发起请求的设备的 BDF</strong>.</li>
+<li><strong>Address &#x2F; Address64</strong>:<strong>目标内存或 I&#x2F;O 地址</strong>.</li>
+<li><strong>Length</strong>:<strong>传输的数据长度</strong>.</li>
+</ul>
+</li>
+<li>Data Payload (<strong>数据载荷</strong>):对于写请求或带数据的完成包,这里包含实际传输的数据.</li>
+<li>ECRC (End-to-end CRC):可选的端到端数据<strong>完整性校验</strong>.</li>
+</ul>
+<h2 id="DMA"><a href="#DMA" class="headerlink" title="DMA"></a>DMA</h2><ol>
+<li>定义:DMA (Direct Memory Access):允许系统中的某些硬件子系统(外设)在<strong>无需CPU直接参与</strong>的情况下,直接读写内存<ul>
+<li>DMA控制器代替CPU,处理繁重的数据搬运的工作</li>
+<li>不使用DMA的情况(PIO模式):CPU通过load&#x2F;store指令逐字从外设的数据寄存器读取数据,数据量大CPU陷入忙碌</li>
+</ul>
+</li>
+<li>DMA工作流程<ul>
+<li><strong>CPU设置DMA控制器</strong><ul>
+<li>CPU会向DMA 控制器 (DMAC, DMA Controller)的一组寄存器写入信息,<strong>告诉它数据源地址,目的地址,传输长度,和传输方向以及模式</strong></li>
+</ul>
+</li>
+<li>DMAC接管总线(Bus Mastering)<ul>
+<li><strong>DMAC</strong>需要使用系统总线(如AXI)来访问内存和外设,<strong>向总线仲裁发出总线请求</strong>,在合适的情况下将总线分配给DMAC</li>
+</ul>
+</li>
+<li>数据传输<ul>
+<li>DMAC接手系统总线变成Bus Master,进行数据传输,行为与CPU一致</li>
+<li>DMAC内部的计数器递减,减至0则传输完毕</li>
+</ul>
+</li>
+<li><strong>传输完毕释放总线,向CPU发送中断信号</strong></li>
+</ul>
+</li>
+<li>网口的DMA<ul>
+<li><strong>网卡驱动程序在主内存中预分配</strong>一大块连续的内存区域,作为<strong>接收缓冲区池</strong> (RX Buffers Pool)</li>
+<li>驱动还会<strong>分配</strong>另一块内存,用于存放一个<strong>接收描述符环形队列</strong> (RX Descriptor Ring)</li>
+<li><strong>驱动</strong>会遍历这个描述符队列,<strong>为描述符关联空闲缓冲区池里的 buffer</strong>,填入buffer物理地址</li>
+<li>驱动将<strong>接收描述符环形队列的物理基地址和队列长度</strong>,<strong>写入网卡控制器的寄存器中</strong></li>
+<li>网卡从物理链路上完整地接收到一个以太网帧,<strong>网卡的 DMA 引擎自动地</strong>作为 Bus Master,直接<strong>将数据包写入到buffer</strong>中,随后<strong>更新描述符状态</strong></li>
+<li><strong>网卡使用中断合并</strong>,不会每接收一个包就中断一次</li>
+<li>CPU接收中断后,<strong>驱动根据描述符状态获取数据,传递给网络协议栈,并分配新的空闲的buffer给处理的描述符</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="NVMe协议"><a href="#NVMe协议" class="headerlink" title="NVMe协议"></a>NVMe协议</h2><ol>
+<li>定义:专为 PCIe 固态硬盘 (SSD) 设计的、高性能、可伸缩的主机控制器接口规范<ul>
+<li>AHCI&#x2F;SATA:无论多少IO请求,都要排成队等待控制器依次处理(为一次只能服务一个磁头的机械硬盘设计的)</li>
+<li>是为拥有海量并行通道的 NAND Flash 设计的</li>
+</ul>
+</li>
+<li>NVMe 的核心就是基于内存环形队列的、高效的命令提交与完成机制</li>
+</ol>
+<h3 id="提交与完成队列"><a href="#提交与完成队列" class="headerlink" title="提交与完成队列"></a>提交与完成队列</h3><ol>
+<li><strong>NVMe 的通信基础是成对的队列</strong>:一个用于主机(Host)向控制器(SSD)提交命令,另一个用于控制器向主机报告命令的完成状态</li>
+<li>定义:<ul>
+<li><strong>提交队列</strong> (Submission Queue, SQ):由主机(Host)写入,<strong>用于存放待处理的 I&#x2F;O 命令</strong>.</li>
+<li><strong>完成队列</strong> (Completion Queue, CQ):由控制器(SSD)写入,<strong>用于存放已完成命令的状态回报</strong>.</li>
+</ul>
+</li>
+<li>物理位置: SQ 和 CQ 都是主机驱动程序在主机 DDR 内存中分配的环形缓冲区.</li>
+<li>成对工作: SQ 和 CQ 通常成对出现,构成一个独立的命令处理通道.主机通过写 SSD 的 BAR 寄存器来告知其各个队列的物理地址.</li>
+<li>队列类型:<ul>
+<li>管理队列 (Admin Queue):固定只有一对 (Admin SQ&#x2F;CQ),用于设备初始化和管理任务(如创建 I&#x2F;O 队列、获取设备信息等).</li>
+<li>I&#x2F;O 队列 (I&#x2F;O Queues):可创建多达 65,535 对 (I&#x2F;O SQ&#x2F;CQ),专门用于数据传输命令(如 <code>NVM Read</code>&#x2F;<code>NVM Write</code>).</li>
+</ul>
+</li>
+<li>并行性: 多 I&#x2F;O 队列的设计允许多核 CPU 的每个核心无锁地操作各自的队列,从而实现大规模 I&#x2F;O 并行处理,这是 NVMe 高性能的关键.</li>
+</ol>
+<h3 id="命令执行与完成机制"><a href="#命令执行与完成机制" class="headerlink" title="命令执行与完成机制"></a>命令执行与完成机制</h3><ol>
+<li>NVMe 采用生产者-消费者模型管理队列指针,实现高效的异步通信.<ul>
+<li>提交命令 (主机作为生产者):<ul>
+<li>主机驱动在环形队列SQ中构建命令,维护尾指针</li>
+<li>通过MMIO写操作,将更新后的 SQ 尾指针值写入 SSD 的提交队列门铃 (SQ Doorbell),通知 SSD 有新命令.</li>
+</ul>
+</li>
+<li>处理命令 (SSD 作为消费者):<ul>
+<li>SSD 在收到门铃后,从其内部维护的 SQ 头指针 (Head Pointer) 开始,通过 DMA 读取新命令.</li>
+<li>每处理一个命令,SSD 就更新其内部的 SQ 头指针.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h3 id="数据指针"><a href="#数据指针" class="headerlink" title="数据指针"></a>数据指针</h3><ol>
+<li>由于现代操作系统采用<strong>虚拟内存</strong>,<strong>大块数据缓冲区在物理内存中通常不连续</strong></li>
+<li>PRP 和 SGL 是 NVMe 定义的两种 Scatter-Gather DMA 机制,用于描述这些非连续的数据区.<ul>
+<li>PRP (Physical Region Page):<ul>
+<li>它是一种描述符格式,其<strong>基本单位是物理内存页</strong> (Page),是一个指向物理页地址列表的机制</li>
+<li>命令中的 DPTR (Data Pointer) 字段,如果指向的是 PRP,那么它<strong>指向的是一个或多个页地址</strong></li>
+</ul>
+</li>
+<li>SGL (Scatter Gather List):<ul>
+<li>它是一种更通用的描述符格式,其<strong>基本单位是段</strong> (Segment),它是一个指向[地址, 长度]列表的机制</li>
+<li>命令中的 DPTR 字段,如果指向的是 SGL,那么它<strong>指向内存中的一个或多个 SGL 段描述符</strong>.</li>
+<li>每个 SGL 段描述符都是一个[地址,长度]的二元组.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="SSD-基本原理"><a href="#SSD-基本原理" class="headerlink" title="SSD 基本原理"></a>SSD 基本原理</h2><ol>
+<li>SSD使用NAND Flash作为永久性存储介质的存储设备</li>
+<li>物理结构<ul>
+<li>Page(页):是<strong>读取和写入的最小单位</strong>(通常 4KB - 16KB).</li>
+<li>Block(块):是<strong>擦除的最小单位</strong>(通常 2MB - 4MB),由许多个页组成(如 256 个页)</li>
+</ul>
+</li>
+<li>三大核心规则<ul>
+<li>读写不对称:<strong>可以按 页 为单位读写,但只能按 块 为单位擦除</strong></li>
+<li><strong>先擦后写</strong>:你不能覆盖一个已经写入数据的页.如果想修改一个页,必须先将它所在的整个块擦除</li>
+<li><strong>有限的擦写寿命</strong> (P&#x2F;E Cycles):每个块能被擦除和编程(写入)的次数是有限的.这导致了 磨损 .<ul>
+<li>SLC (1 bit&#x2F;cell):寿命最长 (10万次),最贵.</li>
+<li>MLC (2 bits&#x2F;cell):寿命、性能、成本均衡 (数千次).</li>
+<li>TLC (3 bits&#x2F;cell):密度更高,成本低,寿命较短 (数百到上千次).</li>
+<li>QLC(4 bits&#x2F;cell):密度最高,最便宜,寿命最短 (数百次)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>FTL</strong>(闪存转换层)是SSD 主控芯片的固件,<strong>为操作系统屏蔽 NAND 的物理特性</strong>,<strong>提供一个虚拟的、简单的块设备接口</strong></li>
+<li>FTL 的<strong>核心是维护一张</strong> LBA(Logical Block Address,<strong>逻辑块地址</strong>)<strong>到</strong>PPA (Physical Page Address<strong>物理页地址</strong>) 的映射表<ul>
+<li>查找空闲PPA(物理页)</li>
+<li>写入数据到该PPA</li>
+<li>更新LBA -&gt; PPA映射表</li>
+<li>将旧数据标记为失效</li>
+</ul>
+</li>
+<li>磨损均衡<ul>
+<li><strong>FTL会有意识地将写入操作均匀分布到所有的物理Block 上</strong></li>
+<li>当一个逻辑块地址被<strong>更新时</strong>,FTL不会在原地修改数据</li>
+<li>它会找一个新的、干净的物理 Page 来写入新数据,然后更新映射表,<strong>让这个逻辑块地址指向新的物理地址</strong></li>
+<li>旧数据所在的 Page 则被标记为失效(invalid)</li>
+</ul>
+</li>
+<li>垃圾回收:磨损均衡策略导致了大量的失效数据散落在各个 Block 中(写的page小于擦除的块,失效的page散步在各个块)<ul>
+<li>选定目标: <strong>FTL 找到一个 垃圾 最多的 Block</strong> (失效数据比例最高的块) 作为回收目标</li>
+<li>搬运有效数据: <strong>读取该Block的有效数据</strong></li>
+<li>写入新家: <strong>将有效数据写入到干净的 Block</strong></li>
+<li>更新映射: 更新 FTL 映射表,<strong>让相应的 LBA 指向这些数据的新物理地址</strong></li>
+<li>擦除旧块</li>
+</ul>
+</li>
+<li>垃圾回收会在SSD空闲块少的时候触发,因此SSD在快写满时性能下降</li>
+</ol>
+<h2 id="Linux-块设备层"><a href="#Linux-块设备层" class="headerlink" title="Linux 块设备层"></a>Linux 块设备层</h2><ol>
+<li><p>是 Linux 内核中专门用于处理块设备(如 SSD、硬盘、SD 卡、eMMC)I&#x2F;O 请求的一个核心子系统</p>
+<ul>
+<li>位于文件系统和块设备驱动程序之间</li>
+</ul>
+</li>
+<li><p>核心作用</p>
+<ul>
+<li><strong>给上层文件系统提供不关心硬件的操作接口</strong></li>
+<li>通过IO调度器对海量IO进行合并排序,以降低延迟增加吞吐</li>
+</ul>
+</li>
+<li><p>I&#x2F;O 请求的完整路径</p>
+</li>
+</ol>
+<ul>
+<li><p>用户空间发起write</p>
+</li>
+<li><p>VFS (Virtual File System, <strong>虚拟文件系统</strong>)</p>
+<ul>
+<li>VFS 是<strong>内核的通用文件接口</strong>,它首先处理权限检查、文件描述符等与具体文件系统无关的事务</li>
+<li><strong>将请求传递给对应的具体文件系统</strong></li>
+</ul>
+</li>
+<li><p>文件系统</p>
+<ul>
+<li><strong>文件系统计算待写入的数据应该放到哪几个逻辑块</strong></li>
+<li><strong>创建</strong>一个或多个<strong>bio结构体</strong>.bio 是块设备层 I&#x2F;O 的基本描述单位,它包含了目标设备、LBA、内存中的数据缓冲区地址、读&#x2F;写方向等信息</li>
+<li><strong>将bio传递给块设备层</strong></li>
+</ul>
+</li>
+<li><p>块设备层</p>
+<ul>
+<li><p><strong>块设备层接收到来自文件系统的 bio</strong></p>
+</li>
+<li><p>通过IO调度器优化读写:排序并合并针对相邻逻辑块的写入请求</p>
+</li>
+<li><p><strong>将bio打包成为request结构体,放到设备的请求队列</strong></p>
+</li>
+</ul>
+</li>
+<li><p><strong>设备驱动</strong>(如NVMe)</p>
+<ul>
+<li><strong>从请求队列中取出request</strong>,将内核的通用request结构翻译成硬件能够识别的具体命令</li>
+<li><strong>构建具体命令</strong>,以NVMe为例,在内存构建具体的写命令放入SQ</li>
+<li><strong>驱动通过写PCIe控制器的寄存器</strong>(BAR空间映射的)<strong>向PCIe总线上的硬件设备</strong>,也就是SSD,<strong>发起一次PCIe写来唤醒门铃</strong></li>
+</ul>
+</li>
+<li><p>硬件处理</p>
+<ul>
+<li><strong>PCIe硬核封装TLP包</strong>,传输至M2插槽,<strong>传输至SSD控制器</strong></li>
+<li><strong>SSD控制器内部PCIe EndPoint解析TLP包,解析出这是对门铃寄存器SQ Doorbell的操作</strong></li>
+<li><strong>门铃唤醒闪存转换层(FTL)</strong>,FTL<strong>使用PCIe DMA从内存中获取具体的操作命令</strong>,并且<strong>通过PCIe DMA进行具体的操作</strong></li>
+<li>完成操作后SSD构建命令放入CQ,通过PCIe返回给驱动,通知驱动操作完成,驱动通知块设备层,逐层向上返回</li>
+</ul>
+</li>
+</ul>
+<ol start="4">
+<li><p>请求完成返回路径</p>
+<ul>
+<li>驱动的中断程序接收到了设备的完成信号,通知块设备层request已经完成</li>
+<li>块设备层标记request和bio已经完成</li>
+<li>文件系统收到完成通知产生用户空间write的返回</li>
+</ul>
+</li>
+<li><p>IO调度器(Linux)</p>
+<ul>
+<li><strong>none</strong>(或 noop): 几乎不做任何事,<strong>直接将请求下发</strong>.适用于 NVMe SSD,因为它相信SSD内部的FTL调度更好</li>
+<li><strong>mq-deadline</strong>: <strong>为每个请求设置一个超时时间</strong>,在<strong>保证吞吐量的同时兼顾了公平性</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h2><ol>
+<li><strong>日志</strong> (Journaling) 是一种文件系统技术,<strong>旨在保证文件系统的一致性</strong> (Consistency),<strong>防止系统意外崩溃或断电时数据结构损坏</strong><ul>
+<li>在修改数据前记录一下将要修改的操作</li>
+<li>引入了额外的写操作和 I&#x2F;O 同步点</li>
+</ul>
+</li>
+<li>ext4三种日志模式<ul>
+<li>data&#x3D;<strong>journal</strong> (最安全,最慢):<strong>元数据和数据都会被完整地写入日志区</strong>,然后<strong>再被写入到文件系统的最终位置</strong>    <ul>
+<li>数据(Data):文件的实际内容</li>
+<li>元数据(Metadata):数据的各种属性和存储信息</li>
+<li>引入了写放大</li>
+</ul>
+</li>
+<li>data&#x3D;ordered (默认模式,均衡):<strong>只有元数据被写入日志</strong>,数据块必须先于引用它的元数据被写入磁盘<ul>
+<li>引入了强同步点</li>
+</ul>
+</li>
+<li>ata&#x3D;writeback (最快,最不安全):<strong>只有元数据被写入日志</strong>,数据的写入和元数据的写入<strong>没有顺序保证</strong><ul>
+<li>崩溃后可能出现损坏数据</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h1 id="通信协议与数据处理"><a href="#通信协议与数据处理" class="headerlink" title="通信协议与数据处理"></a>通信协议与数据处理</h1><h2 id="Pcap"><a href="#Pcap" class="headerlink" title="Pcap"></a>Pcap</h2><ol>
+<li>Pcap分为全局文件头和多个数据包</li>
+<li>全局文件头:魔术字标明这是Pcap包,快照长度表示后面有多少数据包</li>
+<li>数据包:每个数据包都有包头,包头包含<ul>
+<li>数据包被捕获的时间,分为两个字段,秒和小数部分</li>
+<li>数据包的长度</li>
+<li>数据包的原始长度,两个长度相等表示包是完整的</li>
+</ul>
+</li>
+</ol>
+<h2 id="字节序"><a href="#字节序" class="headerlink" title="字节序"></a>字节序</h2><ol>
+<li>字节序<ul>
+<li>大端序 (Big-Endian): 高位字节 (Most Significant Byte, MSB) 存放在低地址,符合人类的阅读习惯</li>
+<li>小端序 (Little-Endian): 低位字节 (Least Significant Byte, LSB) 存放在低地址,符合计算机处理的逻辑</li>
+</ul>
+</li>
+<li><strong>网络协议</strong>一般都使用<strong>大端序</strong>,<strong>x86</strong>架构一般使用<strong>小端</strong>,<strong>arm一般小端</strong>但是可以配为大端</li>
+</ol>
+<h2 id="完整性校验"><a href="#完整性校验" class="headerlink" title="完整性校验"></a>完整性校验</h2><ol>
+<li>Checksum校验和:将所有数据按字节&#x2F;字算数相加,可能会加一些位操作<ul>
+<li>纠错能力弱,计算速度快</li>
+<li>IP,TCP&#x2F;UDP协议头部校验和使用该类算法</li>
+</ul>
+</li>
+<li>CRC:将要校验的<strong>数据流看作二进制多项式</strong>M(x),然后<strong>用预先约定好的、固定长度的生成多项式</strong> (Generator Polynomial) G(x)<strong>去除它</strong><ul>
+<li>数学原理保证了对于<strong>位错误的敏感</strong></li>
+<li>只要其<strong>长度小于生成多项式的阶数</strong>(如 CRC-32能检测所有长度小于 32 位的突发错误),就保证<strong>能100%检测出来</strong></li>
+</ul>
+</li>
+<li>CRC32查表法<ul>
+<li><strong>预处理阶段</strong>:预先计算一个<strong>长度为256的数组</strong><code>crc_table</code>,存放<strong>一个字节的256个可能值对应的CRC结果</strong><ul>
+<li>将<strong>字节值i作为初始CRC值</strong>(放在32位数的低8位)</li>
+<li>进行<strong>8次移位和条件异或运算</strong>,模拟CRC硬件的工作过程</li>
+<li>每次<strong>检查最低位</strong>:如果是<strong>1就右移后异或多项式</strong><code>0xEDB88320</code>,如果是<strong>0就只右移</strong></li>
+<li>8次运算后得到的32位值就存储在 <code>crc_table[i]</code> 中</li>
+</ul>
+</li>
+<li>初始化:<strong>初始化32位变量</strong> <code>crc_reg</code> <strong>为初始值</strong> <code>0xFFFFFFFF</code></li>
+<li>处理数据流:<strong>遍历数据流的每一个字节</strong> <code>byte</code>,对于每个字节执行以下操作:<ul>
+<li>取出 <code>crc_reg</code> 的<strong>低8位</strong>,<strong>与当前字节</strong> <code>byte</code> 进行<strong>异或</strong>,<strong>得到索引</strong> <code>index = (crc_reg ^ byte) &amp; 0xFF</code></li>
+<li>将 <code>crc_reg</code> <strong>右移 8 位</strong>:<code>crc_reg = crc_reg &gt;&gt; 8</code></li>
+<li>用右移后的 <code>crc_reg</code> 与 <code>crc_table[index]</code> 进行<strong>异或</strong>:<code>crc_reg = crc_reg ^ crc_table[index]</code></li>
+</ul>
+</li>
+<li>最终处理:<strong>遍历完所有数据后</strong>,将 <code>crc_reg</code> 与 <code>0xFFFFFFFF</code> <strong>进行异或</strong>,得到<strong>最终的CRC32校验码</strong></li>
+<li>校验:将原始数据 + CRC码一起进行CRC32计算,数据无误,计算结果应等于固定的魔数 <code>0x2144DF1C</code></li>
+</ul>
+</li>
+</ol>
+<h2 id="零拷贝"><a href="#零拷贝" class="headerlink" title="零拷贝"></a>零拷贝</h2><ol>
+<li>什么是零拷贝:<strong>避免不必要的数据拷贝,以降低 CPU 负载和内存带宽占用</strong></li>
+<li>传统拷贝,以网络发送为例:<ul>
+<li>用户程序调用read()系统调用,DMA将数据<strong>从硬盘读取到内核空间页缓存</strong></li>
+<li>数据从内核空间页缓存<strong>拷贝到用户空间</strong>应用缓冲区,read()返回</li>
+<li>用户程序调用 send() 系统调用.数据<strong>从用户空间</strong>的应用程序缓冲区,被 CPU <strong>拷贝回内核空间</strong>的 Socket 缓冲区</li>
+<li>DMA 控制器将数据从内核空间的 Socket 缓冲区,<strong>拷贝到</strong>网络接口卡 (NIC) 的<strong>发送缓冲区</strong>中,最终由硬件发送出去</li>
+</ul>
+</li>
+<li>零拷贝模式(特定应用场景的特定优化):<ul>
+<li>用户程序调用 sendfile(socket_fd, file_fd, …)</li>
+<li>内核收到指令.DMA 控制器将数据从磁盘直接读取到内核空间的页缓存中(拷贝一次)</li>
+<li>内核不将数据拷贝到用户空间.而是将页缓存中数据的位置和长度等描述信息,直接附加到 Socket 缓冲区中<ul>
+<li>这里没有移动数据,只移动了指针</li>
+</ul>
+</li>
+<li>DMA 控制器根据 Socket 缓冲区中的描述信息,直接从内核空间的页缓存中,将数据拷贝到网络接口卡的缓冲区中</li>
+</ul>
+</li>
+</ol>
+<h2 id="RTSP"><a href="#RTSP" class="headerlink" title="RTSP"></a>RTSP</h2><ol>
+<li>定义<ul>
+<li>RTSP (Real Time Streaming Protocol):<strong>不负责传输视频画面本身,只负责发送控制命令</strong><ul>
+<li>通常走tcp</li>
+</ul>
+</li>
+<li>RTP (Real-time Transport Protocol):<strong>把一帧帧的视频、一小段段的音频打包好,源源不断地传输</strong><ul>
+<li>通常udp</li>
+</ul>
+</li>
+<li>RTCP (RTP Control Protocol):<strong>周期性地在服务器和播放器之间发送传输质量报告</strong><ul>
+<li>通常udp</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>SDP(Session Description Protocol):是纯文本标准化的格式,用于描述视频流的属性和参数<ul>
+<li>在 RTSP 交互流程中,<strong>SDP 是客户端了解即将要播放的是什么的唯一信息来源</strong></li>
+<li>客户端请求:<strong>客户端</strong>(如 VLC, OpenCV)<strong>向 RTSP 服务器发送 DESCRIBE 命令</strong>,<strong>请求媒体流的描述信息</strong>.</li>
+<li>服务器响应:<strong>服务器以 SDP 格式的文本作为响应</strong>体,回复给客户端.</li>
+<li>客户端解析:<strong>客户端收到 SDP 文本后</strong>,会逐行解析,提取出关键信息,并据<strong>此来初始化自己的播放器、解码器和网络接收模块</strong></li>
+</ul>
+</li>
+</ol>
+<h2 id="TCP-IP-UDP"><a href="#TCP-IP-UDP" class="headerlink" title="TCP&#x2F;IP,UDP"></a>TCP&#x2F;IP,UDP</h2><ol>
+<li>层级关系<ul>
+<li><strong>TCP,UDP位与传输层,承担具体的传输任务</strong></li>
+<li>IP位与网络层,负责寻址与路由(根据IP地址找到门牌号)</li>
+</ul>
+</li>
+<li>UDP:无连接,不可靠,无流控,延迟低</li>
+<li>TCP:<ul>
+<li>三次握手<ul>
+<li>你能听见我吗?</li>
+<li>我能听见你,你能听见我的回复吗?</li>
+<li>我能听见你的回复</li>
+</ul>
+</li>
+<li>可靠传输:TCP会把包拆为段,每个段有序列号,用于保证是否收到数据以及超时重传</li>
+<li>字节流:<ul>
+<li>TCP隐藏了底层数据包的边界,应用程序看来就是一根水管</li>
+<li>因此需要自己处理消息的边界(加标识符)</li>
+</ul>
+</li>
+<li>滑动窗口:接收方会告诉发送方接收缓冲区还有多大,使用滑动窗口控制发送速率</li>
+<li>拥塞控制:TCP探测整个网络的拥堵情况控制发送速率</li>
+<li>四次挥手<ul>
+<li>我要挂了哈</li>
+<li>好的我知道你要挂了,等我说完你再挂</li>
+<li>我说完了你挂吧</li>
+<li>好拜拜</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<h2 id="HTTP"><a href="#HTTP" class="headerlink" title="HTTP"></a>HTTP</h2><ol>
+<li>定义:<strong>构建于TCP协议上</strong>,提供超文本传输功能<ul>
+<li>无状态,服务器默认不保存两次请求之间的信息,每个请求都是独立的</li>
+</ul>
+</li>
+</ol>
+<h2 id="WebSocket"><a href="#WebSocket" class="headerlink" title="WebSocket"></a>WebSocket</h2><ol>
+<li>传统 HTTP 的痛点:<strong>HTTP 是一个客户端拉取 (Client Pull)的协议</strong><ul>
+<li><strong>客户端不问,服务器就永远不会主动说话</strong></li>
+<li>这对于需要服务器主动推送信息的场景(如聊天室、股票行情、系统状态实时监控)来说,非常低效:</li>
+</ul>
+</li>
+<li><strong>WebSocket提供了一种在单个 TCP 连接上进行全双工 (Full-Duplex)、双向通信的协议</strong><ul>
+<li>HTTP 就像寄信,<strong>WebSocket</strong> 就像建立了一通<strong>电话</strong></li>
+</ul>
+</li>
+<li><strong>WebSocket借用了 HTTP 协议来完成初始的握手连接</strong>,从而<strong>可以穿透绝大多数只允许 HTTP 流量的防火墙和代理服务器</strong></li>
+</ol>
+<h2 id="CAN总线"><a href="#CAN总线" class="headerlink" title="CAN总线"></a>CAN总线</h2><ol>
+<li>定义:CAN 是一种专为恶劣环境设计的、基于消息 (Message-based) 的串行通信协议<ul>
+<li>允许多个微控制器(称为节点)在无需主机的情况下,通过一对双绞线进行相互通信</li>
+</ul>
+</li>
+<li>特点<ul>
+<li>CAN总线是一个<strong>基于订阅的广播协议</strong>,所有节点都往总线发,节点<strong>根据自己订阅的ID选择性的接收数据</strong></li>
+<li>没有源地址目的地址,<strong>发送的内容使用ID来标识内容类型和优先级,ID越小优先级越高</strong></li>
+</ul>
+</li>
+<li>非破坏性仲裁<ul>
+<li>载波侦听CSMA:CAN设备发送数据<strong>边写入边监听</strong>,每发送一位就监听一次是否和自己发的一样</li>
+<li>发送从报文的最高位也就是ID开始发,<strong>发送的0会覆盖1,1不会覆盖0</strong></li>
+<li>当发送的时候发现自己发送1但是<strong>监听到0说明有高优先级在发给他让路</strong></li>
+</ul>
+</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Zzkuang
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="http://zhangkuang.asia/2025/08/15/%E5%B5%8C%E5%85%A5%E5%BC%8F%E8%BD%AF%E4%BB%B6%E5%B7%A5%E7%A8%8B%E5%B8%88%E7%A7%8B%E6%8B%9B%E7%9F%A5%E8%AF%86%E7%82%B9%E6%A2%B3%E7%90%86/" title="嵌入式软件工程师秋招知识点梳理">http://zhangkuang.asia/2025/08/15/嵌入式软件工程师秋招知识点梳理/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Zynq/" rel="tag"># Zynq</a>
+              <a href="/tags/Petalinux/" rel="tag"># Petalinux</a>
+              <a href="/tags/C/" rel="tag"># C++</a>
+              <a href="/tags/%E7%A7%8B%E6%8B%9B/" rel="tag"># 秋招</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/08/07/%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%BD%91%E7%BB%9C%E6%9C%8D%E5%8A%A1%E5%99%A8%E8%AE%BE%E8%AE%A1/" rel="prev" title="嵌入式网络服务器设计">
+                  <i class="fa fa-angle-left"></i> 嵌入式网络服务器设计
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/08/24/FRP%E5%AE%9E%E6%88%98-%E4%B8%BAARM%E5%B7%A5%E6%8E%A7%E6%9C%BA%E6%90%AD%E5%BB%BA%E7%A8%B3%E5%AE%9A-%E5%AE%89%E5%85%A8%E7%9A%844G%E8%BF%9C%E7%A8%8BSSH%E8%BF%90%E7%BB%B4%E9%80%9A%E9%81%93/" rel="next" title="FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道">
+                  FRP实战:为ARM工控机搭建稳定,安全的4G远程SSH运维通道 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kuang</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '64px',
+  right: 'unset',
+  left: '32px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha256-dABdfBfUoC8vJUBOwGVdm8L9qlMWaHTIfXt+7GnZCIo=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.css" integrity="sha256-uTcjoMD6rPt4OyV3Rs02Slxl0BJGMNVKAm/1eYPt2go=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"zhangkuang.asia","root":"/","images":"/images","scheme":"Gemini","darkmode":false,"version":"8.23.2","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":true,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":true,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"},"path":"/search.xml","localsearch":{"enable":true,"top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="前言 本文目标:依托之前搭建的Zynq-7000-完整硬件平台构建与验证权威指南硬件平台文件,开发对应的Petalinux下BRAM通信回环实验,并通过该实验了解Petalinux下UIO,中断,内存映射相关概念">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Petalinux环境下BRAM通讯指南">
+<meta property="og:url" content="http://zhangkuang.asia/2025/08/03/Petalinux%E7%8E%AF%E5%A2%83%E4%B8%8BBRAM%E9%80%9A%E8%AE%AF%E6%8C%87%E5%8D%97/index.html">
+<meta property="og:site_name" content="Kuang&#39;s Tech Log">
+<meta property="og:description" content="前言 本文目标:依托之前搭建的Zynq-7000-完整硬件平台构建与验证权威指南硬件平台文件,开发对应的Petalinux下BRAM通信回环实验,并通过该实验了解Petalinux下UIO,中断,内存映射相关概念">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2025-08-03T08:17:45.000Z">
+<meta property="article:modified_time" content="2025-08-05T13:44:30.000Z">
+<meta property="article:author" content="Zzkuang">
+<meta property="article:tag" content="Petalinux">
+<meta property="article:tag" content="UIO">
+<meta property="article:tag" content="BRAM">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="http://zhangkuang.asia/2025/08/03/Petalinux%E7%8E%AF%E5%A2%83%E4%B8%8BBRAM%E9%80%9A%E8%AE%AF%E6%8C%87%E5%8D%97/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"en","comments":true,"permalink":"http://zhangkuang.asia/2025/08/03/Petalinux%E7%8E%AF%E5%A2%83%E4%B8%8BBRAM%E9%80%9A%E8%AE%AF%E6%8C%87%E5%8D%97/","path":"2025/08/03/Petalinux环境下BRAM通讯指南/","title":"Petalinux环境下BRAM通讯指南"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Petalinux环境下BRAM通讯指南 | Kuang's Tech Log</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancyapps-ui/6.0.5/fancybox/fancybox.umd.js" integrity="sha256-UiSieVaV/DXce2LW7QH+o77w+AIoAvSCPBkezriZ2DQ=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.5.0/search.js" integrity="sha256-xFC6PJ82SL9b3WkGjFavNiA9gm5z6UBxWPiu4CYjptg=" crossorigin="anonymous" defer></script>
+<script src="/js/third-party/search/local-search.js" defer></script>
+
+
+
+
+  <script src="/js/third-party/fancybox.js" defer></script>
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<style>.darkmode--activated{--body-bg-color:#282828;--content-bg-color:#333;--card-bg-color:#555;--text-color:#ccc;--blockquote-color:#bbb;--link-color:#ccc;--link-hover-color:#eee;--brand-color:#ddd;--brand-hover-color:#ddd;--table-row-odd-bg-color:#282828;--table-row-hover-bg-color:#363636;--menu-item-bg-color:#555;--btn-default-bg:#222;--btn-default-color:#ccc;--btn-default-border-color:#555;--btn-default-hover-bg:#666;--btn-default-hover-color:#ccc;--btn-default-hover-border-color:#666;--highlight-background:#282b2e;--highlight-foreground:#a9b7c6;--highlight-gutter-background:#34393d;--highlight-gutter-foreground:#9ca9b6}.darkmode--activated img{opacity:.75}.darkmode--activated img:hover{opacity:.9}.darkmode--activated code{color:#69dbdc;background:0 0}button.darkmode-toggle{z-index:9999}.darkmode-ignore,img{display:flex!important}.beian img{display:inline-block!important}</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Kuang's Tech Log</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">任何资源链接问题或者技术问题欢迎邮件联系讨论</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+      <div class="search-header">
+        <span class="search-icon">
+          <i class="fa fa-search"></i>
+        </span>
+        <div class="search-input-container">
+          <input autocomplete="off" autocapitalize="off" maxlength="80"
+                placeholder="Searching..." spellcheck="false"
+                type="search" class="search-input">
+        </div>
+        <span class="popup-btn-close" role="button">
+          <i class="fa fa-times-circle"></i>
+        </span>
+      </div>
+      <div class="search-result-container">
+        <div class="search-result-icon">
+          <i class="fa fa-spinner fa-pulse fa-5x"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BAPetalinux%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.</span> <span class="nav-text">创建Petalinux项目</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9A%E5%88%9B%E5%BB%BAPetaLinux%E9%A1%B9%E7%9B%AE"><span class="nav-number">2.1.</span> <span class="nav-text">第一步：创建PetaLinux项目</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E5%AF%BC%E5%85%A5%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="nav-number">2.2.</span> <span class="nav-text">第二步：导入硬件配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%89%E6%AD%A5%EF%BC%9A%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.</span> <span class="nav-text">第三步：系统配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%93%E5%AD%98%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.1.</span> <span class="nav-text">缓存配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E9%85%8D%E7%BD%AE%E4%B8%BASD%E5%8D%A1"><span class="nav-number">2.3.2.</span> <span class="nav-text">启动配置为SD卡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%B2%E5%8F%A3%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.3.</span> <span class="nav-text">串口配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.4.</span> <span class="nav-text">以太网配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0%E9%85%8D%E7%BD%AE"><span class="nav-number">2.3.5.</span> <span class="nav-text">启动参数配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%9B%9B%E6%AD%A5%EF%BC%9A%E5%86%85%E6%A0%B8%E9%85%8D%E7%BD%AE"><span class="nav-number">2.4.</span> <span class="nav-text">第四步：内核配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DMA%E5%BC%95%E6%93%8E%E6%94%AF%E6%8C%81"><span class="nav-number">2.4.1.</span> <span class="nav-text">DMA引擎支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPIO%E6%94%AF%E6%8C%81"><span class="nav-number">2.4.2.</span> <span class="nav-text">GPIO支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UIO%E6%94%AF%E6%8C%81%EF%BC%88%E7%94%A8%E6%88%B7%E7%A9%BA%E9%97%B4IO%E8%AE%BF%E9%97%AE%EF%BC%89"><span class="nav-number">2.4.3.</span> <span class="nav-text">UIO支持（用户空间IO访问）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%A5%E5%A4%AA%E7%BD%91%E9%A9%B1%E5%8A%A8"><span class="nav-number">2.4.4.</span> <span class="nav-text">以太网驱动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PHY%E9%A9%B1%E5%8A%A8%EF%BC%88%E5%85%B3%E9%94%AE%EF%BC%81%EF%BC%89"><span class="nav-number">2.4.5.</span> <span class="nav-text">PHY驱动（关键！）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%BA%94%E6%AD%A5%EF%BC%9A%E6%A0%B9%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E9%85%8D%E7%BD%AE"><span class="nav-number">2.5.</span> <span class="nav-text">第五步：根文件系统配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E7%A1%80%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.5.1.</span> <span class="nav-text">基础系统</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E6%94%AF%E6%8C%81"><span class="nav-number">2.5.2.</span> <span class="nav-text">网络支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#GPIO%E5%BA%93%E6%94%AF%E6%8C%81"><span class="nav-number">2.5.3.</span> <span class="nav-text">GPIO库支持</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E5%8A%A8%E7%99%BB%E5%BD%95%E9%85%8D%E7%BD%AE%EF%BC%88%E9%87%8D%E8%A6%81%EF%BC%81%EF%BC%89"><span class="nav-number">2.5.4.</span> <span class="nav-text">自动登录配置（重要！）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%85%AD%E6%AD%A5%EF%BC%9A%E8%AE%BE%E5%A4%87%E6%A0%91%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="nav-number">2.6.</span> <span class="nav-text">第六步：设备树文件配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B8%83%E6%AD%A5%EF%BC%9A%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA"><span class="nav-number">2.7.</span> <span class="nav-text">第七步：系统构建</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E5%85%AB%E6%AD%A5%EF%BC%9A%E7%94%9F%E6%88%90%E5%90%AF%E5%8A%A8%E9%95%9C%E5%83%8F"><span class="nav-number">2.8.</span> <span class="nav-text">第八步：生成启动镜像</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AC%AC%E4%B9%9D%E6%AD%A5%EF%BC%9ASD%E5%8D%A1%E5%88%B6%E4%BD%9C"><span class="nav-number">2.9.</span> <span class="nav-text">第九步：SD卡制作</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux%E4%B8%8B%E7%A1%AC%E4%BB%B6%E6%AD%A3%E7%A1%AE%E6%80%A7%E6%A3%80%E6%9F%A5"><span class="nav-number">3.</span> <span class="nav-text">Linux下硬件正确性检查</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%99%BB%E5%BD%95Linux"><span class="nav-number">3.1.</span> <span class="nav-text">登录Linux</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E8%AE%BE%E8%AE%A1"><span class="nav-number">3.2.</span> <span class="nav-text">硬件设计</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E7%A1%AC%E4%BB%B6%E6%A3%80%E6%9F%A5%E5%91%BD%E4%BB%A4"><span class="nav-number">3.3.</span> <span class="nav-text">系统硬件检查命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E4%B8%AD%E6%96%AD%E4%BF%A1%E6%81%AF"><span class="nav-number">3.4.</span> <span class="nav-text">查看中断信息</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0%E5%9B%9E%E7%8E%AF%E5%8A%9F%E8%83%BD"><span class="nav-number">4.</span> <span class="nav-text">代码实现回环功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E6%A6%82%E5%BF%B5%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90"><span class="nav-number">4.1.</span> <span class="nav-text">核心概念深度解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E4%BB%B6%E6%8F%8F%E8%BF%B0%E7%AC%A6%E6%9C%BA%E5%88%B6"><span class="nav-number">4.1.1.</span> <span class="nav-text">文件描述符机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%86%85%E5%AD%98%E6%98%A0%E5%B0%84%E5%8E%9F%E7%90%86"><span class="nav-number">4.1.2.</span> <span class="nav-text">内存映射原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UIO%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86%E6%9C%BA%E5%88%B6"><span class="nav-number">4.1.3.</span> <span class="nav-text">UIO中断处理机制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CDMA%E5%AF%84%E5%AD%98%E5%99%A8%E6%8E%A7%E5%88%B6%E8%AF%A6%E8%A7%A3"><span class="nav-number">4.1.4.</span> <span class="nav-text">CDMA寄存器控制详解</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-number">4.2.</span> <span class="nav-text">测试结果</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E4%BC%98%E5%8C%96"><span class="nav-number">5.</span> <span class="nav-text">构建优化</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Zzkuang"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Zzkuang</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">42</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://gitee.com/zzkuang" title="Gitee → https:&#x2F;&#x2F;gitee.com&#x2F;zzkuang" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>Gitee</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:zzkuang0516@163.com" title="E-Mail → mailto:zzkuang0516@163.com" rel="noopener me" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/small/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="en">
+    <link itemprop="mainEntityOfPage" href="http://zhangkuang.asia/2025/08/03/Petalinux%E7%8E%AF%E5%A2%83%E4%B8%8BBRAM%E9%80%9A%E8%AE%AF%E6%8C%87%E5%8D%97/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Zzkuang">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Petalinux环境下BRAM通讯指南 | Kuang's Tech Log">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Petalinux环境下BRAM通讯指南
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-08-03 16:17:45" itemprop="dateCreated datePublished" datetime="2025-08-03T16:17:45+08:00">2025-08-03</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-08-05 21:44:30" itemprop="dateModified" datetime="2025-08-05T21:44:30+08:00">2025-08-05</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><ul>
+<li><strong>本文目标</strong>:依托之前搭建的<a href="/2025/07/21/Zynq-7000-%E5%AE%8C%E6%95%B4%E7%A1%AC%E4%BB%B6%E5%B9%B3%E5%8F%B0%E6%9E%84%E5%BB%BA%E4%B8%8E%E9%AA%8C%E8%AF%81%E6%9D%83%E5%A8%81%E6%8C%87%E5%8D%97/" title="Zynq-7000 完整硬件平台构建与验证权威指南">Zynq-7000-完整硬件平台构建与验证权威指南</a>硬件平台文件,开发对应的Petalinux下BRAM通信回环实验,并通过该实验了解Petalinux下UIO,中断,内存映射相关概念</li>
+</ul>
+<span id="more"></span>
+
+<h1 id="创建Petalinux项目"><a href="#创建Petalinux项目" class="headerlink" title="创建Petalinux项目"></a>创建Petalinux项目</h1><h2 id="第一步：创建PetaLinux项目"><a href="#第一步：创建PetaLinux项目" class="headerlink" title="第一步：创建PetaLinux项目"></a>第一步：创建PetaLinux项目</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建基于Zynq模板的项目</span></span><br><span class="line">petalinux-create --<span class="built_in">type</span> project --template zynq --name zynq_linux_project</span><br><span class="line"><span class="built_in">cd</span> zynq_linux_project</span><br></pre></td></tr></table></figure>
+
+<p><strong>说明：</strong> 选择zynq模板为Zynq 7000系列芯片提供基础配置框架。</p>
+<h2 id="第二步：导入硬件配置"><a href="#第二步：导入硬件配置" class="headerlink" title="第二步：导入硬件配置"></a>第二步：导入硬件配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建硬件文件目录</span></span><br><span class="line"><span class="built_in">mkdir</span> -p hardware</span><br><span class="line"></span><br><span class="line"><span class="comment"># 将Vivado生成的.xsa文件放入hardware目录</span></span><br><span class="line"><span class="comment"># 导入硬件配置</span></span><br><span class="line">petalinux-config --get-hw-description=./hardware/</span><br></pre></td></tr></table></figure>
+
+<p><strong>重要事项：</strong></p>
+<ul>
+<li>使用相对路径导入，确保路径正确性</li>
+<li>如果弹出配置菜单，通常可以直接保存退出</li>
+<li>导入后会在 <code>project-spec/hw-description/</code> 生成硬件信息</li>
+</ul>
+<h2 id="第三步：系统配置"><a href="#第三步：系统配置" class="headerlink" title="第三步：系统配置"></a>第三步：系统配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">petalinux-config</span><br></pre></td></tr></table></figure>
+
+<p><strong>关键配置项：</strong></p>
+<h3 id="缓存配置"><a href="#缓存配置" class="headerlink" title="缓存配置"></a>缓存配置</h3><p>参考<a href="/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/" title="PetaLinux 2023.2 离线缓存与加速编译配置">PetaLinux-2023-2-离线缓存与加速编译配置</a></p>
+<h3 id="启动配置为SD卡"><a href="#启动配置为SD卡" class="headerlink" title="启动配置为SD卡"></a>启动配置为SD卡</h3><ul>
+<li><strong>路径：</strong> <code>Subsystem AUTO Hardware Settings</code> -&gt; <code>SD/SDIO Settings</code></li>
+<li><strong>设置：</strong> 确认 <code>Primary SD/SDIO (ps7_sd_0)</code> 已选择</li>
+<li><code>Image Packaging Configuration -&gt; Root filesystem type</code>,从 <code>INITRD</code> 改为 <code>EXT4 (SD/eMMC/SATA/USB)</code></li>
+</ul>
+<h3 id="串口配置"><a href="#串口配置" class="headerlink" title="串口配置"></a>串口配置</h3><ul>
+<li><strong>路径：</strong> <code>Subsystem AUTO Hardware Settings</code> -&gt; <code>Serial Settings</code></li>
+<li>配置(此处是因为开发板的底板串口为串口1,此处配置要看开发板)：<ul>
+<li><code>FSBL Serial stdin/stdout (ps7_uart_1)</code></li>
+<li><code>DTG Serial stdin/stdout (ps7_uart_1)</code></li>
+<li><code>System stdin/stdout baudrate for ps7_uart_1 (115200)</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="以太网配置"><a href="#以太网配置" class="headerlink" title="以太网配置"></a>以太网配置</h3><ul>
+<li><strong>路径：</strong> <code>Subsystem AUTO Hardware Settings</code> -&gt; <code>Ethernet Settings</code></li>
+<li>配置：<ul>
+<li><code>Primary Ethernet (ps7_ethernet_0)</code> - 确认已选择</li>
+<li><code>[*] Obtain IP address automatically</code> - 启用DHCP</li>
+<li>MAC地址保持默认即可</li>
+</ul>
+</li>
+</ul>
+<h3 id="启动参数配置"><a href="#启动参数配置" class="headerlink" title="启动参数配置"></a>启动参数配置</h3><ul>
+<li><p>路径: <code>DTG Settings -&gt; Kernel Bootargs</code>设置为手动设置参数,设置如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">console=ttyPS0,115200 earlycon root=/dev/mmcblk0p2 ro rootwait uio_pdrv_genirq.of_id=generic-uio</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="第四步：内核配置"><a href="#第四步：内核配置" class="headerlink" title="第四步：内核配置"></a>第四步：内核配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">petalinux-config -c kernel</span><br></pre></td></tr></table></figure>
+
+<p><strong>必需启用的驱动模块：</strong></p>
+<h3 id="DMA引擎支持"><a href="#DMA引擎支持" class="headerlink" title="DMA引擎支持"></a>DMA引擎支持</h3><ul>
+<li><strong>路径：</strong> <code>Device Drivers</code> -&gt; <code>DMA Engine support</code></li>
+<li><strong>启用：</strong> <code>&lt;*&gt; Xilinx AXI DMAS Engine</code></li>
+<li><strong>状态：</strong> 通常默认已启用</li>
+</ul>
+<h3 id="GPIO支持"><a href="#GPIO支持" class="headerlink" title="GPIO支持"></a>GPIO支持</h3><ul>
+<li><strong>路径：</strong> <code>Device Drivers</code> -&gt; <code>GPIO Support</code> -&gt; <code>Memory mapped GPIO drivers</code></li>
+<li><strong>启用：</strong> <code>&lt;*&gt; Xilinx Zynq GPIO support</code></li>
+<li><strong>状态：</strong> 通常默认已启用</li>
+</ul>
+<h3 id="UIO支持（用户空间IO访问）"><a href="#UIO支持（用户空间IO访问）" class="headerlink" title="UIO支持（用户空间IO访问）"></a>UIO支持（用户空间IO访问）</h3><ul>
+<li><p><strong>路径：</strong> <code>Device Drivers</code> -&gt; <code>Userspace I/O drivers</code></p>
+</li>
+<li><p>必须启用：</p>
+<ul>
+<li><code>&lt;M&gt; Userspace I/O platform driver with generic IRQ handling</code>,该项无法修改为<code>*</code></li>
+<li><code>&lt;*&gt; Userspace platform driver with generic irq and dynamic memory</code></li>
+</ul>
+</li>
+<li><p><strong>重要性：</strong> 用于用户空间访问BRAM控制器等自定义IP</p>
+</li>
+<li><p><strong>UIO驱动的作用</strong></p>
+<ul>
+<li><p><strong>Userspace I&#x2F;O (UIO)</strong> 的优势：</p>
+<ul>
+<li><p>允许用户空间程序直接访问硬件寄存器</p>
+</li>
+<li><p>避免编写复杂的内核驱动</p>
+</li>
+<li><p>适用于自定义IP核的快速原型开发</p>
+</li>
+<li><p>支持中断处理和内存映射</p>
+</li>
+</ul>
+</li>
+<li><p><strong>适用场景：</strong></p>
+<ul>
+<li>BRAM控制器的用户空间访问</li>
+<li>自定义AXI IP核的控制</li>
+<li>硬件加速器的用户空间接口</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="以太网驱动"><a href="#以太网驱动" class="headerlink" title="以太网驱动"></a>以太网驱动</h3><ul>
+<li><strong>路径：</strong> <code>Device Drivers</code> -&gt; <code>Network device support</code> -&gt; <code>Ethernet driver support</code></li>
+<li><strong>启用：</strong> <code>&lt;*&gt; Xilinx 10/100/1000 AXI Ethernet support</code></li>
+</ul>
+<h3 id="PHY驱动（关键！）"><a href="#PHY驱动（关键！）" class="headerlink" title="PHY驱动（关键！）"></a>PHY驱动（关键！）</h3><ul>
+<li><strong>路径：</strong> <code>Device Drivers</code> -&gt; <code>Network device support</code> -&gt; <code>PHY Device support and infrastructure</code></li>
+<li><strong>必须启用：</strong> <code>[*] Micrel Phys</code></li>
+<li><strong>重要性：</strong> 没有正确的PHY驱动，网卡无法工作</li>
+</ul>
+<h2 id="第五步：根文件系统配置"><a href="#第五步：根文件系统配置" class="headerlink" title="第五步：根文件系统配置"></a>第五步：根文件系统配置</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">petalinux-config -c rootfs</span><br></pre></td></tr></table></figure>
+
+<p><strong>推荐配置：</strong></p>
+<h3 id="基础系统"><a href="#基础系统" class="headerlink" title="基础系统"></a>基础系统</h3><ul>
+<li>路径: <code>Filesystem Packages  -&gt; base  -&gt; busybox</code></li>
+</ul>
+<ul>
+<li><code>[*] busybox</code> - 基础系统工具集</li>
+<li><code>[*] busybox-udhcpc</code> - DHCP客户端（用于自动获取IP）</li>
+</ul>
+<h3 id="网络支持"><a href="#网络支持" class="headerlink" title="网络支持"></a>网络支持</h3><ul>
+<li>SSH服务默认已配置，无需额外设置</li>
+</ul>
+<h3 id="GPIO库支持"><a href="#GPIO库支持" class="headerlink" title="GPIO库支持"></a>GPIO库支持</h3><ul>
+<li><strong>路径：</strong> <code>Filesystem Packages</code> -&gt; <code>libs</code> -&gt; <code>libgpiod</code></li>
+<li><strong>启用：</strong> <code>[*] libgpiod</code></li>
+</ul>
+<h3 id="自动登录配置（重要！）"><a href="#自动登录配置（重要！）" class="headerlink" title="自动登录配置（重要！）"></a>自动登录配置（重要！）</h3><ul>
+<li><strong>路径：</strong> <code>Image Features</code></li>
+<li>必须启用,在该开发板上使用UART1登录时root密码登录会出现一直失败的情况,可能是BUG：<ul>
+<li><code>-*- empty-root-password</code> - 设置root用户空密码</li>
+<li><code>[*] serial-autologin-root</code> - 串口自动以root身份登录</li>
+</ul>
+</li>
+</ul>
+<h2 id="第六步：设备树文件配置"><a href="#第六步：设备树文件配置" class="headerlink" title="第六步：设备树文件配置"></a>第六步：设备树文件配置</h2><ul>
+<li><p>编辑 <code>project-spec/meta-user/recipes-bsp/device-tree/files/system-user.dtsi</code></p>
+</li>
+<li><p>添加如下内容</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">/include/ <span class="string">&quot;system-conf.dtsi&quot;</span></span><br><span class="line">/ &#123;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// BRAM控制器配置为UIO模式</span></span><br><span class="line">&amp;axi_bram_ctrl_0 &#123;</span><br><span class="line">    compatible = <span class="string">&quot;generic-uio&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">&amp;axi_bram_ctrl_1 &#123;</span><br><span class="line">    compatible = <span class="string">&quot;generic-uio&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// CDMA配置为UIO模式</span></span><br><span class="line">&amp;axi_cdma_0 &#123;</span><br><span class="line">    compatible = <span class="string">&quot;generic-uio&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设备树配置原理</p>
+<ul>
+<li><code>compatible = &quot;generic-uio&quot;</code>: 告诉Linux使用UIO框架</li>
+<li>UIO框架自动创建<code>/dev/uioX</code>设备文件</li>
+<li>支持用户空间直接访问硬件寄存器和中断</li>
+</ul>
+</li>
+</ul>
+<h2 id="第七步：系统构建"><a href="#第七步：系统构建" class="headerlink" title="第七步：系统构建"></a>第七步：系统构建</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 完整构建（首次构建20-60分钟）</span></span><br><span class="line">petalinux-build</span><br></pre></td></tr></table></figure>
+
+<p><strong>构建说明：</strong></p>
+<ul>
+<li>首次构建会下载并编译大量软件包</li>
+<li>构建过程包括：内核编译、根文件系统生成、设备树编译等</li>
+<li>如果出现网络下载错误，根据URL下载并补充在downloads目录下,详情参考<a href="/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/" title="PetaLinux 2023.2 离线缓存与加速编译配置">PetaLinux-2023-2-离线缓存与加速编译配置</a></li>
+</ul>
+<h2 id="第八步：生成启动镜像"><a href="#第八步：生成启动镜像" class="headerlink" title="第八步：生成启动镜像"></a>第八步：生成启动镜像</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">打包启动镜像</span></span><br><span class="line">petalinux-package --boot --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot --force</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">验证生成的文件</span></span><br><span class="line">ls -la images/linux/BOOT.BIN images/linux/image.ub images/linux/boot.scr</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>生成的关键文件：</strong><ul>
+<li><code>BOOT.BIN</code> (~5MB) - 包含FSBL、FPGA比特流、U-Boot、设备树</li>
+<li><code>image.ub</code> (~76MB) - FIT格式，包含Linux内核和根文件系统</li>
+<li><code>boot.scr</code> (~3.5KB) - U-Boot启动脚本</li>
+</ul>
+</li>
+<li>注意,2023.2版本似乎不会在后续编译的时候生成boot.scr,因此该文件时间在后续构建是旧的</li>
+</ul>
+<h2 id="第九步：SD卡制作"><a href="#第九步：SD卡制作" class="headerlink" title="第九步：SD卡制作"></a>第九步：SD卡制作</h2><ul>
+<li><p>先查看自己的sd卡名称,我的设备是sdb1</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo fdisk -l</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>挂载SD卡分区（需要提前分区：FAT32启动分区 + EXT4根文件系统分区）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo mount /dev/sdb1 /mnt/boot </span><br><span class="line">sudo mount /dev/sdb2 /mnt/rootfs</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>复制启动文件到boot分区,解压根文件系统到rootfs分区</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo cp images/linux/BOOT.BIN /mnt/boot/</span><br><span class="line">sudo cp images/linux/image.ub /mnt/boot/</span><br><span class="line">sudo cp images/linux/boot.scr /mnt/boot/</span><br><span class="line">sudo tar -xzf images/linux/rootfs.tar.gz -C /mnt/rootfs/</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>同步并卸载</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sync</span><br><span class="line">sudo umount /mnt/boot /mnt/rootfs</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="Linux下硬件正确性检查"><a href="#Linux下硬件正确性检查" class="headerlink" title="Linux下硬件正确性检查"></a>Linux下硬件正确性检查</h1><h2 id="登录Linux"><a href="#登录Linux" class="headerlink" title="登录Linux"></a>登录Linux</h2><p>通过串口连接,启动开发板后可以进入串口的控制台页面,添加用户,配置网卡</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mv</span> /etc/network/interfaces /etc/network/interfaces.bak</span><br><span class="line">vi /etc/network/interfaces</span><br></pre></td></tr></table></figure>
+
+<p>添加如下内容</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">/etc/network/interfaces -- configuration file <span class="keyword">for</span> ifup(8), ifdown(8)</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">The loopback interface</span></span><br><span class="line">auto lo</span><br><span class="line">iface lo inet loopback</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Ethernet interface eth0 - Static IP Configuration</span></span><br><span class="line">auto eth0</span><br><span class="line">iface eth0 inet static</span><br><span class="line">    address 192.168.1.101</span><br><span class="line">    netmask 255.255.255.0</span><br><span class="line">    network 192.168.1.0</span><br><span class="line">    gateway 192.168.1.1</span><br><span class="line">    # dns-nameservers 8.8.8.8 1.1.1.1</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">auto eth1</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">iface eth1 inet dhcp</span></span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="comment"># Wireless interfaces</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="comment"># iface wlan0 inet dhcp</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="comment">#        wireless_mode managed</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="comment">#        wireless_essid any</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="comment">#        wpa-driver wext</span></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="comment">#        wpa-conf /etc/wpa_supplicant.conf</span></span></span><br></pre></td></tr></table></figure>
+
+<p>添加用户</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">adduser kuang</span><br><span class="line">passwd kuang</span><br><span class="line">usermod -aG sudo kuang</span><br><span class="line">usermod -aG root kuang</span><br></pre></td></tr></table></figure>
+
+<p>这样就可以ssh登录linux了</p>
+<h2 id="硬件设计"><a href="#硬件设计" class="headerlink" title="硬件设计"></a>硬件设计</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">硬件架构:</span><br><span class="line">BRAM Controller 0 → Block Memory Port A</span><br><span class="line">BRAM Controller 1 → Block Memory Port B  </span><br><span class="line">AXI CDMA → AXI Smart Connect</span><br><span class="line">中断连接: CDMA → xconcat In0 → IRQ_F2P[0]</span><br></pre></td></tr></table></figure>
+
+<h2 id="系统硬件检查命令"><a href="#系统硬件检查命令" class="headerlink" title="系统硬件检查命令"></a><strong>系统硬件检查命令</strong></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 检查UIO设备</span></span><br><span class="line"><span class="built_in">ls</span> -la /dev/uio*</span><br><span class="line"></span><br><span class="line"><span class="comment"># 确认设备对应关系</span></span><br><span class="line"><span class="keyword">for</span> uio <span class="keyword">in</span> /dev/uio*; <span class="keyword">do</span></span><br><span class="line">    num=$(<span class="built_in">basename</span> <span class="variable">$uio</span> | sed <span class="string">&#x27;s/uio//&#x27;</span>)</span><br><span class="line">    <span class="built_in">echo</span> <span class="string">&quot;=== <span class="variable">$uio</span> ===&quot;</span></span><br><span class="line">    <span class="built_in">cat</span> /sys/class/uio/uio<span class="variable">$num</span>/name</span><br><span class="line">    <span class="built_in">cat</span> /sys/class/uio/uio<span class="variable">$num</span>/maps/map0/addr</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<p>输出结果</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">zynq_linux_project:~$ ls -la /dev/uio*</span><br><span class="line">crw-------    1 root     root      246,   0 Jan  1  1970 /dev/uio0</span><br><span class="line">crw-------    1 root     root      246,   1 Jan  1  1970 /dev/uio1</span><br><span class="line">crw-------    1 root     root      246,   2 Jan  1  1970 /dev/uio2</span><br><span class="line">zynq_linux_project:~$ for uio in /dev/uio*; do</span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">    num=$(<span class="built_in">basename</span> <span class="variable">$uio</span> | sed <span class="string">&#x27;s/uio//&#x27;</span>)</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">    <span class="built_in">echo</span> <span class="string">&quot;=== <span class="variable">$uio</span> ===&quot;</span></span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">    <span class="built_in">cat</span> /sys/class/uio/uio<span class="variable">$num</span>/name</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">    <span class="built_in">cat</span> /sys/class/uio/uio<span class="variable">$num</span>/maps/map0/addr</span></span><br><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash"><span class="keyword">done</span></span></span><br><span class="line">=== /dev/uio0 ===</span><br><span class="line">axi_bram_ctrl</span><br><span class="line">0x40000000</span><br><span class="line">=== /dev/uio1 ===</span><br><span class="line">axi_bram_ctrl</span><br><span class="line">0x40001000</span><br><span class="line">=== /dev/uio2 ===</span><br><span class="line">dma</span><br><span class="line">0x7e200000</span><br><span class="line">zynq_linux_project:~$ </span><br></pre></td></tr></table></figure>
+
+<p>输出分析</p>
+<ul>
+<li><strong>设备文件路径</strong>：<code>/dev/uio0</code>, <code>/dev/uio1</code>, <code>/dev/uio2</code></li>
+<li><strong>硬件地址映射</strong>：<ul>
+<li>BRAM A: 0x40000000</li>
+<li>BRAM B: 0x40001000</li>
+<li>CDMA: 0x7e200000</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><strong>设备类型确认</strong>：两个BRAM控制器 + 一个DMA控制器</li>
+</ul>
+<h2 id="查看中断信息"><a href="#查看中断信息" class="headerlink" title="查看中断信息"></a>查看中断信息</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">zynq_linux_project:~$ <span class="built_in">cat</span> /proc/device-tree/amba_pl/dma@7e200000/interrupts | hexdump -C</span><br><span class="line">00000000  00 00 00 00 00 00 00 1d  00 00 00 04              |............|</span><br><span class="line">0000000c</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>解析:在第一个命令中,除了每行首位的行号,剩下的一共36个字节,每十二个字节为一组,每组的前四个字节是只能高端类型,中间四个是中断号,后四个是触发方式<ul>
+<li><code>00 00 00 00</code>: 中断类型 &#x3D; 0 (SPI中断)</li>
+<li><code>00 00 00 1d</code>: 中断号 &#x3D; 0x1d &#x3D; <strong>29</strong></li>
+<li><code>00 00 00 04</code>: 触发方式 &#x3D; 4 (高电平触发)</li>
+</ul>
+</li>
+<li>中断号计算<ul>
+<li>硬件中断号 &#x3D; 29 </li>
+<li>Linux中断号 &#x3D; 29 + 32 &#x3D; 61</li>
+<li>SPI中断: Linux中断号 &#x3D; 设备树中断号 + 32</li>
+</ul>
+</li>
+</ul>
+<h1 id="代码实现回环功能"><a href="#代码实现回环功能" class="headerlink" title="代码实现回环功能"></a>代码实现回环功能</h1><p>代码编译参考<a href="/2025/07/22/%E9%85%8D%E7%BD%AE-Windows-CLion-%E4%B8%BA-PetaLinux-%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%BF%9B%E8%A1%8C%E8%BF%9C%E7%A8%8B%E4%BA%A4%E5%8F%89%E7%BC%96%E8%AF%91/" title="配置 Windows CLion 为 PetaLinux 虚拟机进行远程交叉编译">配置-Windows-CLion-为-PetaLinux-虚拟机进行远程交叉编译</a></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br><span class="line">233</span><br><span class="line">234</span><br><span class="line">235</span><br><span class="line">236</span><br><span class="line">237</span><br><span class="line">238</span><br><span class="line">239</span><br><span class="line">240</span><br><span class="line">241</span><br><span class="line">242</span><br><span class="line">243</span><br><span class="line">244</span><br><span class="line">245</span><br><span class="line">246</span><br><span class="line">247</span><br><span class="line">248</span><br><span class="line">249</span><br><span class="line">250</span><br><span class="line">251</span><br><span class="line">252</span><br><span class="line">253</span><br><span class="line">254</span><br><span class="line">255</span><br><span class="line">256</span><br><span class="line">257</span><br><span class="line">258</span><br><span class="line">259</span><br><span class="line">260</span><br><span class="line">261</span><br><span class="line">262</span><br><span class="line">263</span><br><span class="line">264</span><br><span class="line">265</span><br><span class="line">266</span><br><span class="line">267</span><br><span class="line">268</span><br><span class="line">269</span><br><span class="line">270</span><br><span class="line">271</span><br><span class="line">272</span><br><span class="line">273</span><br><span class="line">274</span><br><span class="line">275</span><br><span class="line">276</span><br><span class="line">277</span><br><span class="line">278</span><br><span class="line">279</span><br><span class="line">280</span><br><span class="line">281</span><br><span class="line">282</span><br><span class="line">283</span><br><span class="line">284</span><br><span class="line">285</span><br><span class="line">286</span><br><span class="line">287</span><br><span class="line">288</span><br><span class="line">289</span><br><span class="line">290</span><br><span class="line">291</span><br><span class="line">292</span><br><span class="line">293</span><br><span class="line">294</span><br><span class="line">295</span><br><span class="line">296</span><br><span class="line">297</span><br><span class="line">298</span><br><span class="line">299</span><br><span class="line">300</span><br><span class="line">301</span><br><span class="line">302</span><br><span class="line">303</span><br><span class="line">304</span><br><span class="line">305</span><br><span class="line">306</span><br><span class="line">307</span><br><span class="line">308</span><br><span class="line">309</span><br><span class="line">310</span><br><span class="line">311</span><br><span class="line">312</span><br><span class="line">313</span><br><span class="line">314</span><br><span class="line">315</span><br><span class="line">316</span><br><span class="line">317</span><br><span class="line">318</span><br><span class="line">319</span><br><span class="line">320</span><br><span class="line">321</span><br><span class="line">322</span><br><span class="line">323</span><br><span class="line">324</span><br><span class="line">325</span><br><span class="line">326</span><br><span class="line">327</span><br><span class="line">328</span><br><span class="line">329</span><br><span class="line">330</span><br><span class="line">331</span><br><span class="line">332</span><br><span class="line">333</span><br><span class="line">334</span><br><span class="line">335</span><br><span class="line">336</span><br><span class="line">337</span><br><span class="line">338</span><br><span class="line">339</span><br><span class="line">340</span><br><span class="line">341</span><br><span class="line">342</span><br><span class="line">343</span><br><span class="line">344</span><br><span class="line">345</span><br><span class="line">346</span><br><span class="line">347</span><br><span class="line">348</span><br><span class="line">349</span><br><span class="line">350</span><br><span class="line">351</span><br><span class="line">352</span><br><span class="line">353</span><br><span class="line">354</span><br><span class="line">355</span><br><span class="line">356</span><br><span class="line">357</span><br><span class="line">358</span><br><span class="line">359</span><br><span class="line">360</span><br><span class="line">361</span><br><span class="line">362</span><br><span class="line">363</span><br><span class="line">364</span><br><span class="line">365</span><br><span class="line">366</span><br><span class="line">367</span><br><span class="line">368</span><br><span class="line">369</span><br><span class="line">370</span><br><span class="line">371</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Linux FPGA中断DMA实验总结 - 标准实现</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 实验目标：</span></span><br><span class="line"><span class="comment"> * 1. 掌握Linux UIO框架的使用</span></span><br><span class="line"><span class="comment"> * 2. 理解用户空间硬件中断处理</span></span><br><span class="line"><span class="comment"> * 3. 实现BRAM间的DMA数据传输</span></span><br><span class="line"><span class="comment"> * 4. 验证中断驱动的异步操作</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/mman.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdint.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="comment">// 硬件地址定义（从Address Editor获取）</span></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BRAM_A_ADDR         0x40000000  <span class="comment">// BRAM A物理基址</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BRAM_B_ADDR         0x40001000  <span class="comment">// BRAM B物理基址</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="comment">// CDMA寄存器定义（来自Xilinx产品指南）</span></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMACR              0x00    <span class="comment">// 控制寄存器偏移</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMASR              0x04    <span class="comment">// 状态寄存器偏移</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SA                  0x18    <span class="comment">// 源地址寄存器偏移</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DA                  0x20    <span class="comment">// 目标地址寄存器偏移</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BTT                 0x28    <span class="comment">// 传输字节数寄存器偏移</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 控制寄存器位定义</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMACR_RESET        (1 &lt;&lt; 2)    <span class="comment">// bit 2: 软件复位</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMACR_IOC_IrqEn    (1 &lt;&lt; 12)   <span class="comment">// bit 12: 完成中断使能</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMACR_Err_IrqEn    (1 &lt;&lt; 14)   <span class="comment">// bit 14: 错误中断使能</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 状态寄存器位定义  </span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMASR_IDLE         (1 &lt;&lt; 1)    <span class="comment">// bit 1: 空闲状态（只读）</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMASR_IOC_Irq      (1 &lt;&lt; 12)   <span class="comment">// bit 12: 完成中断标志</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> CDMASR_Err_Irq      (1 &lt;&lt; 14)   <span class="comment">// bit 14: 错误中断标志</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="comment">// BRAM设备类 - 用户空间硬件抽象</span></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BRAMDevice</span> &#123;</span></span><br><span class="line">private:</span><br><span class="line">    <span class="type">int</span> fd;                      <span class="comment">// UIO设备文件描述符</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">uint32_t</span> *memory;   <span class="comment">// 映射的内存指针</span></span><br><span class="line">    </span><br><span class="line">public:</span><br><span class="line">    BRAMDevice() : fd(<span class="number">-1</span>), memory(nullptr) &#123;&#125;</span><br><span class="line">    </span><br><span class="line">    ~BRAMDevice() &#123;</span><br><span class="line">        <span class="comment">// RAII模式：自动资源清理</span></span><br><span class="line">        <span class="keyword">if</span> (memory) munmap((<span class="type">void</span>*)memory, <span class="number">0x1000</span>);</span><br><span class="line">        <span class="keyword">if</span> (fd &gt;= <span class="number">0</span>) close(fd);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 初始化BRAM设备</span></span><br><span class="line"><span class="comment">     * device_path: UIO设备路径，如&quot;/dev/uio0&quot;</span></span><br><span class="line"><span class="comment">     * 返回: 0成功，-1失败</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">int</span> <span class="title function_">init</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *device_path)</span> &#123;</span><br><span class="line">        <span class="comment">// 打开UIO设备文件</span></span><br><span class="line">        fd = open(device_path, O_RDWR | O_SYNC);</span><br><span class="line">        <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 将硬件寄存器映射到用户空间</span></span><br><span class="line">        <span class="comment">// mmap(): 建立虚拟地址到物理地址的映射</span></span><br><span class="line">        memory = (<span class="keyword">volatile</span> <span class="type">uint32_t</span>*)mmap(</span><br><span class="line">            nullptr,              <span class="comment">// 让内核选择虚拟地址</span></span><br><span class="line">            <span class="number">0x1000</span>,              <span class="comment">// 映射4KB空间</span></span><br><span class="line">            PROT_READ | PROT_WRITE, <span class="comment">// 可读写权限</span></span><br><span class="line">            MAP_SHARED,          <span class="comment">// 与硬件共享，写入立即生效</span></span><br><span class="line">            fd,                  <span class="comment">// UIO设备文件描述符</span></span><br><span class="line">            <span class="number">0</span>                    <span class="comment">// 从偏移0开始映射</span></span><br><span class="line">        );</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> (memory == MAP_FAILED) ? <span class="number">-1</span> : <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 写入数据到BRAM</span></span><br><span class="line"><span class="comment">     * offset: word偏移（0,1,2...）</span></span><br><span class="line"><span class="comment">     * data: 32位数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">void</span> <span class="title function_">write</span><span class="params">(<span class="type">uint32_t</span> offset, <span class="type">uint32_t</span> data)</span> &#123;</span><br><span class="line">        memory[offset] = data;</span><br><span class="line">        <span class="comment">// volatile确保写入操作立即执行，不被编译器优化</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 从BRAM读取数据</span></span><br><span class="line"><span class="comment">     * offset: word偏移（0,1,2...）</span></span><br><span class="line"><span class="comment">     * 返回: 32位数据</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">uint32_t</span> <span class="title function_">read</span><span class="params">(<span class="type">uint32_t</span> offset)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> memory[offset];</span><br><span class="line">        <span class="comment">// volatile确保每次都真实读取硬件</span></span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 清空BRAM区域</span></span><br><span class="line"><span class="comment">     * start: 起始word偏移</span></span><br><span class="line"><span class="comment">     * count: 清空的word数量</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">void</span> <span class="title function_">clear</span><span class="params">(<span class="type">uint32_t</span> start, <span class="type">uint32_t</span> count)</span> &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">uint32_t</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">            memory[start + i] = <span class="number">0x00000000</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="comment">// CDMA控制器类 - 中断驱动DMA控制</span></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CDMAController</span> &#123;</span></span><br><span class="line">private:</span><br><span class="line">    <span class="type">int</span> fd;                      <span class="comment">// UIO设备文件描述符</span></span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">uint32_t</span> *regs;     <span class="comment">// CDMA寄存器映射</span></span><br><span class="line">    </span><br><span class="line">public:</span><br><span class="line">    CDMAController() : fd(<span class="number">-1</span>), regs(nullptr) &#123;&#125;</span><br><span class="line">    </span><br><span class="line">    ~CDMAController() &#123;</span><br><span class="line">        <span class="comment">// RAII模式：自动资源清理</span></span><br><span class="line">        <span class="keyword">if</span> (regs) munmap((<span class="type">void</span>*)regs, <span class="number">0x1000</span>);</span><br><span class="line">        <span class="keyword">if</span> (fd &gt;= <span class="number">0</span>) close(fd);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 初始化CDMA控制器</span></span><br><span class="line"><span class="comment">     * device_path: UIO设备路径，如&quot;/dev/uio2&quot;</span></span><br><span class="line"><span class="comment">     * 返回: 0成功，-1失败</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">int</span> <span class="title function_">init</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *device_path)</span> &#123;</span><br><span class="line">        <span class="comment">// 打开CDMA的UIO设备</span></span><br><span class="line">        fd = open(device_path, O_RDWR | O_SYNC);</span><br><span class="line">        <span class="keyword">if</span> (fd &lt; <span class="number">0</span>) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 映射CDMA寄存器到用户空间</span></span><br><span class="line">        regs = (<span class="keyword">volatile</span> <span class="type">uint32_t</span>*)mmap(nullptr, <span class="number">0x1000</span>, </span><br><span class="line">                                       PROT_READ | PROT_WRITE, </span><br><span class="line">                                       MAP_SHARED, fd, <span class="number">0</span>);</span><br><span class="line">        <span class="keyword">if</span> (regs == MAP_FAILED) <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// ========================================</span></span><br><span class="line">        <span class="comment">// CDMA初始化序列（标准流程）</span></span><br><span class="line">        <span class="comment">// ========================================</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 第1步：软件复位CDMA</span></span><br><span class="line">        regs[CDMACR/<span class="number">4</span>] = CDMACR_RESET;</span><br><span class="line">        <span class="comment">// 等待硬件清除复位位（表示复位完成）</span></span><br><span class="line">        <span class="keyword">while</span> (regs[CDMACR/<span class="number">4</span>] &amp; CDMACR_RESET) &#123;</span><br><span class="line">            usleep(<span class="number">1000</span>);  <span class="comment">// 等待1ms</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 第2步：配置中断使能</span></span><br><span class="line">        regs[CDMACR/<span class="number">4</span>] = CDMACR_IOC_IrqEn | CDMACR_Err_IrqEn;</span><br><span class="line">        <span class="comment">// IOC_IrqEn: 传输完成时产生中断</span></span><br><span class="line">        <span class="comment">// Err_IrqEn: 传输错误时产生中断</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 启动DMA传输（异步操作）</span></span><br><span class="line"><span class="comment">     * src: 源物理地址</span></span><br><span class="line"><span class="comment">     * dst: 目标物理地址  </span></span><br><span class="line"><span class="comment">     * size: 传输字节数</span></span><br><span class="line"><span class="comment">     * 返回: 0成功，-1失败</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">int</span> <span class="title function_">start_transfer</span><span class="params">(<span class="type">uint32_t</span> src, <span class="type">uint32_t</span> dst, <span class="type">uint32_t</span> size)</span> &#123;</span><br><span class="line">        <span class="comment">// 检查CDMA是否处于空闲状态</span></span><br><span class="line">        <span class="keyword">if</span> (!(regs[CDMASR/<span class="number">4</span>] &amp; CDMASR_IDLE)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;  <span class="comment">// CDMA忙碌中</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 清除之前的中断标志（写1清除）</span></span><br><span class="line">        regs[CDMASR/<span class="number">4</span>] = CDMASR_IOC_Irq | CDMASR_Err_Irq;</span><br><span class="line">        </span><br><span class="line">        <span class="comment">// ========================================</span></span><br><span class="line">        <span class="comment">// CDMA传输参数配置</span></span><br><span class="line">        <span class="comment">// ========================================</span></span><br><span class="line">        regs[SA/<span class="number">4</span>] = src;       <span class="comment">// 设置源地址</span></span><br><span class="line">        regs[DA/<span class="number">4</span>] = dst;       <span class="comment">// 设置目标地址</span></span><br><span class="line">        regs[BTT/<span class="number">4</span>] = size;     <span class="comment">// 写入传输字节数（启动传输）</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 注意：写入BTT寄存器会立即启动DMA传输！</span></span><br><span class="line">        <span class="comment">// 这是Xilinx CDMA的硬件设计特性</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">     * 等待传输完成（中断驱动）</span></span><br><span class="line"><span class="comment">     * 返回: 0成功，-1失败</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="type">int</span> <span class="title function_">wait_completion</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// ========================================</span></span><br><span class="line">        <span class="comment">// Linux UIO中断处理标准流程</span></span><br><span class="line">        <span class="comment">// ========================================</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 第1步：使能UIO中断等待</span></span><br><span class="line">        <span class="type">uint32_t</span> enable = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (write(fd, &amp;enable, <span class="keyword">sizeof</span>(enable)) != <span class="keyword">sizeof</span>(enable)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 这不是使能硬件中断（已在init中使能）</span></span><br><span class="line">        <span class="comment">// 而是告诉UIO内核模块&quot;我准备等待下一个中断&quot;</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 第2步：阻塞等待中断发生</span></span><br><span class="line">        <span class="type">uint32_t</span> interrupt_count;</span><br><span class="line">        <span class="keyword">if</span> (read(fd, &amp;interrupt_count, <span class="keyword">sizeof</span>(interrupt_count)) != <span class="keyword">sizeof</span>(interrupt_count)) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// read()会阻塞当前进程，直到硬件中断发生</span></span><br><span class="line">        <span class="comment">// 内核收到中断后会唤醒进程，read()返回中断计数</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment">// 第3步：检查中断类型并清除标志</span></span><br><span class="line">        <span class="type">uint32_t</span> status = regs[CDMASR/<span class="number">4</span>];</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (status &amp; CDMASR_IOC_Irq) &#123;</span><br><span class="line">            <span class="comment">// 传输完成中断</span></span><br><span class="line">            regs[CDMASR/<span class="number">4</span>] = CDMASR_IOC_Irq;  <span class="comment">// 写1清除中断标志</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;  <span class="comment">// 成功</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (status &amp; CDMASR_Err_Irq) &#123;</span><br><span class="line">            <span class="comment">// 传输错误中断</span></span><br><span class="line">            regs[CDMASR/<span class="number">4</span>] = CDMASR_Err_Irq;  <span class="comment">// 写1清除错误标志</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">// 失败</span></span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> <span class="number">-2</span>;  <span class="comment">// 未知中断类型</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="comment">// 主程序 - Linux标准中断DMA流程演示</span></span><br><span class="line"><span class="comment">// ============================================================================</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;=== Linux FPGA中断DMA实验 ===\n\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 设备对象初始化</span></span><br><span class="line">    BRAMDevice bram_a, bram_b;</span><br><span class="line">    CDMAController cdma;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="comment">// 第1步：设备初始化</span></span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;1. 设备初始化\n&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (bram_a.init(<span class="string">&quot;/dev/uio0&quot;</span>) &lt; <span class="number">0</span> || </span><br><span class="line">        bram_b.init(<span class="string">&quot;/dev/uio1&quot;</span>) &lt; <span class="number">0</span> ||</span><br><span class="line">        cdma.init(<span class="string">&quot;/dev/uio2&quot;</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;   ❌ 设备初始化失败\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;   ✅ 所有设备初始化成功\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="comment">// 第2步：准备发送数据</span></span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;2. 准备发送数据\n&quot;</span>);</span><br><span class="line">    <span class="type">const</span> <span class="type">uint32_t</span> test_size = <span class="number">16</span>;  <span class="comment">// 传输16个word</span></span><br><span class="line">    <span class="keyword">for</span> (<span class="type">uint32_t</span> i = <span class="number">0</span>; i &lt; test_size; i++) &#123;</span><br><span class="line">        bram_a.write(i, <span class="number">0x12345678</span> + i);</span><br><span class="line">        <span class="comment">// 写入测试模式：0x12345678, 0x12345679, 0x1234567A, ...</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;   ✅ 发送数据准备完成\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="comment">// 第3步：清空接收区域</span></span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;3. 清空接收区域\n&quot;</span>);</span><br><span class="line">    bram_b.clear(<span class="number">0</span>, test_size);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;   ✅ 接收区域已清空\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="comment">// 第4步：启动DMA传输（异步）</span></span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;4. 启动DMA传输\n&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (cdma.start_transfer(BRAM_A_ADDR, BRAM_B_ADDR, test_size * <span class="number">4</span>) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;   ❌ 传输启动失败\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;   ✅ DMA传输已启动（异步模式）\n&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="comment">// 第5步：等待传输完成（中断驱动）</span></span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;5. 等待传输完成\n&quot;</span>);</span><br><span class="line">    <span class="type">int</span> result = cdma.wait_completion();</span><br><span class="line">    <span class="keyword">if</span> (result == <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;   ✅ 传输完成（收到完成中断）\n&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;   ❌ 传输失败 (错误码: %d)\n&quot;</span>, result);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="comment">// 第6步：验证接收数据</span></span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;6. 验证接收数据\n&quot;</span>);</span><br><span class="line">    <span class="type">bool</span> success = <span class="literal">true</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">uint32_t</span> i = <span class="number">0</span>; i &lt; test_size; i++) &#123;</span><br><span class="line">        <span class="type">uint32_t</span> sent = bram_a.read(i);</span><br><span class="line">        <span class="type">uint32_t</span> received = bram_b.read(i);</span><br><span class="line">        <span class="keyword">if</span> (sent != received) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;   ❌ 数据不匹配[%u]: 发送=0x%08X, 接收=0x%08X\n&quot;</span>, </span><br><span class="line">                   i, sent, received);</span><br><span class="line">            success = <span class="literal">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (success) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;   ✅ 数据完整性验证通过\n&quot;</span>);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;   ❌ 数据完整性验证失败\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="comment">// 实验结果</span></span><br><span class="line">    <span class="comment">// ========================================</span></span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;\n=== 实验结果: %s ===\n&quot;</span>, success ? <span class="string">&quot;✅ 成功&quot;</span> : <span class="string">&quot;❌ 失败&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> success ? <span class="number">0</span> : <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * ============================================================================</span></span><br><span class="line"><span class="comment"> * 编译和运行指令</span></span><br><span class="line"><span class="comment"> * ============================================================================</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 编译:</span></span><br><span class="line"><span class="comment"> * arm-xilinx-linux-gnueabi-g++ -o fpga_dma_experiment main.cpp -std=c++11</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 运行:</span></span><br><span class="line"><span class="comment"> * sudo ./fpga_dma_experiment</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * ============================================================================</span></span><br><span class="line"><span class="comment"> * 实验学习要点总结</span></span><br><span class="line"><span class="comment"> * ============================================================================</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 1. Linux UIO框架使用:</span></span><br><span class="line"><span class="comment"> *    - 设备树配置 compatible = &quot;generic-uio&quot;</span></span><br><span class="line"><span class="comment"> *    - 通过 /dev/uioX 访问硬件</span></span><br><span class="line"><span class="comment"> *    - mmap() 映射硬件寄存器到用户空间</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 2. 用户空间中断处理:</span></span><br><span class="line"><span class="comment"> *    - write(fd, &amp;enable, 4) 使能中断等待</span></span><br><span class="line"><span class="comment"> *    - read(fd, &amp;count, 4) 阻塞等待中断</span></span><br><span class="line"><span class="comment"> *    - 检查硬件状态寄存器确定中断类型</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 3. CDMA控制流程:</span></span><br><span class="line"><span class="comment"> *    - 软件复位 → 配置中断使能 → 设置传输参数 → 等待完成</span></span><br><span class="line"><span class="comment"> *    - 写入BTT寄存器启动传输（硬件特性）</span></span><br><span class="line"><span class="comment"> *    - 中断驱动的异步操作模式</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 4. 硬件抽象设计:</span></span><br><span class="line"><span class="comment"> *    - RAII模式自动资源管理</span></span><br><span class="line"><span class="comment"> *    - volatile 关键字防止编译器优化</span></span><br><span class="line"><span class="comment"> *    - 错误检查和异常处理</span></span><br><span class="line"><span class="comment"> * </span></span><br><span class="line"><span class="comment"> * 这是工业级FPGA应用开发的标准模式！</span></span><br><span class="line"><span class="comment"> * ============================================================================</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="核心概念深度解析"><a href="#核心概念深度解析" class="headerlink" title="核心概念深度解析"></a>核心概念深度解析</h2><h3 id="文件描述符机制"><a href="#文件描述符机制" class="headerlink" title="文件描述符机制"></a>文件描述符机制</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> fd = <span class="built_in">open</span>(<span class="string">&quot;/dev/uio2&quot;</span>, O_RDWR);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>fd是进程级索引</strong>：每个进程独立的文件表索引</li>
+<li><strong>内核文件对象</strong>：fd指向内核中的file结构体</li>
+<li><strong>资源隔离</strong>：不同进程的相同fd值可能指向不同文件</li>
+</ul>
+<h3 id="内存映射原理"><a href="#内存映射原理" class="headerlink" title="内存映射原理"></a>内存映射原理</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> <span class="type">uint32_t</span> *regs = (<span class="keyword">volatile</span> <span class="type">uint32_t</span>*)<span class="built_in">mmap</span>(...);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>虚拟地址映射</strong>：硬件物理地址 ↔ 用户空间虚拟地址</li>
+<li><strong>零拷贝访问</strong>：直接操作硬件，无系统调用开销</li>
+<li><strong>volatile关键字</strong>：防止编译器缓存优化，确保每次访问都是真实硬件操作</li>
+</ul>
+<h3 id="UIO中断处理机制"><a href="#UIO中断处理机制" class="headerlink" title="UIO中断处理机制"></a><strong>UIO中断处理机制</strong></h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 使能中断等待</span></span><br><span class="line"><span class="built_in">write</span>(fd, &amp;enable, <span class="number">4</span>);  <span class="comment">// 告诉内核&quot;我准备等待&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 阻塞等待中断</span></span><br><span class="line"><span class="built_in">read</span>(fd, &amp;count, <span class="number">4</span>);    <span class="comment">// 进程睡眠，直到硬件中断唤醒</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>内核内部流程：</strong></p>
+<ol>
+<li>硬件产生中断 → 内核中断处理函数</li>
+<li>增加中断计数器 → 唤醒等待的用户进程</li>
+<li>用户进程继续执行 → 检查硬件状态寄存器</li>
+</ol>
+<h3 id="CDMA寄存器控制详解"><a href="#CDMA寄存器控制详解" class="headerlink" title="CDMA寄存器控制详解"></a><strong>CDMA寄存器控制详解</strong></h3><p><strong>关键寄存器映射：</strong></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">物理地址        虚拟地址    功能</span><br><span class="line">0x7e200000  →  regs[0]  → CDMACR控制寄存器</span><br><span class="line">0x7e200004  →  regs[1]  → CDMASR状态寄存器</span><br><span class="line">0x7e200018  →  regs[6]  → SA源地址寄存器</span><br><span class="line">0x7e200020  →  regs[8]  → DA目标地址寄存器</span><br><span class="line">0x7e200028  →  regs[10] → BTT传输字节数寄存器</span><br></pre></td></tr></table></figure>
+
+<p><strong>控制流程解析：</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1. 复位CDMA（清除所有内部状态）</span></span><br><span class="line">regs[CDMACR/<span class="number">4</span>] = CDMACR_RESET;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 2. 等待复位完成（硬件自动清除复位位）</span></span><br><span class="line"><span class="keyword">while</span> (regs[CDMACR/<span class="number">4</span>] &amp; CDMACR_RESET) <span class="built_in">usleep</span>(<span class="number">1000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 3. 使能硬件中断</span></span><br><span class="line">regs[CDMACR/<span class="number">4</span>] = CDMACR_IOC_IrqEn | CDMACR_Err_IrqEn;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 4. 配置传输参数</span></span><br><span class="line">regs[SA/<span class="number">4</span>] = <span class="number">0x40000000</span>;    <span class="comment">// 源地址</span></span><br><span class="line">regs[DA/<span class="number">4</span>] = <span class="number">0x40001000</span>;    <span class="comment">// 目标地址</span></span><br><span class="line">regs[BTT/<span class="number">4</span>] = <span class="number">64</span>;           <span class="comment">// 写入启动传输！</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 5. 等待中断并检查状态</span></span><br><span class="line"><span class="type">uint32_t</span> status = regs[CDMASR/<span class="number">4</span>];</span><br><span class="line"><span class="keyword">if</span> (status &amp; CDMASR_IOC_Irq) &#123;</span><br><span class="line">    <span class="comment">// 传输完成，清除中断标志</span></span><br><span class="line">    regs[CDMASR/<span class="number">4</span>] = CDMASR_IOC_Irq;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="测试结果"><a href="#测试结果" class="headerlink" title="测试结果"></a>测试结果</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">=== BRAM中断DMA传输流程 ===</span><br><span class="line"></span><br><span class="line">1. 准备发送数据</span><br><span class="line">   ✅ 发送数据准备完成</span><br><span class="line">2. 清空接收区域</span><br><span class="line">   ✅ 接收区域已清空</span><br><span class="line">3. 启动DMA传输</span><br><span class="line">   ✅ 传输已启动</span><br><span class="line">4. 等待传输完成</span><br><span class="line">   ✅ 传输完成</span><br><span class="line">5. 验证接收数据</span><br><span class="line">   ✅ 数据比对成功</span><br><span class="line"></span><br><span class="line">=== 传输结果: ✅ 成功 ===</span><br></pre></td></tr></table></figure>
+
+<h1 id="构建优化"><a href="#构建优化" class="headerlink" title="构建优化"></a>构建优化</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">硬件配置变更后的最小重构</span></span><br><span class="line">petalinux-build -c device-tree -x cleanall</span><br><span class="line">petalinux-build -c device-tree</span><br><span class="line">petalinux-build -c kernel</span><br><span class="line">petalinux-package --boot --fsbl images/linux/zynq_fsbl.elf --fpga images/linux/system.bit --u-boot --force</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅根文件系统变更</span></span><br><span class="line">petalinux-build -c rootfs</span><br><span class="line">petalinux-build -c kernel              # 重新打包image.ub</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">仅内核配置变更</span></span><br><span class="line">petalinux-build -c kernel -x cleanall</span><br><span class="line">petalinux-build -c kernel</span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>Post author:  </strong>Zzkuang
+  </li>
+  <li class="post-copyright-link">
+      <strong>Post link: </strong>
+      <a href="http://zhangkuang.asia/2025/08/03/Petalinux%E7%8E%AF%E5%A2%83%E4%B8%8BBRAM%E9%80%9A%E8%AE%AF%E6%8C%87%E5%8D%97/" title="Petalinux环境下BRAM通讯指南">http://zhangkuang.asia/2025/08/03/Petalinux环境下BRAM通讯指南/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>Copyright Notice:  </strong>All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-Hans" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> unless stating additionally.
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Petalinux/" rel="tag"># Petalinux</a>
+              <a href="/tags/UIO/" rel="tag"># UIO</a>
+              <a href="/tags/BRAM/" rel="tag"># BRAM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2025/07/31/PetaLinux-2023-2-%E7%A6%BB%E7%BA%BF%E7%BC%93%E5%AD%98%E4%B8%8E%E5%8A%A0%E9%80%9F%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE/" rel="prev" title="PetaLinux 2023.2 离线缓存与加速编译配置">
+                  <i class="fa fa-angle-left"></i> PetaLinux 2023.2 离线缓存与加速编译配置
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/08/05/Xilinx-Zynq-AXI-DMA%E5%9B%9E%E7%8E%AF%E5%BC%80%E5%8F%91%E5%AE%8C%E6%95%B4%E6%8C%87%E5%8D%97/" rel="next" title="Xilinx Zynq AXI DMA回环开发完整指南">
+                  Xilinx Zynq AXI DMA回环开发完整指南 <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Kuang</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+<script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.7/lib/darkmode-js.min.js"></script>
+
+<script>
+var options = {
+  bottom: '64px',
+  right: 'unset',
+  left: '32px',
+  time: '0.5s',
+  mixColor: 'transparent',
+  backgroundColor: 'transparent',
+  buttonColorDark: '#100f2c',
+  buttonColorLight: '#fff',
+  saveInCookies: true,
+  label: '🌓',
+  autoMatchOsTheme: true
+}
+const darkmode = new Darkmode(options);
+window.darkmode = darkmode;
+darkmode.showWidget();
+</script>
+
+</body>
+</html>
